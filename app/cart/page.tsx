@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface CartItem {
   id: string;
@@ -12,8 +12,14 @@ interface CartItem {
 }
 
 const SAMPLE_CART: CartItem[] = [
-  { id: "1", name: "Wireless Headphones", price: 79.99, quantity: 1, image: "/products/headphones.jpg" },
-  { id: "2", name: "Smart Watch Pro", price: 199.99, quantity: 1, image: "/products/watch.jpg" },
+  {
+    id: '1',
+    name: 'Wireless Headphones',
+    price: 79.99,
+    quantity: 1,
+    image: '/products/headphones.jpg',
+  },
+  { id: '2', name: 'Smart Watch Pro', price: 199.99, quantity: 1, image: '/products/watch.jpg' },
 ];
 
 export default function CartPage() {
@@ -37,7 +43,7 @@ export default function CartPage() {
                       alt={item.name}
                       className="h-full w-full object-cover"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = "/placeholder.jpg";
+                        (e.target as HTMLImageElement).src = '/placeholder.jpg';
                       }}
                     />
                   </div>
@@ -54,7 +60,7 @@ export default function CartPage() {
               <span className="text-lg font-semibold">${subtotal.toFixed(2)}</span>
             </div>
             <div className="mt-4 flex justify-end">
-              <Button onClick={() => (window.location.href = "/checkout")}>
+              <Button onClick={() => (window.location.href = '/checkout')}>
                 Proceed to Checkout
               </Button>
             </div>

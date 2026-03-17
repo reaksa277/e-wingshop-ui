@@ -1,29 +1,23 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { ShoppingCart, User, Menu, X, Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import Link from 'next/link';
+import { ShoppingCart, User, Menu, X, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const formatNumber = (num: number, digits: number = 2) => {
-    return num.toString().padStart(digits, "0");
-  };
-
   return (
     <header className="sticky top-0 z-50 w-full bg-white">
-
       <div className="container mx-auto px-4">
         {/* Main Header */}
         <div className="flex h-20 items-center justify-between gap-4">
           {/* Logo */}
-          <a href="/" className="shrink-0">
-            <h1 className="font-display text-2xl font-bold text-brand">
-              E-Wingshop
-            </h1>
-          </a>
+          <Link href="/" className="shrink-0">
+            <h1 className="font-display text-2xl font-bold text-brand">E-Wingshop</h1>
+          </Link>
 
           {/* Search Bar - Desktop */}
           <div className="hidden flex-1 max-w-xl items-center gap-2 md:flex">
@@ -41,44 +35,37 @@ export function Header() {
           <div className="flex items-center gap-2">
             {/* Desktop Nav */}
             <nav className="hidden items-center gap-6 md:flex">
-              <a
+              <Link
                 href="/"
                 className="text-sm font-medium text-gray-700 transition-colors hover:text-brand"
               >
                 Home
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/products"
                 className="text-sm font-medium text-gray-700 transition-colors hover:text-brand"
               >
                 Products
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/deals"
                 className="text-sm font-medium text-gray-700 transition-colors hover:text-brand"
               >
                 Deals
-              </a>
+              </Link>
             </nav>
 
             {/* User & Cart */}
             <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-full hover:bg-brand-pale"
-              >
+              <Button variant="ghost" size="icon" className="rounded-full hover:bg-brand-pale">
                 <User className="h-5 w-5 text-gray-600" />
               </Button>
-              <a
-                href="/cart"
-                className="relative rounded-full hover:bg-brand-pale"
-              > 
+              <Link href="/cart" className="relative rounded-full hover:bg-brand-pale">
                 <ShoppingCart className="h-5 w-5 text-gray-600" />
                 <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-brand text-xs font-semibold text-white">
                   0
                 </span>
-              </a>
+              </Link>
               {/* Mobile Menu Toggle */}
               <Button
                 variant="ghost"
@@ -86,11 +73,7 @@ export function Header() {
                 className="md:hidden"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >
-                {isMobileMenuOpen ? (
-                  <X className="h-5 w-5" />
-                ) : (
-                  <Menu className="h-5 w-5" />
-                )}
+                {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </Button>
             </div>
           </div>
@@ -113,24 +96,15 @@ export function Header() {
       {isMobileMenuOpen && (
         <div className="border-t bg-white md:hidden">
           <nav className="flex flex-col space-y-4 p-4">
-            <a
-              href="/"
-              className="text-sm font-medium text-gray-700 hover:text-brand"
-            >
+            <Link href="/" className="text-sm font-medium text-gray-700 hover:text-brand">
               Home
-            </a>
-            <a
-              href="/categories"
-              className="text-sm font-medium text-gray-700 hover:text-brand"
-            >
+            </Link>
+            <Link href="/categories" className="text-sm font-medium text-gray-700 hover:text-brand">
               Categories
-            </a>
-            <a
-              href="/deals"
-              className="text-sm font-medium text-gray-700 hover:text-brand"
-            >
+            </Link>
+            <Link href="/deals" className="text-sm font-medium text-gray-700 hover:text-brand">
               Deals
-            </a>
+            </Link>
           </nav>
         </div>
       )}

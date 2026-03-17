@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
 interface CategoryPillProps {
   id: string;
@@ -11,20 +11,13 @@ interface CategoryPillProps {
   className?: string;
 }
 
-export function CategoryPill({
-  id,
-  label,
-  icon,
-  isActive,
-  onClick,
-  className,
-}: CategoryPillProps) {
+export function CategoryPill({ id, label, icon, isActive, onClick, className }: CategoryPillProps) {
   return (
     <button
       onClick={onClick}
       className={cn(
-        "category-pill relative overflow-hidden",
-        isActive ? "active bg-brand text-white" : "inactive",
+        'category-pill relative overflow-hidden',
+        isActive ? 'active bg-brand text-white' : 'inactive',
         className
       )}
       data-category={id}
@@ -32,12 +25,12 @@ export function CategoryPill({
       {/* Slide-in background effect */}
       <span
         className={cn(
-          "absolute inset-0 bg-brand transition-transform duration-300 ease-out",
-          isActive ? "scale-x-100" : "scale-x-0"
+          'absolute inset-0 bg-brand transition-transform duration-300 ease-out',
+          isActive ? 'scale-x-100' : 'scale-x-0'
         )}
-        style={{ transformOrigin: "left" }}
+        style={{ transformOrigin: 'left' }}
       />
-      
+
       {/* Content */}
       <span className="relative z-10 flex items-center gap-1.5">
         {icon && <span>{icon}</span>}
@@ -61,17 +54,12 @@ export function CategoryPills({
   className,
 }: CategoryPillsProps) {
   return (
-    <div
-      className={cn(
-        "flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide",
-        className
-      )}
-    >
+    <div className={cn('flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide', className)}>
       <CategoryPill
         id="all"
         label="All"
-        isActive={activeCategory === "all"}
-        onClick={() => onCategoryChange("all")}
+        isActive={activeCategory === 'all'}
+        onClick={() => onCategoryChange('all')}
       />
       {categories.map((category) => (
         <CategoryPill

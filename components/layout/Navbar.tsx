@@ -1,6 +1,7 @@
-"use client";
+'use client';
 
-import { useState } from "react";
+import { useState } from 'react';
+import Link from 'next/link';
 import {
   MapPin,
   Search,
@@ -15,22 +16,21 @@ import {
   X,
   Menu,
   Leaf,
-} from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+} from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [cartItemCount] = useState(3);
 
   const navLinks = [
-    { label: "Home", href: "/" },
-    { label: "Shop", href: "/products", hasDropdown: true },
-    { label: "Fruits & Vegetables", href: "/categories/fruits-vegetables" },
-    { label: "Beverages", href: "/categories/beverages" },
-    { label: "Blog", href: "/blog" },
-    { label: "Contact", href: "/contact" },
+    { label: 'Home', href: '/' },
+    { label: 'Shop', href: '/products', hasDropdown: true },
+    { label: 'Fruits & Vegetables', href: '/categories/fruits-vegetables' },
+    { label: 'Beverages', href: '/categories/beverages' },
+    { label: 'Blog', href: '/blog' },
+    { label: 'Contact', href: '/contact' },
   ];
 
   return (
@@ -82,14 +82,12 @@ export function Navbar() {
       <div className="border-b border-gray-100 px-4 py-3 md:px-8">
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
-          <a href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-light">
               <Leaf className="h-6 w-6 text-brand" />
             </div>
-            <span className="font-display text-xl font-bold text-brand">
-              E-Wingshop
-            </span>
-          </a>
+            <span className="font-display text-xl font-bold text-brand">E-Wingshop</span>
+          </Link>
 
           {/* Location Pill - Desktop */}
           <button className="hidden items-center gap-2 rounded-full bg-brand-pale px-4 py-2 text-sm font-medium text-brand-dark transition-colors hover:bg-brand-light md:flex">
@@ -175,14 +173,14 @@ export function Navbar() {
           {/* Left Nav Links */}
           <nav className="flex items-center gap-6">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.label}
                 href={link.href}
                 className="flex items-center gap-1 text-sm font-medium text-gray-700 transition-colors hover:text-brand"
               >
                 {link.label}
                 {link.hasDropdown && <ChevronDown className="h-3.5 w-3.5" />}
-              </a>
+              </Link>
             ))}
           </nav>
 
@@ -203,64 +201,64 @@ export function Navbar() {
       {isMobileMenuOpen && (
         <div className="border-t bg-white lg:hidden">
           <nav className="flex flex-col space-y-3 p-4">
-            <a
+            <Link
               href="/"
               className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-brand-pale hover:text-brand"
             >
               Home
-            </a>
-            <a
+            </Link>
+            <Link
               href="/products"
               className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-brand-pale hover:text-brand"
             >
               Shop
-            </a>
-            <a
+            </Link>
+            <Link
               href="/categories/fruits-vegetables"
               className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-brand-pale hover:text-brand"
             >
               Fruits & Vegetables
-            </a>
-            <a
+            </Link>
+            <Link
               href="/categories/beverages"
               className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-brand-pale hover:text-brand"
             >
               Beverages
-            </a>
-            <a
+            </Link>
+            <Link
               href="/blog"
               className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-brand-pale hover:text-brand"
             >
               Blog
-            </a>
-            <a
+            </Link>
+            <Link
               href="/contact"
               className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-brand-pale hover:text-brand"
             >
               Contact
-            </a>
+            </Link>
             <div className="border-t pt-3">
-              <a
+              <Link
                 href="/account"
                 className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-brand-pale hover:text-brand"
               >
                 <User className="h-4 w-4" />
                 My Account
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/wishlist"
                 className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-brand-pale hover:text-brand"
               >
                 <Heart className="h-4 w-4" />
                 Wishlist
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/orders"
                 className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-brand-pale hover:text-brand"
               >
                 <Package className="h-4 w-4" />
                 Order Tracking
-              </a>
+              </Link>
             </div>
           </nav>
         </div>

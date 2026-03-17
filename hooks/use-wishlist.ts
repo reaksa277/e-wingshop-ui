@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState, useCallback } from "react";
+import { useState, useCallback } from 'react';
 
 export function useWishlist() {
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -9,7 +9,7 @@ export function useWishlist() {
   const toggleWishlist = useCallback(() => {
     setIsAnimating(true);
     setIsWishlisted((prev) => !prev);
-    
+
     setTimeout(() => {
       setIsAnimating(false);
     }, 400);

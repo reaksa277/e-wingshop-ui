@@ -1,13 +1,13 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { ShoppingBag, Truck, Clock, Shield, Check, ArrowRight } from "lucide-react"
+import { useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { ShoppingBag, Truck, Clock, Shield, Check, ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   return (
     <div className="min-h-screen flex">
@@ -27,7 +27,7 @@ export default function LoginPage() {
             <div className="absolute top-0 left-1/4 w-32 h-32 bg-white/20 rounded-full blur-xl animate-pulse"></div>
             <div className="absolute bottom-1/4 right-0 w-40 h-40 bg-white/15 rounded-full blur-xl animate-pulse delay-300"></div>
             <div className="absolute top-1/2 left-0 w-28 h-28 bg-white/25 rounded-full blur-lg animate-pulse delay-700"></div>
-            
+
             {/* Central illustration placeholder */}
             <div className="absolute inset-0 flex items-center justify-center">
               <ShoppingBag className="w-48 h-48 text-white/30" strokeWidth={1} />
@@ -40,7 +40,7 @@ export default function LoginPage() {
           <h1 className="font-display text-4xl font-bold leading-tight">
             Fresh groceries delivered to your door
           </h1>
-          
+
           <ul className="space-y-4">
             <li className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
@@ -76,12 +76,8 @@ export default function LoginPage() {
 
           {/* Heading */}
           <div className="text-center mb-8">
-            <h2 className="font-display text-3xl font-bold text-gray-900 mb-2">
-              Welcome back
-            </h2>
-            <p className="text-gray-500">
-              Sign in to continue shopping
-            </p>
+            <h2 className="font-display text-3xl font-bold text-gray-900 mb-2">Welcome back</h2>
+            <p className="text-gray-500">Sign in to continue shopping</p>
           </div>
 
           {/* Form */}
@@ -195,7 +191,7 @@ export default function LoginPage() {
           {/* Sign Up Link */}
           <div className="text-center mt-8">
             <p className="text-gray-600">
-              New here?{" "}
+              New here?{' '}
               <a
                 href="/register"
                 className="text-brand hover:text-brand-dark font-medium inline-flex items-center gap-1 transition-colors"
@@ -213,5 +209,5 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

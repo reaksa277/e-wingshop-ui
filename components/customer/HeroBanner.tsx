@@ -1,56 +1,58 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Leaf, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState } from 'react';
+import { Leaf, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export function HeroBanner() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const slides = [
     {
-      tag: "Weekend Discount",
-      title: "Get the best quality products at the lowest prices",
-      description: "We have prepared special discount for you on organic breakfast products.",
-      currentPrice: "$21.67",
-      originalPrice: "$29.55",
-      image: "🥣",
-      product: "Organic Granola Box",
+      tag: 'Weekend Discount',
+      title: 'Get the best quality products at the lowest prices',
+      description: 'We have prepared special discount for you on organic breakfast products.',
+      currentPrice: '$21.67',
+      originalPrice: '$29.55',
+      image: '🥣',
+      product: 'Organic Granola Box',
     },
     {
-      tag: "Fresh Arrival",
-      title: "Farm-fresh fruits delivered to your doorstep",
-      description: "Hand-picked organic fruits from local farms, available at special introductory prices.",
-      currentPrice: "$15.99",
-      originalPrice: "$22.99",
-      image: "🍓",
-      product: "Mixed Berry Collection",
+      tag: 'Fresh Arrival',
+      title: 'Farm-fresh fruits delivered to your doorstep',
+      description:
+        'Hand-picked organic fruits from local farms, available at special introductory prices.',
+      currentPrice: '$15.99',
+      originalPrice: '$22.99',
+      image: '🍓',
+      product: 'Mixed Berry Collection',
     },
     {
-      tag: "Limited Offer",
-      title: "Premium dairy products for your family",
-      description: "100% organic milk and cheese from grass-fed cows, now at exclusive discounts.",
-      currentPrice: "$18.50",
-      originalPrice: "$25.00",
-      image: "🧀",
-      product: "Artisan Cheese Set",
+      tag: 'Limited Offer',
+      title: 'Premium dairy products for your family',
+      description: '100% organic milk and cheese from grass-fed cows, now at exclusive discounts.',
+      currentPrice: '$18.50',
+      originalPrice: '$25.00',
+      image: '🧀',
+      product: 'Artisan Cheese Set',
     },
     {
-      tag: "Best Seller",
-      title: "Healthy snacks for your daily routine",
-      description: "Nutritious and delicious snacks made with natural ingredients, perfect for any time.",
-      currentPrice: "$12.99",
-      originalPrice: "$17.99",
-      image: "🥜",
-      product: "Mixed Nuts Premium Pack",
+      tag: 'Best Seller',
+      title: 'Healthy snacks for your daily routine',
+      description:
+        'Nutritious and delicious snacks made with natural ingredients, perfect for any time.',
+      currentPrice: '$12.99',
+      originalPrice: '$17.99',
+      image: '🥜',
+      product: 'Mixed Nuts Premium Pack',
     },
     {
-      tag: "New Launch",
-      title: "Cold-pressed juices for a fresh start",
-      description: "100% pure fruit and vegetable juices with no added sugar or preservatives.",
-      currentPrice: "$24.99",
-      originalPrice: "$32.99",
-      image: "🧃",
-      product: "Juice Detox Bundle",
+      tag: 'New Launch',
+      title: 'Cold-pressed juices for a fresh start',
+      description: '100% pure fruit and vegetable juices with no added sugar or preservatives.',
+      currentPrice: '$24.99',
+      originalPrice: '$32.99',
+      image: '🧃',
+      product: 'Juice Detox Bundle',
     },
   ];
 
@@ -67,8 +69,8 @@ export function HeroBanner() {
             linear-gradient(45deg, rgba(26,107,47,0.03) 25%, transparent 25%),
             linear-gradient(315deg, rgba(26,107,47,0.03) 25%, transparent 25%)
           `,
-          backgroundSize: "40px 40px",
-          backgroundPosition: "0 0, 0 20px, 20px -20px, -20px 0px",
+          backgroundSize: '40px 40px',
+          backgroundPosition: '0 0, 0 20px, 20px -20px, -20px 0px',
         }}
       >
         {/* Background Decorative Circles */}
@@ -96,9 +98,7 @@ export function HeroBanner() {
 
             {/* Price Row */}
             <div className="flex items-center gap-3">
-              <span className="text-2xl font-bold text-brand">
-                {currentSlideData.currentPrice}
-              </span>
+              <span className="text-2xl font-bold text-brand">{currentSlideData.currentPrice}</span>
               <span className="text-base text-gray-400 line-through">
                 {currentSlideData.originalPrice}
               </span>
@@ -135,18 +135,14 @@ export function HeroBanner() {
 
         {/* Navigation Arrows */}
         <button
-          onClick={() =>
-            setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1))
-          }
+          onClick={() => setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1))}
           className="absolute left-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-gray-700 shadow-card transition-all hover:bg-brand hover:text-white hover:shadow-green backdrop-blur-sm"
           aria-label="Previous slide"
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
         <button
-          onClick={() =>
-            setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1))
-          }
+          onClick={() => setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1))}
           className="absolute right-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-gray-700 shadow-card transition-all hover:bg-brand hover:text-white hover:shadow-green backdrop-blur-sm"
           aria-label="Next slide"
         >
@@ -160,9 +156,7 @@ export function HeroBanner() {
               key={index}
               onClick={() => setCurrentSlide(index)}
               className={`h-2.5 rounded-full transition-all duration-300 ${
-                index === currentSlide
-                  ? "w-8 bg-brand"
-                  : "w-2.5 bg-gray-300 hover:bg-gray-400"
+                index === currentSlide ? 'w-8 bg-brand' : 'w-2.5 bg-gray-300 hover:bg-gray-400'
               }`}
               aria-label={`Go to slide ${index + 1}`}
             />

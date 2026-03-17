@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { Star, ShoppingCart, Check } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Star, ShoppingCart, Check } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 interface ProductCardProps {
   id: string;
   image: string;
-  badge?: "Best Sale" | "Organic" | "Frozen" | string;
+  badge?: 'Best Sale' | 'Organic' | 'Frozen' | string;
   discount?: string;
   name: string;
   weight: string;
@@ -36,14 +36,14 @@ export function ProductCard({
 
   const getBadgeStyles = (badgeName: string) => {
     switch (badgeName) {
-      case "Best Sale":
-        return "bg-brand-light text-brand-dark";
-      case "Organic":
-        return "bg-brand text-white";
-      case "Frozen":
-        return "bg-blue-100 text-blue-800";
+      case 'Best Sale':
+        return 'bg-brand-light text-brand-dark';
+      case 'Organic':
+        return 'bg-brand text-white';
+      case 'Frozen':
+        return 'bg-blue-100 text-blue-800';
       default:
-        return "bg-brand-light text-brand-dark";
+        return 'bg-brand-light text-brand-dark';
     }
   };
 
@@ -84,7 +84,9 @@ export function ProductCard({
 
         {/* Weight / Origin */}
         {origin && (
-          <p className="text-xs text-gray-500">{origin} • {weight}</p>
+          <p className="text-xs text-gray-500">
+            {origin} • {weight}
+          </p>
         )}
 
         {/* Star Rating */}
@@ -99,9 +101,7 @@ export function ProductCard({
         {/* Price and Add Button */}
         <div className="mt-auto flex items-center justify-between">
           <div className="flex flex-col">
-            <span className="text-lg font-bold text-brand">
-              AED {price.toFixed(2)}
-            </span>
+            <span className="text-lg font-bold text-brand">AED {price.toFixed(2)}</span>
             {originalPrice && (
               <span className="text-xs text-gray-400 line-through">
                 AED {originalPrice.toFixed(2)}
@@ -115,14 +115,12 @@ export function ProductCard({
               setTimeout(() => setIsAdded(false), 1500);
             }}
             className={`flex h-9 w-9 items-center justify-center rounded-full bg-brand text-white shadow-sm transition-all duration-200 hover:bg-brand-dark hover:shadow-green ${
-              isAdded ? "scale-125 animate-bounce bg-green-600 hover:bg-green-600" : "active:scale-95"
+              isAdded
+                ? 'scale-125 animate-bounce bg-green-600 hover:bg-green-600'
+                : 'active:scale-95'
             }`}
           >
-            {isAdded ? (
-              <Check className="h-4 w-4" />
-            ) : (
-              <ShoppingCart className="h-4 w-4" />
-            )}
+            {isAdded ? <Check className="h-4 w-4" /> : <ShoppingCart className="h-4 w-4" />}
           </button>
         </div>
       </div>

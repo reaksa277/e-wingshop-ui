@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useEffect, useRef } from "react";
-import { cn } from "@/lib/utils";
-import { usePageLoadAnimation } from "@/hooks/use-page-load-animation";
+import { useEffect, useRef } from 'react';
+import { cn } from '@/lib/utils';
+import { usePageLoadAnimation } from '@/hooks/use-page-load-animation';
 
 interface PageSectionProps {
   index: number;
@@ -11,12 +11,7 @@ interface PageSectionProps {
   staggerDelay?: number;
 }
 
-export function PageSection({
-  index,
-  children,
-  className,
-  staggerDelay = 100,
-}: PageSectionProps) {
+export function PageSection({ index, children, className, staggerDelay = 100 }: PageSectionProps) {
   const { isSectionLoaded } = usePageLoadAnimation(10, {
     staggerDelay,
     initialDelay: 0,
@@ -26,12 +21,12 @@ export function PageSection({
   return (
     <section
       className={cn(
-        "page-section opacity-0 transition-all duration-500",
-        loaded && "opacity-100",
+        'page-section opacity-0 transition-all duration-500',
+        loaded && 'opacity-100',
         className
       )}
       style={{
-        animationDelay: loaded ? `${index * staggerDelay}ms` : "0ms",
+        animationDelay: loaded ? `${index * staggerDelay}ms` : '0ms',
       }}
     >
       {children}
@@ -58,17 +53,17 @@ export function StaggeredContainer({
   });
 
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn('space-y-4', className)}>
       {items.map((item, index) => (
         <div
           key={index}
           className={cn(
-            "page-section opacity-0 transition-all duration-500",
-            isSectionLoaded(index) && "opacity-100",
+            'page-section opacity-0 transition-all duration-500',
+            isSectionLoaded(index) && 'opacity-100',
             itemClassName
           )}
           style={{
-            animationDelay: isSectionLoaded(index) ? `${index * staggerDelay}ms` : "0ms",
+            animationDelay: isSectionLoaded(index) ? `${index * staggerDelay}ms` : '0ms',
           }}
         >
           {item}

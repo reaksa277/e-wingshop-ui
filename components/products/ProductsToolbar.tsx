@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Grid, List, ChevronDown } from "lucide-react";
+import { Grid, List, ChevronDown } from 'lucide-react';
 
 interface ProductsToolbarProps {
   totalProducts: number;
@@ -8,8 +8,8 @@ interface ProductsToolbarProps {
   itemsPerPage: number;
   sortOption: string;
   onSortChange: (option: string) => void;
-  viewMode: "grid" | "list";
-  onViewModeChange: (mode: "grid" | "list") => void;
+  viewMode: 'grid' | 'list';
+  onViewModeChange: (mode: 'grid' | 'list') => void;
 }
 
 export function ProductsToolbar({
@@ -28,13 +28,11 @@ export function ProductsToolbar({
     <div className="flex items-center justify-between border-b border-gray-100 bg-white px-6 py-4">
       {/* Left: Showing count */}
       <p className="text-sm text-gray-600">
-        Showing{" "}
+        Showing{' '}
         <span className="font-semibold text-gray-900">
           {startItem}–{endItem}
-        </span>{" "}
-        of{" "}
-        <span className="font-semibold text-gray-900">{totalProducts}</span>{" "}
-        results
+        </span>{' '}
+        of <span className="font-semibold text-gray-900">{totalProducts}</span> results
       </p>
 
       {/* Right: Sort + View Toggle */}
@@ -59,22 +57,22 @@ export function ProductsToolbar({
         {/* View Mode Toggle */}
         <div className="flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 p-1">
           <button
-            onClick={() => onViewModeChange("grid")}
+            onClick={() => onViewModeChange('grid')}
             className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
-              viewMode === "grid"
-                ? "bg-brand text-white shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
+              viewMode === 'grid'
+                ? 'bg-brand text-white shadow-sm'
+                : 'text-gray-500 hover:text-gray-700'
             }`}
             aria-label="Grid view"
           >
             <Grid className="h-4 w-4" />
           </button>
           <button
-            onClick={() => onViewModeChange("list")}
+            onClick={() => onViewModeChange('list')}
             className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
-              viewMode === "list"
-                ? "bg-brand text-white shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
+              viewMode === 'list'
+                ? 'bg-brand text-white shadow-sm'
+                : 'text-gray-500 hover:text-gray-700'
             }`}
             aria-label="List view"
           >

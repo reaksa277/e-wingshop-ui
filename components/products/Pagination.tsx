@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PaginationProps {
   currentPage: number;
@@ -8,11 +8,7 @@ interface PaginationProps {
   onPageChange: (page: number) => void;
 }
 
-export function Pagination({
-  currentPage,
-  totalPages,
-  onPageChange,
-}: PaginationProps) {
+export function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
   const getVisiblePages = () => {
     const pages: (number | string)[] = [];
     const showPages = 5;
@@ -24,17 +20,17 @@ export function Pagination({
     } else {
       if (currentPage <= 3) {
         for (let i = 1; i <= 4; i++) pages.push(i);
-        pages.push("...");
+        pages.push('...');
         pages.push(totalPages);
       } else if (currentPage >= totalPages - 2) {
         pages.push(1);
-        pages.push("...");
+        pages.push('...');
         for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i);
       } else {
         pages.push(1);
-        pages.push("...");
+        pages.push('...');
         for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i);
-        pages.push("...");
+        pages.push('...');
         pages.push(totalPages);
       }
     }
@@ -56,23 +52,20 @@ export function Pagination({
       {/* Page Numbers */}
       <div className="flex items-center gap-2">
         {getVisiblePages().map((page, index) =>
-          typeof page === "number" ? (
+          typeof page === 'number' ? (
             <button
               key={index}
               onClick={() => onPageChange(page)}
               className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold transition-colors ${
                 page === currentPage
-                  ? "bg-brand text-white shadow-green"
-                  : "text-gray-700 hover:bg-gray-100"
+                  ? 'bg-brand text-white shadow-green'
+                  : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
               {page}
             </button>
           ) : (
-            <span
-              key={index}
-              className="flex h-10 w-8 items-center justify-center text-gray-400"
-            >
+            <span key={index} className="flex h-10 w-8 items-center justify-center text-gray-400">
               {page}
             </span>
           )

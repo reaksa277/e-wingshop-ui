@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { Header } from "@/components/Header";
+import { useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { Header } from '@/components/Header';
 import {
   Star,
   ChevronLeft,
@@ -18,12 +18,12 @@ import {
   MapPin,
   ChevronDown,
   ChevronUp,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface Product {
   id: string;
   image: string;
-  badge?: "Organic" | "Best Sale" | "Frozen";
+  badge?: 'Organic' | 'Best Sale' | 'Frozen';
   discount?: string;
   name: string;
   weight: string;
@@ -47,201 +47,209 @@ interface Product {
 
 // Sample product data (in real app, fetch from API)
 const products: Record<string, Product> = {
-  "1": {
-    id: "1",
-    image: "🍎",
-    badge: "Organic" as const,
-    discount: "20% OFF",
-    name: "Fresh Organic Apples",
-    weight: "1000gm",
-    origin: "Imported from South Africa",
+  '1': {
+    id: '1',
+    image: '🍎',
+    badge: 'Organic' as const,
+    discount: '20% OFF',
+    name: 'Fresh Organic Apples',
+    weight: '1000gm',
+    origin: 'Imported from South Africa',
     rating: 4.8,
     reviewCount: 124,
     price: 12.99,
     originalPrice: 16.99,
-    description: "Premium quality organic apples, hand-picked from the finest orchards in South Africa. Rich in vitamins and fiber, these crisp and juicy apples are perfect for snacking, baking, or making fresh juice.",
+    description:
+      'Premium quality organic apples, hand-picked from the finest orchards in South Africa. Rich in vitamins and fiber, these crisp and juicy apples are perfect for snacking, baking, or making fresh juice.',
     nutrition: {
-      calories: "52 kcal",
-      protein: "0.3g",
-      carbs: "14g",
-      fiber: "2.4g",
-      fat: "0.2g",
+      calories: '52 kcal',
+      protein: '0.3g',
+      carbs: '14g',
+      fiber: '2.4g',
+      fat: '0.2g',
     },
     stock: 45,
-    category: "fruits",
-    features: ["Pesticide-free", "Non-GMO", "Rich in Vitamin C"],
+    category: 'fruits',
+    features: ['Pesticide-free', 'Non-GMO', 'Rich in Vitamin C'],
   },
-  "2": {
-    id: "2",
-    image: "🥛",
-    badge: "Best Sale" as const,
-    name: "Full Cream Milk",
-    weight: "1L",
-    origin: "Local Farm",
+  '2': {
+    id: '2',
+    image: '🥛',
+    badge: 'Best Sale' as const,
+    name: 'Full Cream Milk',
+    weight: '1L',
+    origin: 'Local Farm',
     rating: 4.5,
     reviewCount: 89,
     price: 5.99,
-    description: "Fresh full cream milk sourced from local farms. Rich in calcium and protein, perfect for drinking, cooking, or baking. Pasteurized and homogenized for quality and safety.",
+    description:
+      'Fresh full cream milk sourced from local farms. Rich in calcium and protein, perfect for drinking, cooking, or baking. Pasteurized and homogenized for quality and safety.',
     nutrition: {
-      calories: "61 kcal",
-      protein: "3.2g",
-      carbs: "4.8g",
-      fiber: "0g",
-      fat: "3.3g",
+      calories: '61 kcal',
+      protein: '3.2g',
+      carbs: '4.8g',
+      fiber: '0g',
+      fat: '3.3g',
     },
     stock: 120,
-    category: "dairy",
-    features: ["Farm Fresh", "Pasteurized", "High in Calcium"],
+    category: 'dairy',
+    features: ['Farm Fresh', 'Pasteurized', 'High in Calcium'],
   },
-  "3": {
-    id: "3",
-    image: "🍦",
-    badge: "Frozen" as const,
-    discount: "15% OFF",
-    name: "Vanilla Ice Cream",
-    weight: "500ml",
-    origin: "Local",
+  '3': {
+    id: '3',
+    image: '🍦',
+    badge: 'Frozen' as const,
+    discount: '15% OFF',
+    name: 'Vanilla Ice Cream',
+    weight: '500ml',
+    origin: 'Local',
     rating: 4.7,
     reviewCount: 56,
     price: 8.99,
     originalPrice: 10.99,
-    description: "Creamy vanilla ice cream made with real vanilla beans. A classic dessert favorite that pairs perfectly with any topping or stands alone as a sweet treat.",
+    description:
+      'Creamy vanilla ice cream made with real vanilla beans. A classic dessert favorite that pairs perfectly with any topping or stands alone as a sweet treat.',
     nutrition: {
-      calories: "207 kcal",
-      protein: "3.5g",
-      carbs: "24g",
-      fiber: "0.5g",
-      fat: "11g",
+      calories: '207 kcal',
+      protein: '3.5g',
+      carbs: '24g',
+      fiber: '0.5g',
+      fat: '11g',
     },
     stock: 30,
-    category: "snacks",
-    features: ["Real Vanilla", "No Artificial Colors", "Creamy Texture"],
+    category: 'snacks',
+    features: ['Real Vanilla', 'No Artificial Colors', 'Creamy Texture'],
   },
-  "4": {
-    id: "4",
-    image: "🥖",
-    name: "Whole Wheat Bread",
-    weight: "400gm",
-    origin: "Baked Daily",
+  '4': {
+    id: '4',
+    image: '🥖',
+    name: 'Whole Wheat Bread',
+    weight: '400gm',
+    origin: 'Baked Daily',
     rating: 4.3,
     reviewCount: 201,
     price: 3.99,
-    description: "Freshly baked whole wheat bread made with 100% whole grain flour. High in fiber and nutrients, perfect for sandwiches, toast, or enjoying with your favorite spread.",
+    description:
+      'Freshly baked whole wheat bread made with 100% whole grain flour. High in fiber and nutrients, perfect for sandwiches, toast, or enjoying with your favorite spread.',
     nutrition: {
-      calories: "265 kcal",
-      protein: "13g",
-      carbs: "49g",
-      fiber: "7g",
-      fat: "3.5g",
+      calories: '265 kcal',
+      protein: '13g',
+      carbs: '49g',
+      fiber: '7g',
+      fat: '3.5g',
     },
     stock: 60,
-    category: "bakery",
-    features: ["100% Whole Grain", "High Fiber", "No Preservatives"],
+    category: 'bakery',
+    features: ['100% Whole Grain', 'High Fiber', 'No Preservatives'],
   },
-  "5": {
-    id: "5",
-    image: "🥚",
-    badge: "Organic" as const,
-    name: "Farm Fresh Eggs",
-    weight: "12 pack",
-    origin: "Local Farm",
+  '5': {
+    id: '5',
+    image: '🥚',
+    badge: 'Organic' as const,
+    name: 'Farm Fresh Eggs',
+    weight: '12 pack',
+    origin: 'Local Farm',
     rating: 4.9,
     reviewCount: 312,
     price: 14.99,
-    description: "Fresh organic eggs from free-range hens. Rich in protein and essential nutrients, these farm-fresh eggs are perfect for breakfast, baking, or any meal.",
+    description:
+      'Fresh organic eggs from free-range hens. Rich in protein and essential nutrients, these farm-fresh eggs are perfect for breakfast, baking, or any meal.',
     nutrition: {
-      calories: "155 kcal",
-      protein: "13g",
-      carbs: "1.1g",
-      fiber: "0g",
-      fat: "11g",
+      calories: '155 kcal',
+      protein: '13g',
+      carbs: '1.1g',
+      fiber: '0g',
+      fat: '11g',
     },
     stock: 85,
-    category: "dairy",
-    features: ["Free Range", "Omega-3 Rich", "Grade A"],
+    category: 'dairy',
+    features: ['Free Range', 'Omega-3 Rich', 'Grade A'],
   },
-  "6": {
-    id: "6",
-    image: "🧀",
-    discount: "10% OFF",
-    name: "Cheddar Cheese Slices",
-    weight: "200gm",
-    origin: "Imported",
+  '6': {
+    id: '6',
+    image: '🧀',
+    discount: '10% OFF',
+    name: 'Cheddar Cheese Slices',
+    weight: '200gm',
+    origin: 'Imported',
     rating: 4.6,
     reviewCount: 78,
     price: 9.99,
     originalPrice: 11.99,
-    description: "Premium aged cheddar cheese slices with a rich, sharp flavor. Perfect for sandwiches, burgers, or enjoying with crackers. Made from 100% real cheese.",
+    description:
+      'Premium aged cheddar cheese slices with a rich, sharp flavor. Perfect for sandwiches, burgers, or enjoying with crackers. Made from 100% real cheese.',
     nutrition: {
-      calories: "403 kcal",
-      protein: "25g",
-      carbs: "1.3g",
-      fiber: "0g",
-      fat: "33g",
+      calories: '403 kcal',
+      protein: '25g',
+      carbs: '1.3g',
+      fiber: '0g',
+      fat: '33g',
     },
     stock: 40,
-    category: "dairy",
-    features: ["Aged 12 Months", "Real Cheese", "Sharp Flavor"],
+    category: 'dairy',
+    features: ['Aged 12 Months', 'Real Cheese', 'Sharp Flavor'],
   },
-  "7": {
-    id: "7",
-    image: "🥤",
-    name: "Orange Juice",
-    weight: "1.5L",
-    origin: "Imported",
+  '7': {
+    id: '7',
+    image: '🥤',
+    name: 'Orange Juice',
+    weight: '1.5L',
+    origin: 'Imported',
     rating: 4.4,
     reviewCount: 145,
     price: 7.99,
-    description: "100% pure orange juice with no added sugar or preservatives. Packed with vitamin C and natural citrus flavor, perfect for breakfast or anytime refreshment.",
+    description:
+      '100% pure orange juice with no added sugar or preservatives. Packed with vitamin C and natural citrus flavor, perfect for breakfast or anytime refreshment.',
     nutrition: {
-      calories: "45 kcal",
-      protein: "0.7g",
-      carbs: "10.4g",
-      fiber: "0.2g",
-      fat: "0.2g",
+      calories: '45 kcal',
+      protein: '0.7g',
+      carbs: '10.4g',
+      fiber: '0.2g',
+      fat: '0.2g',
     },
     stock: 55,
-    category: "beverages",
-    features: ["100% Pure", "No Added Sugar", "Vitamin C Rich"],
+    category: 'beverages',
+    features: ['100% Pure', 'No Added Sugar', 'Vitamin C Rich'],
   },
-  "8": {
-    id: "8",
-    image: "🍗",
-    badge: "Frozen" as const,
-    name: "Chicken Breast",
-    weight: "500gm",
-    origin: "Local Farm",
+  '8': {
+    id: '8',
+    image: '🍗',
+    badge: 'Frozen' as const,
+    name: 'Chicken Breast',
+    weight: '500gm',
+    origin: 'Local Farm',
     rating: 4.7,
     reviewCount: 234,
     price: 18.99,
-    description: "Premium quality chicken breast, lean and tender. Perfect for grilling, baking, or stir-frying. High in protein and low in fat, ideal for healthy meals.",
+    description:
+      'Premium quality chicken breast, lean and tender. Perfect for grilling, baking, or stir-frying. High in protein and low in fat, ideal for healthy meals.',
     nutrition: {
-      calories: "165 kcal",
-      protein: "31g",
-      carbs: "0g",
-      fiber: "0g",
-      fat: "3.6g",
+      calories: '165 kcal',
+      protein: '31g',
+      carbs: '0g',
+      fiber: '0g',
+      fat: '3.6g',
     },
     stock: 25,
-    category: "meat",
-    features: ["Lean Cut", "High Protein", "Hormone-Free"],
+    category: 'meat',
+    features: ['Lean Cut', 'High Protein', 'Hormone-Free'],
   },
 };
 
 function Badge({ type }: { type: string }) {
   const styles: Record<string, string> = {
-    Organic: "bg-brand-light text-brand-dark",
-    "Best Sale": "bg-amber-100 text-amber-800",
-    Frozen: "bg-blue-100 text-blue-800",
+    Organic: 'bg-brand-light text-brand-dark',
+    'Best Sale': 'bg-amber-100 text-amber-800',
+    Frozen: 'bg-blue-100 text-blue-800',
   };
 
   return (
     <span
       className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ${
-        styles[type] || "bg-gray-100 text-gray-800"
+        styles[type] || 'bg-gray-100 text-gray-800'
       }`}
     >
-      {type === "Organic" && <Leaf className="h-3 w-3" />}
+      {type === 'Organic' && <Leaf className="h-3 w-3" />}
       {type}
     </span>
   );
@@ -297,7 +305,7 @@ export default function ProductDetailPage() {
         <div className="text-center">
           <p className="text-lg text-gray-500">Product not found</p>
           <button
-            onClick={() => router.push("/products")}
+            onClick={() => router.push('/products')}
             className="mt-4 rounded-full bg-brand px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
           >
             Back to products
@@ -316,7 +324,7 @@ export default function ProductDetailPage() {
   return (
     <div className="min-h-screen bg-cream pb-32">
       <Header />
-      
+
       {/* Back Button & Actions Bar */}
       <div className="sticky top-[130px] z-20 flex items-center justify-between bg-white/90 px-4 py-3 backdrop-blur-md shadow-sm md:top-[150px]">
         <button
@@ -335,7 +343,7 @@ export default function ProductDetailPage() {
           >
             <Heart
               className={`h-5 w-5 transition-colors ${
-                isWishlisted ? "fill-red-500 text-red-500" : "text-gray-600"
+                isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-600'
               }`}
             />
           </button>
@@ -398,9 +406,7 @@ export default function ProductDetailPage() {
 
         {/* Price */}
         <div className="mt-5 flex items-center justify-center gap-3">
-          <span className="text-3xl font-bold text-brand">
-            AED {product.price.toFixed(2)}
-          </span>
+          <span className="text-3xl font-bold text-brand">AED {product.price.toFixed(2)}</span>
           {product.originalPrice && (
             <span className="text-base text-gray-400 line-through">
               AED {product.originalPrice.toFixed(2)}
@@ -425,14 +431,8 @@ export default function ProductDetailPage() {
 
         {/* Accordion Sections */}
         <div className="mt-6 rounded-2xl bg-white p-4 shadow-card">
-          <Accordion
-            title="Description"
-            icon={<Leaf className="h-5 w-5" />}
-            defaultOpen
-          >
-            <p className="px-3 text-sm leading-relaxed text-gray-600">
-              {product.description}
-            </p>
+          <Accordion title="Description" icon={<Leaf className="h-5 w-5" />} defaultOpen>
+            <p className="px-3 text-sm leading-relaxed text-gray-600">{product.description}</p>
           </Accordion>
 
           <Accordion title="Nutrition Facts" icon={<ShieldCheck className="h-5 w-5" />}>
@@ -487,9 +487,7 @@ export default function ProductDetailPage() {
               >
                 <Minus className="h-4 w-4" />
               </button>
-              <span className="w-14 text-center text-sm font-bold text-gray-900">
-                {quantity}
-              </span>
+              <span className="w-14 text-center text-sm font-bold text-gray-900">{quantity}</span>
               <button
                 onClick={() => setQuantity(quantity + 1)}
                 className="flex h-11 w-11 items-center justify-center rounded-r-full text-gray-600 transition-colors hover:bg-brand-pale"

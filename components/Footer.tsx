@@ -1,4 +1,4 @@
-import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from "lucide-react";
+import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react';
 
 export function Footer() {
   return (
@@ -7,12 +7,9 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
           {/* Brand Info */}
           <div>
-            <h3 className="font-nunito-sans text-xl font-bold text-white">
-              E-Wingshop
-            </h3>
+            <h3 className="font-nunito-sans text-xl font-bold text-white">E-Wingshop</h3>
             <p className="mt-3 text-sm text-gray-400">
-              Your trusted online grocery store. Fresh products, fast delivery,
-              and great prices.
+              Your trusted online grocery store. Fresh products, fast delivery, and great prices.
             </p>
             <div className="mt-4 flex gap-3">
               <a
@@ -38,15 +35,10 @@ export function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-nunito-sans text-sm font-semibold text-white">
-              Quick Links
-            </h4>
+            <h4 className="font-nunito-sans text-sm font-semibold text-white">Quick Links</h4>
             <ul className="mt-4 space-y-2">
               <li>
-                <a
-                  href="/"
-                  className="text-sm text-gray-400 transition-colors hover:text-white"
-                >
+                <a href="/" className="text-sm text-gray-400 transition-colors hover:text-white">
                   Home
                 </a>
               </li>
@@ -87,9 +79,7 @@ export function Footer() {
 
           {/* Customer Service */}
           <div>
-            <h4 className="font-nunito-sans text-sm font-semibold text-white">
-              Customer Service
-            </h4>
+            <h4 className="font-nunito-sans text-sm font-semibold text-white">Customer Service</h4>
             <ul className="mt-4 space-y-2">
               <li>
                 <a
@@ -116,10 +106,7 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a
-                  href="/faq"
-                  className="text-sm text-gray-400 transition-colors hover:text-white"
-                >
+                <a href="/faq" className="text-sm text-gray-400 transition-colors hover:text-white">
                   FAQ
                 </a>
               </li>
@@ -136,15 +123,11 @@ export function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h4 className="font-nunito-sans text-sm font-semibold text-white">
-              Contact Us
-            </h4>
+            <h4 className="font-nunito-sans text-sm font-semibold text-white">Contact Us</h4>
             <ul className="mt-4 space-y-3">
               <li className="flex items-start gap-2">
                 <MapPin className="mt-0.5 h-4 w-4 text-gray-400" />
-                <span className="text-sm text-gray-400">
-                  Dubai, United Arab Emirates
-                </span>
+                <span className="text-sm text-gray-400">Dubai, United Arab Emirates</span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-gray-400" />
@@ -152,9 +135,7 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-gray-400" />
-                <span className="text-sm text-gray-400">
-                  support@ewingshop.ae
-                </span>
+                <span className="text-sm text-gray-400">support@ewingshop.ae</span>
               </li>
             </ul>
           </div>
@@ -163,14 +144,9 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-8 border-t border-gray-800 pt-6">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <p className="text-xs text-gray-500">
-              © 2024 E-Wingshop. All rights reserved.
-            </p>
+            <p className="text-xs text-gray-500">© 2024 E-Wingshop. All rights reserved.</p>
             <div className="flex gap-4">
-              <a
-                href="/terms"
-                className="text-xs text-gray-500 transition-colors hover:text-white"
-              >
+              <a href="/terms" className="text-xs text-gray-500 transition-colors hover:text-white">
                 Terms of Service
               </a>
               <a

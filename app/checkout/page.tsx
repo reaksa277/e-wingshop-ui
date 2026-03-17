@@ -1,12 +1,19 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Check, MapPin, CreditCard, DollarSign, Smartphone, Shield } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { PromoCodeInput } from "@/components/ui/PromoCodeInput";
-import { cn } from "@/lib/utils";
+import { useState } from 'react';
+import { Check, MapPin, CreditCard, DollarSign, Smartphone, Shield } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from '@/components/ui/card';
+import { PromoCodeInput } from '@/components/ui/PromoCodeInput';
+import { cn } from '@/lib/utils';
 
 interface CartItem {
   id: string;
@@ -17,43 +24,54 @@ interface CartItem {
 }
 
 const SAMPLE_CART: CartItem[] = [
-  { id: "1", name: "Wireless Headphones", price: 79.99, quantity: 1, image: "/products/headphones.jpg" },
-  { id: "2", name: "Smart Watch Pro", price: 199.99, quantity: 1, image: "/products/watch.jpg" },
+  {
+    id: '1',
+    name: 'Wireless Headphones',
+    price: 79.99,
+    quantity: 1,
+    image: '/products/headphones.jpg',
+  },
+  { id: '2', name: 'Smart Watch Pro', price: 199.99, quantity: 1, image: '/products/watch.jpg' },
 ];
 
 const BRANCHES = [
-  { id: "1", name: "Downtown Branch", address: "123 Main Street, City Center", distance: "1.2 km" },
-  { id: "2", name: "Westside Mall", address: "456 Shopping Ave, West District", distance: "3.5 km" },
-  { id: "3", name: "North Point", address: "789 North Road, Uptown", distance: "5.1 km" },
+  { id: '1', name: 'Downtown Branch', address: '123 Main Street, City Center', distance: '1.2 km' },
+  {
+    id: '2',
+    name: 'Westside Mall',
+    address: '456 Shopping Ave, West District',
+    distance: '3.5 km',
+  },
+  { id: '3', name: 'North Point', address: '789 North Road, Uptown', distance: '5.1 km' },
 ];
 
 const STEPS = [
-  { id: 1, name: "Cart" },
-  { id: 2, name: "Delivery" },
-  { id: 3, name: "Payment" },
-  { id: 4, name: "Confirm" },
+  { id: 1, name: 'Cart' },
+  { id: 2, name: 'Delivery' },
+  { id: 3, name: 'Payment' },
+  { id: 4, name: 'Confirm' },
 ];
 
 export default function CheckoutPage() {
   const [currentStep, setCurrentStep] = useState(2);
-  const [selectedBranch, setSelectedBranch] = useState<string>("");
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "cod" | "digital">("card");
+  const [selectedBranch, setSelectedBranch] = useState<string>('');
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'cod' | 'digital'>('card');
   const [saveCard, setSaveCard] = useState(false);
-  
+
   // Form state
   const [formData, setFormData] = useState({
-    fullName: "",
-    phone: "",
-    address1: "",
-    address2: "",
-    city: "",
-    state: "",
-    postalCode: "",
-    deliveryNotes: "",
-    cardNumber: "",
-    cardExpiry: "",
-    cardCvv: "",
-    cardName: "",
+    fullName: '',
+    phone: '',
+    address1: '',
+    address2: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    deliveryNotes: '',
+    cardNumber: '',
+    cardExpiry: '',
+    cardCvv: '',
+    cardName: '',
   });
 
   const subtotal = SAMPLE_CART.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -63,20 +81,20 @@ export default function CheckoutPage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleNextStep = () => {
-    if (currentStep < 4) setCurrentStep(prev => prev + 1);
+    if (currentStep < 4) setCurrentStep((prev) => prev + 1);
   };
 
   const handlePrevStep = () => {
-    if (currentStep > 1) setCurrentStep(prev => prev - 1);
+    if (currentStep > 1) setCurrentStep((prev) => prev - 1);
   };
 
   const handlePlaceOrder = () => {
     // Handle order placement
-    console.log("Order placed!", { formData, selectedBranch, paymentMethod });
+    console.log('Order placed!', { formData, selectedBranch, paymentMethod });
     setCurrentStep(4);
   };
 
@@ -91,10 +109,10 @@ export default function CheckoutPage() {
                 <div className="flex flex-col items-center">
                   <div
                     className={cn(
-                      "flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full border-2 transition-all",
+                      'flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full border-2 transition-all',
                       currentStep >= step.id
-                        ? "border-brand bg-brand text-white"
-                        : "border-border bg-muted text-muted-foreground"
+                        ? 'border-brand bg-brand text-white'
+                        : 'border-border bg-muted text-muted-foreground'
                     )}
                   >
                     {currentStep > step.id ? (
@@ -105,8 +123,8 @@ export default function CheckoutPage() {
                   </div>
                   <span
                     className={cn(
-                      "mt-2 text-xs md:text-sm font-medium",
-                      currentStep >= step.id ? "text-brand" : "text-muted-foreground"
+                      'mt-2 text-xs md:text-sm font-medium',
+                      currentStep >= step.id ? 'text-brand' : 'text-muted-foreground'
                     )}
                   >
                     {step.name}
@@ -115,8 +133,8 @@ export default function CheckoutPage() {
                 {index < STEPS.length - 1 && (
                   <div
                     className={cn(
-                      "mx-2 md:mx-4 h-0.5 w-8 md:w-16 transition-all",
-                      currentStep > step.id ? "bg-brand" : "bg-border"
+                      'mx-2 md:mx-4 h-0.5 w-8 md:w-16 transition-all',
+                      currentStep > step.id ? 'bg-brand' : 'bg-border'
                     )}
                   />
                 )}
@@ -244,10 +262,10 @@ export default function CheckoutPage() {
                         <label
                           key={branch.id}
                           className={cn(
-                            "flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-all",
+                            'flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-all',
                             selectedBranch === branch.id
-                              ? "border-brand bg-brand/5"
-                              : "border-border hover:border-muted-foreground/50"
+                              ? 'border-brand bg-brand/5'
+                              : 'border-border hover:border-muted-foreground/50'
                           )}
                         >
                           <input
@@ -258,7 +276,12 @@ export default function CheckoutPage() {
                             onChange={() => setSelectedBranch(branch.id)}
                             className="mt-1 h-4 w-4 accent-brand"
                           />
-                          <MapPin className={cn("mt-0.5 h-4 w-4 shrink-0", selectedBranch === branch.id ? "text-brand" : "text-muted-foreground")} />
+                          <MapPin
+                            className={cn(
+                              'mt-0.5 h-4 w-4 shrink-0',
+                              selectedBranch === branch.id ? 'text-brand' : 'text-muted-foreground'
+                            )}
+                          />
                           <div className="flex-1">
                             <p className="font-medium">{branch.name}</p>
                             <p className="text-sm text-muted-foreground">{branch.address}</p>
@@ -289,9 +312,7 @@ export default function CheckoutPage() {
                   <Button variant="outline" onClick={handlePrevStep}>
                     Back to Cart
                   </Button>
-                  <Button onClick={handleNextStep}>
-                    Continue to Payment
-                  </Button>
+                  <Button onClick={handleNextStep}>Continue to Payment</Button>
                 </CardFooter>
               </Card>
             )}
@@ -308,10 +329,10 @@ export default function CheckoutPage() {
                   <div className="space-y-2">
                     <label
                       className={cn(
-                        "flex cursor-pointer items-center justify-between rounded-lg border p-4 transition-all",
-                        paymentMethod === "card"
-                          ? "border-brand bg-brand/5"
-                          : "border-border hover:border-muted-foreground/50"
+                        'flex cursor-pointer items-center justify-between rounded-lg border p-4 transition-all',
+                        paymentMethod === 'card'
+                          ? 'border-brand bg-brand/5'
+                          : 'border-border hover:border-muted-foreground/50'
                       )}
                     >
                       <div className="flex items-center gap-3">
@@ -319,28 +340,34 @@ export default function CheckoutPage() {
                           type="radio"
                           name="payment"
                           value="card"
-                          checked={paymentMethod === "card"}
-                          onChange={() => setPaymentMethod("card")}
+                          checked={paymentMethod === 'card'}
+                          onChange={() => setPaymentMethod('card')}
                           className="h-4 w-4 accent-brand"
                         />
                         <CreditCard className="h-5 w-5 text-muted-foreground" />
                         <div>
                           <p className="font-medium">Credit / Debit Card</p>
-                          <p className="text-xs text-muted-foreground">Visa, Mastercard, American Express</p>
+                          <p className="text-xs text-muted-foreground">
+                            Visa, Mastercard, American Express
+                          </p>
                         </div>
                       </div>
                       <div className="flex gap-1">
-                        <div className="h-6 w-9 rounded bg-blue-600 flex items-center justify-center text-white text-xs font-bold">V</div>
-                        <div className="h-6 w-9 rounded bg-red-500 flex items-center justify-center text-white text-xs font-bold">M</div>
+                        <div className="h-6 w-9 rounded bg-blue-600 flex items-center justify-center text-white text-xs font-bold">
+                          V
+                        </div>
+                        <div className="h-6 w-9 rounded bg-red-500 flex items-center justify-center text-white text-xs font-bold">
+                          M
+                        </div>
                       </div>
                     </label>
 
                     <label
                       className={cn(
-                        "flex cursor-pointer items-center justify-between rounded-lg border p-4 transition-all",
-                        paymentMethod === "cod"
-                          ? "border-brand bg-brand/5"
-                          : "border-border hover:border-muted-foreground/50"
+                        'flex cursor-pointer items-center justify-between rounded-lg border p-4 transition-all',
+                        paymentMethod === 'cod'
+                          ? 'border-brand bg-brand/5'
+                          : 'border-border hover:border-muted-foreground/50'
                       )}
                     >
                       <div className="flex items-center gap-3">
@@ -348,24 +375,26 @@ export default function CheckoutPage() {
                           type="radio"
                           name="payment"
                           value="cod"
-                          checked={paymentMethod === "cod"}
-                          onChange={() => setPaymentMethod("cod")}
+                          checked={paymentMethod === 'cod'}
+                          onChange={() => setPaymentMethod('cod')}
                           className="h-4 w-4 accent-brand"
                         />
                         <DollarSign className="h-5 w-5 text-muted-foreground" />
                         <div>
                           <p className="font-medium">Cash on Delivery</p>
-                          <p className="text-xs text-muted-foreground">Pay when you receive your order</p>
+                          <p className="text-xs text-muted-foreground">
+                            Pay when you receive your order
+                          </p>
                         </div>
                       </div>
                     </label>
 
                     <label
                       className={cn(
-                        "flex cursor-pointer items-center justify-between rounded-lg border p-4 transition-all",
-                        paymentMethod === "digital"
-                          ? "border-brand bg-brand/5"
-                          : "border-border hover:border-muted-foreground/50"
+                        'flex cursor-pointer items-center justify-between rounded-lg border p-4 transition-all',
+                        paymentMethod === 'digital'
+                          ? 'border-brand bg-brand/5'
+                          : 'border-border hover:border-muted-foreground/50'
                       )}
                     >
                       <div className="flex items-center gap-3">
@@ -373,21 +402,23 @@ export default function CheckoutPage() {
                           type="radio"
                           name="payment"
                           value="digital"
-                          checked={paymentMethod === "digital"}
-                          onChange={() => setPaymentMethod("digital")}
+                          checked={paymentMethod === 'digital'}
+                          onChange={() => setPaymentMethod('digital')}
                           className="h-4 w-4 accent-brand"
                         />
                         <Smartphone className="h-5 w-5 text-muted-foreground" />
                         <div>
                           <p className="font-medium">Apple Pay / Google Pay</p>
-                          <p className="text-xs text-muted-foreground">Quick and secure digital wallet</p>
+                          <p className="text-xs text-muted-foreground">
+                            Quick and secure digital wallet
+                          </p>
                         </div>
                       </div>
                     </label>
                   </div>
 
                   {/* Card Form */}
-                  {paymentMethod === "card" && (
+                  {paymentMethod === 'card' && (
                     <div className="space-y-4 pt-4 animate-fade-in">
                       <div className="space-y-2">
                         <label htmlFor="cardNumber" className="text-sm font-medium">
@@ -449,7 +480,9 @@ export default function CheckoutPage() {
                           onChange={(e) => setSaveCard(e.target.checked)}
                           className="h-4 w-4 accent-brand"
                         />
-                        <span className="text-sm text-muted-foreground">Save this card for future purchases</span>
+                        <span className="text-sm text-muted-foreground">
+                          Save this card for future purchases
+                        </span>
                       </label>
                     </div>
                   )}
@@ -458,9 +491,7 @@ export default function CheckoutPage() {
                   <Button variant="outline" onClick={handlePrevStep}>
                     Back to Delivery
                   </Button>
-                  <Button onClick={handlePlaceOrder}>
-                    Place Order
-                  </Button>
+                  <Button onClick={handlePlaceOrder}>Place Order</Button>
                 </CardFooter>
               </Card>
             )}
@@ -481,15 +512,20 @@ export default function CheckoutPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-muted-foreground">
-                    Your order has been placed successfully. You will receive a confirmation email shortly.
+                    Your order has been placed successfully. You will receive a confirmation email
+                    shortly.
                   </p>
                   <div className="rounded-lg bg-muted p-4">
-                    <p className="text-sm font-medium">Order Number: #EW-{Date.now().toString().slice(-6)}</p>
-                    <p className="text-sm text-muted-foreground">Estimated delivery: 3-5 business days</p>
+                    <p className="text-sm font-medium">
+                      Order Number: #EW-{Date.now().toString().slice(-6)}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Estimated delivery: 3-5 business days
+                    </p>
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full" onClick={() => window.location.href = "/"}>
+                  <Button className="w-full" onClick={() => (window.location.href = '/')}>
                     Continue Shopping
                   </Button>
                 </CardFooter>
@@ -514,7 +550,7 @@ export default function CheckoutPage() {
                           alt={item.name}
                           className="h-full w-full object-cover"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).src = "/placeholder.jpg";
+                            (e.target as HTMLImageElement).src = '/placeholder.jpg';
                           }}
                         />
                       </div>
@@ -563,10 +599,18 @@ export default function CheckoutPage() {
                   <span>SSL secure checkout</span>
                 </div>
                 <div className="flex items-center justify-center gap-2 border-t pt-3">
-                  <div className="h-6 w-10 rounded bg-blue-600 flex items-center justify-center text-white text-xs font-bold">V</div>
-                  <div className="h-6 w-10 rounded bg-red-500 flex items-center justify-center text-white text-xs font-bold">M</div>
-                  <div className="h-6 w-10 rounded bg-orange-500 flex items-center justify-center text-white text-xs font-bold">A</div>
-                  <div className="h-6 w-10 rounded bg-green-600 flex items-center justify-center text-white text-xs font-bold">P</div>
+                  <div className="h-6 w-10 rounded bg-blue-600 flex items-center justify-center text-white text-xs font-bold">
+                    V
+                  </div>
+                  <div className="h-6 w-10 rounded bg-red-500 flex items-center justify-center text-white text-xs font-bold">
+                    M
+                  </div>
+                  <div className="h-6 w-10 rounded bg-orange-500 flex items-center justify-center text-white text-xs font-bold">
+                    A
+                  </div>
+                  <div className="h-6 w-10 rounded bg-green-600 flex items-center justify-center text-white text-xs font-bold">
+                    P
+                  </div>
                 </div>
               </CardContent>
             </Card>

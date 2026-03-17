@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { ChevronRight } from "lucide-react";
+import { ChevronRight } from 'lucide-react';
 
 const categories = [
-  { id: "1", name: "Fruits & Vegetables", icon: "🥬" },
-  { id: "2", name: "Baby & Pregnancy", icon: "👶" },
-  { id: "3", name: "Beverages", icon: "🧃" },
-  { id: "4", name: "Meats & Seafood", icon: "🍤" },
-  { id: "5", name: "Biscuits & Snacks", icon: "🍪" },
-  { id: "6", name: "Breads & Bakery", icon: "🥖" },
-  { id: "7", name: "Breakfast & Dairy", icon: "🥛" },
-  { id: "8", name: "Frozen Foods", icon: "🧊" },
-  { id: "9", name: "Grocery & Staples", icon: "🛒" },
+  { id: '1', name: 'Fruits & Vegetables', icon: '🥬' },
+  { id: '2', name: 'Baby & Pregnancy', icon: '👶' },
+  { id: '3', name: 'Beverages', icon: '🧃' },
+  { id: '4', name: 'Meats & Seafood', icon: '🍤' },
+  { id: '5', name: 'Biscuits & Snacks', icon: '🍪' },
+  { id: '6', name: 'Breads & Bakery', icon: '🥖' },
+  { id: '7', name: 'Breakfast & Dairy', icon: '🥛' },
+  { id: '8', name: 'Frozen Foods', icon: '🧊' },
+  { id: '9', name: 'Grocery & Staples', icon: '🛒' },
 ];
 
 export function CategoryGrid() {
@@ -21,9 +21,7 @@ export function CategoryGrid() {
       <div className="mb-6 flex items-end justify-between">
         <div>
           <h2 className="text-lg font-bold text-gray-900">Top Categories</h2>
-          <p className="mt-1 text-xs text-gray-500">
-            New products with updated stocks
-          </p>
+          <p className="mt-1 text-xs text-gray-500">New products with updated stocks</p>
         </div>
         <a
           href="/categories"

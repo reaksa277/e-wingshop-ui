@@ -1,22 +1,23 @@
-"use client";
+'use client';
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect, useMemo } from 'react';
 
 export function useStockAnimation(currentStock: number, maxStock: number) {
   const [displayedStock, setDisplayedStock] = useState(0);
-  const [stockLevel, setStockLevel] = useState<"high" | "medium" | "low">("high");
+
+  const stockLevel = useMemo<'high' | 'medium' | 'low'>(() => {
+    const stockPercentage = (currentStock / maxStock) * 100;
+
+    if (stockPercentage < 20) {
+      return 'low';
+    } else if (stockPercentage < 50) {
+      return 'medium';
+    } else {
+      return 'high';
+    }
+  }, [currentStock, maxStock]);
 
   useEffect(() => {
-    const stockPercentage = (currentStock / maxStock) * 100;
-    
-    if (stockPercentage < 20) {
-      setStockLevel("low");
-    } else if (stockPercentage < 50) {
-      setStockLevel("medium");
-    } else {
-      setStockLevel("high");
-    }
-
     // Animate from 0 to current stock
     const duration = 800;
     const steps = 20;

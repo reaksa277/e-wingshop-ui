@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 
 export function HeroBanner() {
   return (
@@ -34,9 +34,7 @@ export function HeroBanner() {
             </div>
             <div className="hidden rounded-2xl bg-white/10 p-4 backdrop-blur-sm sm:block md:p-6">
               <p className="text-xs text-white/80">Delivery</p>
-              <p className="font-nunito-sans text-xl font-bold text-white md:text-2xl">
-                25 min
-              </p>
+              <p className="font-nunito-sans text-xl font-bold text-white md:text-2xl">25 min</p>
               <p className="mt-1 text-xs text-white/70">Fast Delivery</p>
             </div>
           </div>

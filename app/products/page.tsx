@@ -1,310 +1,310 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Header } from "@/components/Header";
-import { FilterSidebar } from "@/components/products/FilterSidebar";
-import { ProductsToolbar } from "@/components/products/ProductsToolbar";
-import { Pagination } from "@/components/products/Pagination";
-import { ProductCard } from "@/components/ProductCard";
-import { SlidersHorizontal } from "lucide-react";
+import { useState } from 'react';
+import { Header } from '@/components/Header';
+import { FilterSidebar } from '@/components/products/FilterSidebar';
+import { ProductsToolbar } from '@/components/products/ProductsToolbar';
+import { Pagination } from '@/components/products/Pagination';
+import { ProductCard } from '@/components/ProductCard';
+import { SlidersHorizontal } from 'lucide-react';
 
 const products = [
   {
-    id: "1",
-    image: "🍎",
-    badge: "Organic" as const,
-    discount: "20% OFF",
-    name: "Fresh Organic Apples",
-    weight: "1000gm",
-    origin: "Imported from South Africa",
+    id: '1',
+    image: '🍎',
+    badge: 'Organic' as const,
+    discount: '20% OFF',
+    name: 'Fresh Organic Apples',
+    weight: '1000gm',
+    origin: 'Imported from South Africa',
     rating: 4.8,
     reviewCount: 124,
     price: 12.99,
     originalPrice: 16.99,
-    category: "fruits",
+    category: 'fruits',
   },
   {
-    id: "2",
-    image: "🥛",
-    badge: "Best Sale" as const,
-    name: "Full Cream Milk",
-    weight: "1L",
+    id: '2',
+    image: '🥛',
+    badge: 'Best Sale' as const,
+    name: 'Full Cream Milk',
+    weight: '1L',
     rating: 4.5,
     reviewCount: 89,
     price: 5.99,
-    category: "dairy",
+    category: 'dairy',
   },
   {
-    id: "3",
-    image: "🍦",
-    badge: "Frozen" as const,
-    discount: "15% OFF",
-    name: "Vanilla Ice Cream",
-    weight: "500ml",
-    origin: "Local",
+    id: '3',
+    image: '🍦',
+    badge: 'Frozen' as const,
+    discount: '15% OFF',
+    name: 'Vanilla Ice Cream',
+    weight: '500ml',
+    origin: 'Local',
     rating: 4.7,
     reviewCount: 56,
     price: 8.99,
     originalPrice: 10.99,
-    category: "snacks",
+    category: 'snacks',
   },
   {
-    id: "4",
-    image: "🥖",
-    name: "Whole Wheat Bread",
-    weight: "400gm",
+    id: '4',
+    image: '🥖',
+    name: 'Whole Wheat Bread',
+    weight: '400gm',
     rating: 4.3,
     reviewCount: 201,
     price: 3.99,
-    category: "bakery",
+    category: 'bakery',
   },
   {
-    id: "5",
-    image: "🥚",
-    badge: "Organic" as const,
-    name: "Farm Fresh Eggs",
-    weight: "12 pack",
-    origin: "Local Farm",
+    id: '5',
+    image: '🥚',
+    badge: 'Organic' as const,
+    name: 'Farm Fresh Eggs',
+    weight: '12 pack',
+    origin: 'Local Farm',
     rating: 4.9,
     reviewCount: 312,
     price: 14.99,
-    category: "dairy",
+    category: 'dairy',
   },
   {
-    id: "6",
-    image: "🧀",
-    discount: "10% OFF",
-    name: "Cheddar Cheese Slices",
-    weight: "200gm",
+    id: '6',
+    image: '🧀',
+    discount: '10% OFF',
+    name: 'Cheddar Cheese Slices',
+    weight: '200gm',
     rating: 4.6,
     reviewCount: 78,
     price: 9.99,
     originalPrice: 11.99,
-    category: "dairy",
+    category: 'dairy',
   },
   {
-    id: "7",
-    image: "🥤",
-    name: "Orange Juice",
-    weight: "1.5L",
-    origin: "Imported",
+    id: '7',
+    image: '🥤',
+    name: 'Orange Juice',
+    weight: '1.5L',
+    origin: 'Imported',
     rating: 4.4,
     reviewCount: 145,
     price: 7.99,
-    category: "beverages",
+    category: 'beverages',
   },
   {
-    id: "8",
-    image: "🍗",
-    badge: "Frozen" as const,
-    name: "Chicken Breast",
-    weight: "500gm",
+    id: '8',
+    image: '🍗',
+    badge: 'Frozen' as const,
+    name: 'Chicken Breast',
+    weight: '500gm',
     rating: 4.7,
     reviewCount: 234,
     price: 18.99,
-    category: "meat",
+    category: 'meat',
   },
   {
-    id: "9",
-    image: "🍌",
-    badge: "Organic" as const,
-    name: "Organic Bananas",
-    weight: "1 bunch",
+    id: '9',
+    image: '🍌',
+    badge: 'Organic' as const,
+    name: 'Organic Bananas',
+    weight: '1 bunch',
     rating: 4.8,
     reviewCount: 156,
     price: 4.99,
-    category: "fruits",
+    category: 'fruits',
   },
   {
-    id: "10",
-    image: "🥬",
-    name: "Fresh Lettuce",
-    weight: "1 head",
+    id: '10',
+    image: '🥬',
+    name: 'Fresh Lettuce',
+    weight: '1 head',
     rating: 4.5,
     reviewCount: 78,
     price: 2.99,
-    category: "fruits",
+    category: 'fruits',
   },
   {
-    id: "11",
-    image: "🥩",
-    badge: "Best Sale" as const,
-    name: "Beef Steak",
-    weight: "300gm",
+    id: '11',
+    image: '🥩',
+    badge: 'Best Sale' as const,
+    name: 'Beef Steak',
+    weight: '300gm',
     rating: 4.9,
     reviewCount: 89,
     price: 35.99,
-    category: "meat",
+    category: 'meat',
   },
   {
-    id: "12",
-    image: "🥐",
-    name: "Butter Croissant",
-    weight: "4 pack",
+    id: '12',
+    image: '🥐',
+    name: 'Butter Croissant',
+    weight: '4 pack',
     rating: 4.6,
     reviewCount: 112,
     price: 8.99,
-    category: "bakery",
+    category: 'bakery',
   },
   {
-    id: "13",
-    image: "🍇",
-    badge: "Organic" as const,
-    name: "Red Grapes",
-    weight: "500gm",
-    origin: "Imported from Chile",
+    id: '13',
+    image: '🍇',
+    badge: 'Organic' as const,
+    name: 'Red Grapes',
+    weight: '500gm',
+    origin: 'Imported from Chile',
     rating: 4.7,
     reviewCount: 98,
     price: 8.99,
-    category: "fruits",
+    category: 'fruits',
   },
   {
-    id: "14",
-    image: "🧈",
-    name: "Salted Butter",
-    weight: "250gm",
+    id: '14',
+    image: '🧈',
+    name: 'Salted Butter',
+    weight: '250gm',
     rating: 4.5,
     reviewCount: 67,
     price: 6.49,
-    category: "dairy",
+    category: 'dairy',
   },
   {
-    id: "15",
-    image: "🍊",
-    discount: "25% OFF",
-    name: "Fresh Oranges",
-    weight: "1kg",
-    origin: "Local Farm",
+    id: '15',
+    image: '🍊',
+    discount: '25% OFF',
+    name: 'Fresh Oranges',
+    weight: '1kg',
+    origin: 'Local Farm',
     rating: 4.6,
     reviewCount: 143,
     price: 5.99,
     originalPrice: 7.99,
-    category: "fruits",
+    category: 'fruits',
   },
   {
-    id: "16",
-    image: "🥤",
-    badge: "Best Seller" as const,
-    name: "Apple Juice",
-    weight: "1L",
+    id: '16',
+    image: '🥤',
+    badge: 'Best Seller' as const,
+    name: 'Apple Juice',
+    weight: '1L',
     rating: 4.4,
     reviewCount: 89,
     price: 6.99,
-    category: "beverages",
+    category: 'beverages',
   },
   {
-    id: "17",
-    image: "🍓",
-    badge: "Organic" as const,
-    name: "Fresh Strawberries",
-    weight: "250gm",
-    origin: "Local Farm",
+    id: '17',
+    image: '🍓',
+    badge: 'Organic' as const,
+    name: 'Fresh Strawberries',
+    weight: '250gm',
+    origin: 'Local Farm',
     rating: 4.8,
     reviewCount: 176,
     price: 7.99,
-    category: "fruits",
+    category: 'fruits',
   },
   {
-    id: "18",
-    image: "🧊",
-    name: "Frozen Peas",
-    weight: "500gm",
+    id: '18',
+    image: '🧊',
+    name: 'Frozen Peas',
+    weight: '500gm',
     rating: 4.3,
     reviewCount: 45,
     price: 3.49,
-    category: "frozen",
+    category: 'frozen',
   },
   {
-    id: "19",
-    image: "🍚",
-    name: "Basmati Rice",
-    weight: "2kg",
+    id: '19',
+    image: '🍚',
+    name: 'Basmati Rice',
+    weight: '2kg',
     rating: 4.7,
     reviewCount: 234,
     price: 12.99,
-    category: "grocery",
+    category: 'grocery',
   },
   {
-    id: "20",
-    image: "🍝",
-    discount: "15% OFF",
-    name: "Spaghetti Pasta",
-    weight: "500gm",
-    origin: "Imported from Italy",
+    id: '20',
+    image: '🍝',
+    discount: '15% OFF',
+    name: 'Spaghetti Pasta',
+    weight: '500gm',
+    origin: 'Imported from Italy',
     rating: 4.5,
     reviewCount: 112,
     price: 4.99,
     originalPrice: 5.99,
-    category: "grocery",
+    category: 'grocery',
   },
   {
-    id: "21",
-    image: "🥫",
-    name: "Tomato Sauce",
-    weight: "400gm",
+    id: '21',
+    image: '🥫',
+    name: 'Tomato Sauce',
+    weight: '400gm',
     rating: 4.4,
     reviewCount: 78,
     price: 3.99,
-    category: "grocery",
+    category: 'grocery',
   },
   {
-    id: "22",
-    image: "🍫",
-    badge: "Best Sale" as const,
-    name: "Dark Chocolate Bar",
-    weight: "100gm",
+    id: '22',
+    image: '🍫',
+    badge: 'Best Sale' as const,
+    name: 'Dark Chocolate Bar',
+    weight: '100gm',
     rating: 4.8,
     reviewCount: 189,
     price: 5.49,
-    category: "snacks",
+    category: 'snacks',
   },
   {
-    id: "23",
-    image: "🥜",
-    name: "Roasted Almonds",
-    weight: "200gm",
+    id: '23',
+    image: '🥜',
+    name: 'Roasted Almonds',
+    weight: '200gm',
     rating: 4.7,
     reviewCount: 156,
     price: 9.99,
-    category: "snacks",
+    category: 'snacks',
   },
   {
-    id: "24",
-    image: "🍯",
-    badge: "Organic" as const,
-    name: "Pure Honey",
-    weight: "500gm",
-    origin: "Local Farm",
+    id: '24',
+    image: '🍯',
+    badge: 'Organic' as const,
+    name: 'Pure Honey',
+    weight: '500gm',
+    origin: 'Local Farm',
     rating: 4.9,
     reviewCount: 267,
     price: 15.99,
-    category: "grocery",
+    category: 'grocery',
   },
 ];
 
 export default function ProductsPage() {
-  const [sortOption, setSortOption] = useState("default");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [sortOption, setSortOption] = useState('default');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const itemsPerPage = 24;
 
   const clearFilters = () => {
-    setSortOption("default");
+    setSortOption('default');
     setCurrentPage(1);
   };
 
   const sortedProducts = [...products].sort((a, b) => {
     switch (sortOption) {
-      case "price-low":
+      case 'price-low':
         return a.price - b.price;
-      case "price-high":
+      case 'price-high':
         return b.price - a.price;
-      case "rating":
+      case 'rating':
         return b.rating - a.rating;
-      case "newest":
+      case 'newest':
         return parseInt(b.id) - parseInt(a.id);
-      case "bestselling":
+      case 'bestselling':
         return b.reviewCount - a.reviewCount;
       default:
         return 0;
@@ -319,7 +319,6 @@ export default function ProductsPage() {
 
   return (
     <div className="flex min-h-screen bg-cream">
-      
       {/* Sidebar - Desktop */}
       <div className="hidden lg:block">
         <FilterSidebar onClearFilters={clearFilters} />
@@ -379,9 +378,9 @@ export default function ProductsPage() {
           <>
             <div
               className={`p-6 ${
-                viewMode === "grid"
-                  ? "grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4"
-                  : "flex flex-col gap-4"
+                viewMode === 'grid'
+                  ? 'grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4'
+                  : 'flex flex-col gap-4'
               }`}
             >
               {paginatedProducts.map((product) => (
@@ -414,9 +413,7 @@ export default function ProductsPage() {
         ) : (
           <div className="flex flex-col items-center justify-center py-20">
             <div className="mb-4 text-6xl">🔍</div>
-            <p className="text-lg font-semibold text-gray-900">
-              No products found
-            </p>
+            <p className="text-lg font-semibold text-gray-900">No products found</p>
             <p className="mt-1 text-sm text-gray-500">
               Try adjusting your filters or search criteria
             </p>

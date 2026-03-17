@@ -1,16 +1,16 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { ShoppingBag, Truck, Clock, Shield, ArrowRight } from "lucide-react"
+import { useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { ShoppingBag, Truck, Clock, Shield, ArrowRight } from 'lucide-react';
 
 export default function RegisterPage() {
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [phone, setPhone] = useState("")
-  const [password, setPassword] = useState("")
-  const [agreedToTerms, setAgreedToTerms] = useState(false)
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   return (
     <div className="min-h-screen flex">
@@ -80,12 +80,8 @@ export default function RegisterPage() {
 
           {/* Heading */}
           <div className="text-center mb-8">
-            <h2 className="font-display text-3xl font-bold text-gray-900 mb-2">
-              Create account
-            </h2>
-            <p className="text-gray-500">
-              Start shopping with E-Wingshop today
-            </p>
+            <h2 className="font-display text-3xl font-bold text-gray-900 mb-2">Create account</h2>
+            <p className="text-gray-500">Start shopping with E-Wingshop today</p>
           </div>
 
           {/* Form */}
@@ -179,12 +175,15 @@ export default function RegisterPage() {
                 />
               </div>
               <label htmlFor="terms" className="text-sm text-gray-600 cursor-pointer">
-                I agree to the{" "}
+                I agree to the{' '}
                 <a href="/terms" className="text-brand hover:text-brand-dark font-medium underline">
                   Terms & Conditions
-                </a>{" "}
-                and{" "}
-                <a href="/privacy" className="text-brand hover:text-brand-dark font-medium underline">
+                </a>{' '}
+                and{' '}
+                <a
+                  href="/privacy"
+                  className="text-brand hover:text-brand-dark font-medium underline"
+                >
                   Privacy Policy
                 </a>
               </label>
@@ -251,7 +250,7 @@ export default function RegisterPage() {
           {/* Login Link */}
           <div className="text-center mt-8">
             <p className="text-gray-600">
-              Already have an account?{" "}
+              Already have an account?{' '}
               <a
                 href="/login"
                 className="text-brand hover:text-brand-dark font-medium inline-flex items-center gap-1 transition-colors"
@@ -269,5 +268,5 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

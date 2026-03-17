@@ -1,16 +1,13 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from 'react';
 
 interface PageLoadOptions {
   staggerDelay?: number;
   initialDelay?: number;
 }
 
-export function usePageLoadAnimation(
-  sectionCount: number,
-  options: PageLoadOptions = {}
-) {
+export function usePageLoadAnimation(sectionCount: number, options: PageLoadOptions = {}) {
   const { staggerDelay = 100, initialDelay = 0 } = options;
   const [loadedSections, setLoadedSections] = useState<Set<number>>(new Set());
 
@@ -18,9 +15,12 @@ export function usePageLoadAnimation(
     const timeouts: NodeJS.Timeout[] = [];
 
     for (let i = 0; i < sectionCount; i++) {
-      const timeout = setTimeout(() => {
-        setLoadedSections((prev) => new Set(prev).add(i));
-      }, initialDelay + i * staggerDelay);
+      const timeout = setTimeout(
+        () => {
+          setLoadedSections((prev) => new Set(prev).add(i));
+        },
+        initialDelay + i * staggerDelay
+      );
 
       timeouts.push(timeout);
     }
