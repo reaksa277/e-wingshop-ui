@@ -322,11 +322,11 @@ export default function ProductDetailPage() {
   const lowStock = product.stock <= 30;
 
   return (
-    <div className="min-h-screen bg-cream pb-32">
-      <Header />
+    <div className="min-h-screen bg-cream">
+      {/* <Header /> */}
 
       {/* Back Button & Actions Bar */}
-      <div className="sticky top-[130px] z-20 flex items-center justify-between bg-white/90 px-4 py-3 backdrop-blur-md shadow-sm md:top-[150px]">
+      <div className="sticky top-0 z-20 flex items-center justify-between bg-white/90 px-4 py-3 backdrop-blur-md shadow-sm md:top-0">
         <button
           onClick={() => router.back()}
           className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 transition-colors hover:bg-gray-100"

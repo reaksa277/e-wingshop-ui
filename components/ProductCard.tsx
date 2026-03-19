@@ -1,6 +1,6 @@
 'use client';
 
-import { Star, ShoppingCart, Check } from 'lucide-react';
+import { Star, ShoppingCart, Check, Minus, Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -16,6 +16,7 @@ interface ProductCardProps {
   reviewCount: number;
   price: number;
   originalPrice?: number;
+  onAddToCart?: (quantity: number) => void;
 }
 
 export function ProductCard({
@@ -30,9 +31,12 @@ export function ProductCard({
   reviewCount,
   price,
   originalPrice,
+  onAddToCart,
 }: ProductCardProps) {
   const router = useRouter();
   const [isAdded, setIsAdded] = useState(false);
+  const [showQuantity, setShowQuantity] = useState(false);
+  const [quantity, setQuantity] = useState(1);
 
   const getBadgeStyles = (badgeName: string) => {
     switch (badgeName) {
@@ -99,7 +103,7 @@ export function ProductCard({
         </div>
 
         {/* Price and Add Button */}
-        <div className="mt-auto flex items-center justify-between">
+        <div className="mt-auto flex items-center justify-between gap-2">
           <div className="flex flex-col">
             <span className="text-lg font-bold text-brand">AED {price.toFixed(2)}</span>
             {originalPrice && (
@@ -108,20 +112,64 @@ export function ProductCard({
               </span>
             )}
           </div>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsAdded(true);
-              setTimeout(() => setIsAdded(false), 1500);
-            }}
-            className={`flex h-9 w-9 items-center justify-center rounded-full bg-brand text-white shadow-sm transition-all duration-200 hover:bg-brand-dark hover:shadow-green ${
-              isAdded
-                ? 'scale-125 animate-bounce bg-green-600 hover:bg-green-600'
-                : 'active:scale-95'
-            }`}
-          >
-            {isAdded ? <Check className="h-4 w-4" /> : <ShoppingCart className="h-4 w-4" />}
-          </button>
+          {showQuantity ? (
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setQuantity((prev) => Math.max(1, prev - 1));
+                }}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-600 transition-colors hover:bg-gray-200 active:scale-95"
+              >
+                <Minus className="h-3.5 w-3.5" />
+              </button>
+              <span className="w-6 text-center text-sm font-semibold text-gray-700">
+                {quantity}
+              </span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setQuantity((prev) => Math.min(99, prev + 1));
+                }}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-600 transition-colors hover:bg-gray-200 active:scale-95"
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsAdded(true);
+                  onAddToCart?.(quantity);
+                  setTimeout(() => {
+                    setIsAdded(false);
+                    setShowQuantity(false);
+                    setQuantity(1);
+                  }, 1500);
+                }}
+                className={`flex h-9 items-center justify-center rounded-full bg-brand px-4 text-white shadow-sm transition-all duration-200 hover:bg-brand-dark hover:shadow-green ${
+                  isAdded
+                    ? 'scale-125 animate-bounce bg-green-600 hover:bg-green-600'
+                    : 'active:scale-95'
+                }`}
+              >
+                {isAdded ? (
+                  <Check className="h-4 w-4" />
+                ) : (
+                  <span className="text-xs font-semibold">Add</span>
+                )}
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowQuantity(true);
+              }}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-white shadow-sm transition-all duration-200 hover:bg-brand-dark hover:shadow-green active:scale-95"
+            >
+              <ShoppingCart className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
     </div>

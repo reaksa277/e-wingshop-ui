@@ -15,7 +15,7 @@ export default function Home() {
     <div className="flex min-h-screen flex-col bg-white">
       <AnnouncementBar />
       <Header />
-      <main className="flex-1 pt-[140px] md:pt-[88px]">
+      <main className="flex-1">
         <HeroBanner />
         <CategoryFilter onCategoryChange={setSelectedCategory} />
         <ProductGrid selectedCategory={selectedCategory} />

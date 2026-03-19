@@ -6,7 +6,8 @@ import { FilterSidebar } from '@/components/products/FilterSidebar';
 import { ProductsToolbar } from '@/components/products/ProductsToolbar';
 import { Pagination } from '@/components/products/Pagination';
 import { ProductCard } from '@/components/ProductCard';
-import { SlidersHorizontal } from 'lucide-react';
+import { SlidersHorizontal, ShoppingCart, ArrowLeft } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const products = [
   {
@@ -283,11 +284,22 @@ const products = [
 ];
 
 export default function ProductsPage() {
+  const router = useRouter();
   const [sortOption, setSortOption] = useState('default');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [cartItems, setCartItems] = useState<{ [key: string]: number }>({});
+  const [totalCartItems, setTotalCartItems] = useState(0);
   const itemsPerPage = 24;
+
+  const handleAddToCart = (productId: string, quantity: number) => {
+    setCartItems((prev) => ({
+      ...prev,
+      [productId]: (prev[productId] || 0) + quantity,
+    }));
+    setTotalCartItems((prev) => prev + quantity);
+  };
 
   const clearFilters = () => {
     setSortOption('default');
@@ -350,6 +362,17 @@ export default function ProductsPage() {
 
       {/* Main Content */}
       <div className="flex-1">
+        {/* Back Button */}
+        <div className="border-b border-gray-100 bg-white px-6 py-4">
+          <button
+            onClick={() => router.push('/')}
+            className="flex items-center gap-2 text-sm font-medium text-gray-600 transition-colors hover:text-brand"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Home
+          </button>
+        </div>
+
         {/* Toolbar */}
         <ProductsToolbar
           totalProducts={products.length}
@@ -360,6 +383,18 @@ export default function ProductsPage() {
           viewMode={viewMode}
           onViewModeChange={setViewMode}
         />
+
+        {/* Cart Summary */}
+        {totalCartItems > 0 && (
+          <div className="sticky top-0 z-40 bg-brand px-6 py-3 text-center text-white shadow-md">
+            <div className="flex items-center justify-center gap-2">
+              <ShoppingCart className="h-5 w-5" />
+              <span className="text-sm font-semibold">
+                {totalCartItems} item{totalCartItems > 1 ? 's' : ''} added to cart
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Mobile Filter Button */}
         <div className="flex items-center justify-between border-b border-gray-100 bg-white px-4 py-3 lg:hidden">
@@ -397,6 +432,7 @@ export default function ProductsPage() {
                   reviewCount={product.reviewCount}
                   price={product.price}
                   originalPrice={product.originalPrice}
+                  onAddToCart={(quantity) => handleAddToCart(product.id, quantity)}
                 />
               ))}
             </div>

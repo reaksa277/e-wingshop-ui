@@ -47,12 +47,6 @@ export function Header() {
               >
                 Products
               </Link>
-              <Link
-                href="/deals"
-                className="text-sm font-medium text-gray-700 transition-colors hover:text-brand"
-              >
-                Deals
-              </Link>
             </nav>
 
             {/* User & Cart */}
