@@ -1,15 +1,44 @@
 @import 'tailwindcss';
 
-/* Base styles */
+@theme inline {
+  --color-background: hsl(0 0% 100%);
+  --color-foreground: hsl(0 0% 3.9%);
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(0 0% 3.9%);
+  --color-popover: hsl(0 0% 100%);
+  --color-popover-foreground: hsl(0 0% 3.9%);
+  --color-primary: hsl(0 0% 9%);
+  --color-primary-foreground: hsl(0 0% 98%);
+  --color-secondary: hsl(0 0% 96.1%);
+  --color-secondary-foreground: hsl(0 0% 9%);
+  --color-muted: hsl(0 0% 96.1%);
+  --color-muted-foreground: hsl(0 0% 45.1%);
+  --color-accent: hsl(0 0% 96.1%);
+  --color-accent-foreground: hsl(0 0% 9%);
+  --color-destructive: hsl(0 84.2% 60.2%);
+  --color-destructive-foreground: hsl(0 0% 98%);
+  --color-border: hsl(0 0% 89.8%);
+  --color-input: hsl(0 0% 89.8%);
+  --color-ring: hsl(0 0% 3.9%);
+  --radius: 0.5rem;
+  --color-chart-1: hsl(12 76% 61%);
+  --color-chart-2: hsl(173 58% 39%);
+  --color-chart-3: hsl(197 37% 24%);
+  --color-chart-4: hsl(43 74% 66%);
+  --color-chart-5: hsl(27 87% 67%);
+}
+
 @layer base {
-  html {
-    scroll-behavior: smooth;
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }
 
 /* Custom utilities */
 @layer utilities {
-  /* Scrollbar hide */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -19,48 +48,7 @@
     display: none;
   }
 
-  /* Safe area for mobile */
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom);
-  }
-
-  /* Search bar expand */
-  .search-expand {
-    width: 45%;
-    transition: width 0.3s;
-  }
-
-  .search-expand:focus-within {
-    width: 55%;
-  }
-
-  /* Stock bar */
-  .stock-bar {
-    position: relative;
-    height: 0.5rem;
-    width: 100%;
-    border-radius: 9999px;
-    background-color: #e5e7eb;
-    overflow: hidden;
-  }
-
-  .stock-bar-fill {
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    border-radius: 9999px;
-    background: linear-gradient(to right, #2d9c4a, #1a6b2f);
-    transition:
-      width 0.8s ease-out,
-      background-color 0.3s ease;
-  }
-
-  .stock-bar-fill.low {
-    background: linear-gradient(to right, #ef4444, #dc2626);
-  }
-
-  .stock-bar-fill.medium {
-    background: linear-gradient(to right, #f59e0b, #d97706);
   }
 }

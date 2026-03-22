@@ -1,23 +1,18 @@
 import type { Metadata } from 'next';
-import { Playfair_Display, DM_Sans } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import './globals.css';
+import { ReactQueryProvider } from '@/components/providers/ReactQueryProvider';
+import { Toaster } from '@/components/ui/sonner';
+import { ThemeProvider } from '@/components/providers/ThemeProvider';
 
-const playfair = Playfair_Display({
-  variable: '--font-display',
+const inter = Inter({
   subsets: ['latin'],
-  weight: ['400', '500', '700', '800'],
-});
-
-const dmSans = DM_Sans({
   variable: '--font-sans',
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
 });
 
 export const metadata: Metadata = {
-  title: 'E-Wingshop - Fresh Groceries Delivered',
-  description:
-    'Get 20% OFF your first order. Order now and get it delivered within 25 minutes across the UAE',
+  title: 'E-WingShop Dashboard',
+  description: 'Full-stack Next.js 14 dashboard application',
 };
 
 export default function RootLayout({
@@ -26,8 +21,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${playfair.variable} ${dmSans.variable}`}>
-      <body className="font-sans bg-cream antialiased">{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.variable} font-sans antialiased`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ReactQueryProvider>
+            {children}
+            <Toaster position="top-right" richColors />
+          </ReactQueryProvider>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
