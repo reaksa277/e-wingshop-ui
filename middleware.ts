@@ -9,6 +9,7 @@ const routePermissions: Record<string, string[]> = {
   '/dashboard/roles': ['manage_roles'],
   '/dashboard/branches': ['manage_branches'],
   '/dashboard/products': ['manage_products'],
+  '/dashboard/categories': ['manage_categories'],
   '/dashboard/inventory': ['view_inventory'],
   '/dashboard/orders': ['process_orders'],
   '/dashboard/reports': ['view_sales_reports'],

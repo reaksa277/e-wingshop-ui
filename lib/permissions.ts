@@ -5,6 +5,7 @@ export type Permission =
   | 'manage_roles'
   | 'manage_branches'
   | 'manage_products'
+  | 'manage_categories'
   | 'view_inventory'
   | 'process_orders'
   | 'view_sales_reports'
@@ -16,6 +17,7 @@ export const rolePermissions: Record<Role, Permission[]> = {
     'manage_roles',
     'manage_branches',
     'manage_products',
+    'manage_categories',
     'view_inventory',
     'process_orders',
     'view_sales_reports',
@@ -24,6 +26,7 @@ export const rolePermissions: Record<Role, Permission[]> = {
   manager: [
     'manage_branches',
     'manage_products',
+    'manage_categories',
     'view_inventory',
     'process_orders',
     'view_sales_reports',

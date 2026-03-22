@@ -8,7 +8,6 @@ import { z } from 'zod';
 import { getProducts, getCategories, type ProductFormData } from '@/app/actions/products';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Table,
   TableBody,
@@ -340,7 +339,7 @@ export default function ProductsPage() {
       <Card>
         <CardContent className="pt-6">
           <div className="flex gap-4 flex-wrap">
-            <div className="flex-1 min-w-[200px]">
+            <div className="flex-1 min-w-50">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -352,7 +351,7 @@ export default function ProductsPage() {
               </div>
             </div>
             <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-45">
                 <Filter className="mr-2 h-4 w-4" />
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
@@ -366,7 +365,7 @@ export default function ProductsPage() {
               </SelectContent>
             </Select>
             <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger className="w-[150px]">
+              <SelectTrigger className="w-37.5">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -409,7 +408,7 @@ export default function ProductsPage() {
                 </TableRow>
               ) : (
                 productsData?.data?.products?.map((product: any) => (
-                  <TableRow key={product.id}>
+                  <TableRow key={`${product.sku}-${product.id}`}>
                     <TableCell className="font-mono text-sm">{product.sku}</TableCell>
                     <TableCell className="font-medium">{product.name}</TableCell>
                     <TableCell>{product.category}</TableCell>
