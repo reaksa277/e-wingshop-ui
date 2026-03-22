@@ -43,7 +43,7 @@ export function Topbar() {
   }, [alertsData, setUnreadAlertsCount]);
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: '/auth/login' });
+    await signOut({ callbackUrl: '/login' });
   };
 
   const userInitials = session?.user?.name
