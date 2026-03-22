@@ -33,8 +33,22 @@ const mockOrders = [
     createdAt: new Date().toISOString(),
     branch: { id: 'branch-1', name: 'Main Branch' },
     items: [
-      { id: 'item-1', productId: '1', productName: 'Product A', quantity: 2, unitPrice: 50, subtotal: 100 },
-      { id: 'item-2', productId: '2', productName: 'Product B', quantity: 1, unitPrice: 50, subtotal: 50 },
+      {
+        id: 'item-1',
+        productId: '1',
+        productName: 'Product A',
+        quantity: 2,
+        unitPrice: 50,
+        subtotal: 100,
+      },
+      {
+        id: 'item-2',
+        productId: '2',
+        productName: 'Product B',
+        quantity: 1,
+        unitPrice: 50,
+        subtotal: 50,
+      },
     ],
   },
   {
@@ -46,7 +60,14 @@ const mockOrders = [
     createdAt: new Date().toISOString(),
     branch: { id: 'branch-2', name: 'Downtown Branch' },
     items: [
-      { id: 'item-3', productId: '3', productName: 'Product C', quantity: 4, unitPrice: 50, subtotal: 200 },
+      {
+        id: 'item-3',
+        productId: '3',
+        productName: 'Product C',
+        quantity: 4,
+        unitPrice: 50,
+        subtotal: 200,
+      },
     ],
   },
 ];
@@ -67,16 +88,16 @@ export async function getOrders(
     let filteredOrders = mockOrders;
 
     if (status && status !== 'all') {
-      filteredOrders = filteredOrders.filter(o => o.status === status);
+      filteredOrders = filteredOrders.filter((o) => o.status === status);
     }
 
     // Role-based branch filtering
     if (session.user.role === 'staff' && session.user.branchId) {
-      filteredOrders = filteredOrders.filter(o => o.branchId === session.user.branchId);
+      filteredOrders = filteredOrders.filter((o) => o.branchId === session.user.branchId);
     } else if (branchId && session.user.role === 'superadmin') {
-      filteredOrders = filteredOrders.filter(o => o.branchId === branchId);
+      filteredOrders = filteredOrders.filter((o) => o.branchId === branchId);
     } else if (session.user.role === 'manager' && session.user.branchId) {
-      filteredOrders = filteredOrders.filter(o => o.branchId === session.user.branchId);
+      filteredOrders = filteredOrders.filter((o) => o.branchId === session.user.branchId);
     }
 
     const total = filteredOrders.length;
@@ -104,7 +125,7 @@ export async function getOrderById(id: string) {
       return { success: false, error: 'Unauthorized' };
     }
 
-    const order = mockOrders.find(o => o.id === id);
+    const order = mockOrders.find((o) => o.id === id);
 
     if (!order) {
       return { success: false, error: 'Order not found' };
@@ -163,17 +184,14 @@ export async function createOrder(data: CreateOrderData) {
   }
 }
 
-export async function updateOrderStatus(
-  id: string,
-  status: OrderStatus
-) {
+export async function updateOrderStatus(id: string, status: OrderStatus) {
   try {
     const session = await auth();
     if (!session || !can(session.user.role, 'process_orders')) {
       return { success: false, error: 'Unauthorized' };
     }
 
-    const orderIndex = mockOrders.findIndex(o => o.id === id);
+    const orderIndex = mockOrders.findIndex((o) => o.id === id);
     if (orderIndex === -1) {
       return { success: false, error: 'Order not found' };
     }
@@ -203,11 +221,12 @@ export async function getBranchesForOrder() {
       { id: 'branch-3', name: 'Uptown Branch' },
     ];
 
-    const branches = session.user.role === 'superadmin'
-      ? allBranches
-      : session.user.branchId
-      ? allBranches.filter(b => b.id === session.user.branchId)
-      : allBranches;
+    const branches =
+      session.user.role === 'superadmin'
+        ? allBranches
+        : session.user.branchId
+          ? allBranches.filter((b) => b.id === session.user.branchId)
+          : allBranches;
 
     return { success: true, data: branches };
   } catch (error) {

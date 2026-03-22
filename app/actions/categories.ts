@@ -17,9 +17,24 @@ export type Category = {
 
 // Mock data for categories
 const mockCategories: Category[] = [
-  { id: 'cat-1', name: 'Dairy', description: 'Milk, cheese, yogurt and dairy products', productCount: 15 },
-  { id: 'cat-2', name: 'Bakery', description: 'Fresh bread, pastries and baked goods', productCount: 8 },
-  { id: 'cat-3', name: 'Beverages', description: 'Juices, sodas, water and drinks', productCount: 12 },
+  {
+    id: 'cat-1',
+    name: 'Dairy',
+    description: 'Milk, cheese, yogurt and dairy products',
+    productCount: 15,
+  },
+  {
+    id: 'cat-2',
+    name: 'Bakery',
+    description: 'Fresh bread, pastries and baked goods',
+    productCount: 8,
+  },
+  {
+    id: 'cat-3',
+    name: 'Beverages',
+    description: 'Juices, sodas, water and drinks',
+    productCount: 12,
+  },
   { id: 'cat-4', name: 'Snacks', description: 'Chips, cookies and snack items', productCount: 20 },
   { id: 'cat-5', name: 'Frozen', description: 'Frozen foods and ice cream', productCount: 10 },
 ];

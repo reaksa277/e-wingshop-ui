@@ -105,9 +105,7 @@ export default async function DashboardPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Welcome back, {session?.user?.name}!</h1>
-        <p className="text-muted-foreground">
-          Here's what's happening with your business today.
-        </p>
+        <p className="text-muted-foreground">Here's what's happening with your business today.</p>
       </div>
 
       {/* Stats Grid */}
@@ -155,10 +153,10 @@ export default async function DashboardPage() {
                         order.status === 'FULFILLED'
                           ? 'success'
                           : order.status === 'CANCELLED'
-                          ? 'destructive'
-                          : order.status === 'CONFIRMED'
-                          ? 'warning'
-                          : 'default'
+                            ? 'destructive'
+                            : order.status === 'CONFIRMED'
+                              ? 'warning'
+                              : 'default'
                       }
                     >
                       {order.status}
@@ -169,7 +167,10 @@ export default async function DashboardPage() {
               ))
             )}
           </div>
-          <Link href="/dashboard/orders" className="text-sm text-primary hover:underline mt-4 inline-block">
+          <Link
+            href="/dashboard/orders"
+            className="text-sm text-primary hover:underline mt-4 inline-block"
+          >
             View all orders →
           </Link>
         </CardContent>

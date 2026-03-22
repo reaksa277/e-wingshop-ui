@@ -39,9 +39,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             )}
           >
             <Topbar />
-            <main className="flex-1 overflow-y-auto p-6">
-              {children}
-            </main>
+            <main className="flex-1 overflow-y-auto p-6">{children}</main>
           </div>
         </div>
         <Toaster position="top-right" richColors />

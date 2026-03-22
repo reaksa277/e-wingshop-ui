@@ -26,7 +26,11 @@ export default function OrdersPage() {
   const [page, setPage] = useState(1);
   const queryClient = useQueryClient();
 
-  const { data: ordersData, isLoading, refetch } = useQuery({
+  const {
+    data: ordersData,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ['orders', status, page],
     queryFn: () => getOrders(status, undefined, page),
   });
@@ -108,9 +112,7 @@ export default function OrdersPage() {
                             {order.status}
                           </Badge>
                         </TableCell>
-                        <TableCell>
-                          {new Date(order.createdAt).toLocaleDateString()}
-                        </TableCell>
+                        <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
                         <TableCell className="text-right">
                           <Button
                             variant="ghost"

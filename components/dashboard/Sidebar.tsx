@@ -41,12 +41,37 @@ export function Sidebar({ role }: SidebarProps) {
 
   const navItems: NavItem[] = [
     { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { title: 'Categories', href: '/dashboard/categories', icon: Menu, permission: 'manage_categories' },
-    { title: 'Products', href: '/dashboard/products', icon: Package, permission: 'manage_products' },
+    {
+      title: 'Categories',
+      href: '/dashboard/categories',
+      icon: Menu,
+      permission: 'manage_categories',
+    },
+    {
+      title: 'Products',
+      href: '/dashboard/products',
+      icon: Package,
+      permission: 'manage_products',
+    },
     { title: 'Branches', href: '/dashboard/branches', icon: Store, permission: 'manage_branches' },
-    { title: 'Inventory', href: '/dashboard/inventory', icon: ClipboardList, permission: 'view_inventory' },
-    { title: 'Orders', href: '/dashboard/orders', icon: ShoppingCart, permission: 'process_orders' },
-    { title: 'Reports', href: '/dashboard/reports', icon: BarChart3, permission: 'view_sales_reports' },
+    {
+      title: 'Inventory',
+      href: '/dashboard/inventory',
+      icon: ClipboardList,
+      permission: 'view_inventory',
+    },
+    {
+      title: 'Orders',
+      href: '/dashboard/orders',
+      icon: ShoppingCart,
+      permission: 'process_orders',
+    },
+    {
+      title: 'Reports',
+      href: '/dashboard/reports',
+      icon: BarChart3,
+      permission: 'view_sales_reports',
+    },
     { title: 'Alerts', href: '/dashboard/alerts', icon: Bell, permission: 'dismiss_expiry_alerts' },
     { title: 'Users', href: '/dashboard/users', icon: Users, permission: 'manage_users' },
   ];
@@ -70,12 +95,7 @@ export function Sidebar({ role }: SidebarProps) {
               <span>E-WingShop</span>
             </Link>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggle}
-            className="ml-auto"
-          >
+          <Button variant="ghost" size="icon" onClick={toggle} className="ml-auto">
             {isOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
           </Button>
         </div>
@@ -84,7 +104,9 @@ export function Sidebar({ role }: SidebarProps) {
           <nav className="space-y-1 p-2">
             {visibleNavItems.map((item) => {
               const Icon = item.icon;
-              const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(`${item.href}/`));
+              const isActive =
+                pathname === item.href ||
+                (item.href !== '/dashboard' && pathname.startsWith(`${item.href}/`));
 
               return (
                 <Tooltip key={item.href}>
@@ -92,19 +114,14 @@ export function Sidebar({ role }: SidebarProps) {
                     <Link href={item.href}>
                       <Button
                         variant={isActive ? 'secondary' : 'ghost'}
-                        className={cn(
-                          'w-full justify-start gap-2',
-                          !isOpen && 'justify-center'
-                        )}
+                        className={cn('w-full justify-start gap-2', !isOpen && 'justify-center')}
                       >
                         <Icon className="h-4 w-4" />
                         {isOpen && <span>{item.title}</span>}
                       </Button>
                     </Link>
                   </TooltipTrigger>
-                  {!isOpen && (
-                    <TooltipContent side="right">{item.title}</TooltipContent>
-                  )}
+                  {!isOpen && <TooltipContent side="right">{item.title}</TooltipContent>}
                 </Tooltip>
               );
             })}
@@ -116,10 +133,7 @@ export function Sidebar({ role }: SidebarProps) {
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
-                className={cn(
-                  'w-full justify-start gap-2',
-                  !isOpen && 'justify-center'
-                )}
+                className={cn('w-full justify-start gap-2', !isOpen && 'justify-center')}
               >
                 <Settings className="h-4 w-4" />
                 {isOpen && <span>Settings</span>}

@@ -169,9 +169,7 @@ export async function getExpiryAlertsCount() {
     const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
     let filtered = mockExpiryAlerts.filter(
-      (alert) =>
-        alert.status === 'ACTIVE' &&
-        alert.expiryDate <= thirtyDaysFromNow
+      (alert) => alert.status === 'ACTIVE' && alert.expiryDate <= thirtyDaysFromNow
     );
 
     // Role-based filtering

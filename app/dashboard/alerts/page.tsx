@@ -147,9 +147,7 @@ export default function AlertsPage() {
                   <TableRow key={alert.id}>
                     <TableCell className="font-medium">{alert.product.name}</TableCell>
                     <TableCell>{alert.branch.name}</TableCell>
-                    <TableCell>
-                      {new Date(alert.expiryDate).toLocaleDateString()}
-                    </TableCell>
+                    <TableCell>{new Date(alert.expiryDate).toLocaleDateString()}</TableCell>
                     <TableCell>{getDaysRemainingBadge(alert.daysRemaining)}</TableCell>
                     <TableCell>{alert.quantity}</TableCell>
                     <TableCell>{getStatusBadge(alert.status)}</TableCell>

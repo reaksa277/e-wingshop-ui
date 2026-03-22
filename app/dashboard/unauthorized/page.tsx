@@ -9,9 +9,7 @@ export default function UnauthorizedPage() {
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle>Access Denied</CardTitle>
-        <CardDescription>
-          You don't have permission to access this page.
-        </CardDescription>
+        <CardDescription>You don't have permission to access this page.</CardDescription>
       </CardHeader>
       <CardContent>
         <Button asChild className="w-full">

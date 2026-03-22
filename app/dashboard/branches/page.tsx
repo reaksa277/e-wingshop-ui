@@ -3,7 +3,14 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
-import { getBranches, createBranch, updateBranch, deleteBranch, getManagers, type BranchFormData } from '@/app/actions/branches';
+import {
+  getBranches,
+  createBranch,
+  updateBranch,
+  deleteBranch,
+  getManagers,
+  type BranchFormData,
+} from '@/app/actions/branches';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Phone, User, Plus, Edit, Trash2, Search, Filter } from 'lucide-react';
@@ -61,7 +68,11 @@ export default function BranchesPage() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
 
-  const { data: branchesData, isLoading, refetch } = useQuery({
+  const {
+    data: branchesData,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ['branches'],
     queryFn: () => getBranches(),
   });
@@ -86,10 +97,12 @@ export default function BranchesPage() {
 
   // Filter branches based on search and status
   const filteredBranches = branchesData?.data?.filter((branch: any) => {
-    const matchesSearch = branch.name.toLowerCase().includes(search.toLowerCase()) ||
+    const matchesSearch =
+      branch.name.toLowerCase().includes(search.toLowerCase()) ||
       branch.address.toLowerCase().includes(search.toLowerCase()) ||
       branch.phone.includes(search);
-    const matchesStatus = status === 'all' ||
+    const matchesStatus =
+      status === 'all' ||
       (status === 'active' && branch.isActive) ||
       (status === 'inactive' && !branch.isActive);
     return matchesSearch && matchesStatus;
@@ -166,9 +179,7 @@ export default function BranchesPage() {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>
-                  {editingBranch ? 'Edit Branch' : 'Add New Branch'}
-                </DialogTitle>
+                <DialogTitle>{editingBranch ? 'Edit Branch' : 'Add New Branch'}</DialogTitle>
               </DialogHeader>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -241,7 +252,10 @@ export default function BranchesPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Status</FormLabel>
-                        <Select onValueChange={(value) => field.onChange(value === 'true')} defaultValue={String(field.value)}>
+                        <Select
+                          onValueChange={(value) => field.onChange(value === 'true')}
+                          defaultValue={String(field.value)}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select status" />
@@ -260,9 +274,7 @@ export default function BranchesPage() {
                     <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                       Cancel
                     </Button>
-                    <Button type="submit">
-                      {editingBranch ? 'Update' : 'Create'}
-                    </Button>
+                    <Button type="submit">{editingBranch ? 'Update' : 'Create'}</Button>
                   </div>
                 </form>
               </Form>
@@ -362,11 +374,7 @@ export default function BranchesPage() {
                     <TableCell className="text-right">
                       {isSuperadmin && (
                         <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleEdit(branch)}
-                          >
+                          <Button variant="ghost" size="icon" onClick={() => handleEdit(branch)}>
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button

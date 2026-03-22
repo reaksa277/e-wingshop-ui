@@ -83,9 +83,7 @@ export function Topbar() {
             <ScrollArea className="h-64">
               <div className="space-y-2 p-2">
                 {unreadAlertsCount === 0 ? (
-                  <p className="text-center text-sm text-muted-foreground py-4">
-                    No active alerts
-                  </p>
+                  <p className="text-center text-sm text-muted-foreground py-4">No active alerts</p>
                 ) : (
                   <p className="text-sm text-muted-foreground py-4">
                     {unreadAlertsCount} alert(s) pending review

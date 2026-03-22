@@ -27,7 +27,12 @@ export type Branch = {
     total: number;
     status: string;
     createdAt: Date;
-    items: Array<{ id: string; productId: string; quantity: number; product: { id: string; name: string; sku: string } }>;
+    items: Array<{
+      id: string;
+      productId: string;
+      quantity: number;
+      product: { id: string; name: string; sku: string };
+    }>;
   }>;
   _count?: {
     orders: number;

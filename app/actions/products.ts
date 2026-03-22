@@ -29,8 +29,8 @@ const mockProducts: Product[] = [
     sku: 'MLK-001',
     category: 'Dairy',
     unit: 'pcs',
-    costPrice: 2.50,
-    sellingPrice: 3.50,
+    costPrice: 2.5,
+    sellingPrice: 3.5,
     isActive: true,
     inventory: [
       { branchId: 'branch-1', quantity: 50 },
@@ -44,12 +44,10 @@ const mockProducts: Product[] = [
     sku: 'YGT-001',
     category: 'Dairy',
     unit: 'pcs',
-    costPrice: 1.50,
-    sellingPrice: 2.50,
+    costPrice: 1.5,
+    sellingPrice: 2.5,
     isActive: true,
-    inventory: [
-      { branchId: 'branch-1', quantity: 25 },
-    ],
+    inventory: [{ branchId: 'branch-1', quantity: 25 }],
     totalStock: 25,
   },
   {
@@ -58,8 +56,8 @@ const mockProducts: Product[] = [
     sku: 'CHS-001',
     category: 'Dairy',
     unit: 'pcs',
-    costPrice: 4.00,
-    sellingPrice: 6.00,
+    costPrice: 4.0,
+    sellingPrice: 6.0,
     isActive: true,
     inventory: [
       { branchId: 'branch-1', quantity: 15 },
@@ -73,12 +71,10 @@ const mockProducts: Product[] = [
     sku: 'BRD-001',
     category: 'Bakery',
     unit: 'pcs',
-    costPrice: 1.00,
-    sellingPrice: 2.00,
+    costPrice: 1.0,
+    sellingPrice: 2.0,
     isActive: true,
-    inventory: [
-      { branchId: 'branch-2', quantity: 100 },
-    ],
+    inventory: [{ branchId: 'branch-2', quantity: 100 }],
     totalStock: 100,
   },
   {
@@ -87,8 +83,8 @@ const mockProducts: Product[] = [
     sku: 'OJ-001',
     category: 'Beverages',
     unit: 'pcs',
-    costPrice: 3.00,
-    sellingPrice: 4.50,
+    costPrice: 3.0,
+    sellingPrice: 4.5,
     isActive: false,
     inventory: [],
     totalStock: 0,
@@ -309,11 +305,7 @@ export async function bulkDeleteProducts(ids: string[]) {
     // DELETE /api/products/bulk with body { ids }
 
     // Remove from mock data (in production, this would be done via API)
-    mockProducts.splice(
-      0,
-      mockProducts.length,
-      ...mockProducts.filter((p) => !ids.includes(p.id))
-    );
+    mockProducts.splice(0, mockProducts.length, ...mockProducts.filter((p) => !ids.includes(p.id)));
 
     // TODO: Create audit log via Spring Boot API
     // POST /api/audit-logs with action data

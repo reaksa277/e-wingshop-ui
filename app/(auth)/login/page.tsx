@@ -9,7 +9,14 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { toast } from 'sonner';
 
 const loginSchema = z.object({
@@ -77,9 +84,7 @@ function LoginForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">
-          🦅 E-WingShop
-        </CardTitle>
+        <CardTitle className="text-2xl font-bold text-center">🦅 E-WingShop</CardTitle>
         <CardDescription className="text-center">
           Sign in to your account to continue
         </CardDescription>
@@ -95,9 +100,7 @@ function LoginForm() {
               disabled={isLoading}
               {...register('email')}
             />
-            {errors.email && (
-              <p className="text-sm text-destructive">{errors.email.message}</p>
-            )}
+            {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
@@ -112,10 +115,12 @@ function LoginForm() {
               <p className="text-sm text-destructive">{errors.password.message}</p>
             )}
           </div>
-          
+
           {/* Quick test credentials */}
           <div className="pt-2">
-            <p className="text-sm text-muted-foreground mb-2">Quick test accounts (password: password123)</p>
+            <p className="text-sm text-muted-foreground mb-2">
+              Quick test accounts (password: password123)
+            </p>
             <div className="grid grid-cols-2 gap-2">
               {mockCredentials.map((cred) => (
                 <Button

@@ -81,11 +81,11 @@ export const mockUsers: MockUser[] = [
 ];
 
 export function findUserByEmail(email: string): MockUser | undefined {
-  return mockUsers.find(user => user.email.toLowerCase() === email.toLowerCase());
+  return mockUsers.find((user) => user.email.toLowerCase() === email.toLowerCase());
 }
 
 export function getUserById(id: string): MockUser | undefined {
-  return mockUsers.find(user => user.id === id);
+  return mockUsers.find((user) => user.id === id);
 }
 
 export function getAllUsers(): Omit<MockUser, 'password'>[] {

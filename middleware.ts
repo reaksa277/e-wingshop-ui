@@ -24,9 +24,9 @@ const publicRoutes = ['/auth/login', '/auth/error'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
+
   // Skip middleware for public routes
-  if (publicRoutes.some(route => pathname.startsWith(route))) {
+  if (publicRoutes.some((route) => pathname.startsWith(route))) {
     return NextResponse.next();
   }
 
@@ -35,7 +35,7 @@ export async function middleware(request: NextRequest) {
 
   // Redirect to login if not authenticated and trying to access protected routes
   if (!session?.user) {
-    if (protectedRoutes.some(route => pathname.startsWith(route))) {
+    if (protectedRoutes.some((route) => pathname.startsWith(route))) {
       const loginUrl = new URL('/auth/login', request.url);
       loginUrl.searchParams.set('callbackUrl', pathname);
       return NextResponse.redirect(loginUrl);
@@ -48,7 +48,7 @@ export async function middleware(request: NextRequest) {
   // Check route-specific permissions
   for (const [route, requiredPermissions] of Object.entries(routePermissions)) {
     if (pathname.startsWith(route)) {
-      const hasPermission = requiredPermissions.some(permission =>
+      const hasPermission = requiredPermissions.some((permission) =>
         can(userRole, permission as Permission)
       );
 

@@ -2,7 +2,13 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getCategories, createCategory, updateCategory, deleteCategory, type CategoryFormData } from '@/app/actions/categories';
+import {
+  getCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+  type CategoryFormData,
+} from '@/app/actions/categories';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -146,13 +152,16 @@ export default function CategoriesPage() {
           <h1 className="text-3xl font-bold">Categories</h1>
           <p className="text-muted-foreground">Manage product categories</p>
         </div>
-        <Dialog open={isAddDialogOpen || !!editingCategory} onOpenChange={(open) => {
-          setIsAddDialogOpen(open);
-          if (!open) {
-            setEditingCategory(null);
-            resetForm();
-          }
-        }}>
+        <Dialog
+          open={isAddDialogOpen || !!editingCategory}
+          onOpenChange={(open) => {
+            setIsAddDialogOpen(open);
+            if (!open) {
+              setEditingCategory(null);
+              resetForm();
+            }
+          }}
+        >
           <DialogTrigger asChild>
             <Button onClick={() => setIsAddDialogOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
@@ -162,9 +171,7 @@ export default function CategoriesPage() {
           <DialogContent className="sm:max-w-106.25">
             <form onSubmit={handleSubmit}>
               <DialogHeader>
-                <DialogTitle>
-                  {editingCategory ? 'Edit Category' : 'Add New Category'}
-                </DialogTitle>
+                <DialogTitle>{editingCategory ? 'Edit Category' : 'Add New Category'}</DialogTitle>
                 <DialogDescription>
                   {editingCategory
                     ? 'Update category information.'
@@ -178,9 +185,7 @@ export default function CategoriesPage() {
                     id="name"
                     placeholder="e.g., Dairy Products"
                     value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     disabled={createMutation.isPending || updateMutation.isPending}
                   />
                 </div>
@@ -190,9 +195,7 @@ export default function CategoriesPage() {
                     id="description"
                     placeholder="Brief description of this category..."
                     value={formData.description}
-                    onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     disabled={createMutation.isPending || updateMutation.isPending}
                     rows={3}
                   />
@@ -210,12 +213,15 @@ export default function CategoriesPage() {
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+                <Button
+                  type="submit"
+                  disabled={createMutation.isPending || updateMutation.isPending}
+                >
                   {createMutation.isPending || updateMutation.isPending
                     ? 'Saving...'
                     : editingCategory
-                    ? 'Update'
-                    : 'Create'}
+                      ? 'Update'
+                      : 'Create'}
                 </Button>
               </DialogFooter>
             </form>
@@ -265,11 +271,7 @@ export default function CategoriesPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEdit(category)}
-                        >
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(category)}>
                           <Pencil className="h-4 w-4" />
                         </Button>
                         <Button
@@ -296,16 +298,13 @@ export default function CategoriesPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the category
-              &quot;{deletingCategory?.name}&quot;.
+              This action cannot be undone. This will permanently delete the category &quot;
+              {deletingCategory?.name}&quot;.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              disabled={deleteMutation.isPending}
-            >
+            <AlertDialogAction onClick={handleDelete} disabled={deleteMutation.isPending}>
               {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>

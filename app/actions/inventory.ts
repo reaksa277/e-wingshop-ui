@@ -131,9 +131,7 @@ export async function getInventory(
       if (status === 'out') {
         filtered = filtered.filter((i) => i.quantity === 0);
       } else if (status === 'low') {
-        filtered = filtered.filter(
-          (i) => i.quantity > 0 && i.quantity <= i.lowStockThreshold
-        );
+        filtered = filtered.filter((i) => i.quantity > 0 && i.quantity <= i.lowStockThreshold);
       } else if (status === 'ok') {
         filtered = filtered.filter((i) => i.quantity > i.lowStockThreshold);
       }
@@ -163,11 +161,7 @@ const adjustInventorySchema = z.object({
   note: z.string().optional(),
 });
 
-export async function adjustInventory(
-  inventoryId: string,
-  newQuantity: number,
-  note?: string
-) {
+export async function adjustInventory(inventoryId: string, newQuantity: number, note?: string) {
   try {
     const session = await auth();
     if (!session || !can(session.user.role, 'view_inventory')) {
@@ -347,7 +341,8 @@ export async function createInventory(data: {
     if (existing) {
       return {
         success: false,
-        error: 'Inventory record already exists for this product at this branch. Use adjust instead.',
+        error:
+          'Inventory record already exists for this product at this branch. Use adjust instead.',
       };
     }
 

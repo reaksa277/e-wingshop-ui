@@ -1,7 +1,15 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { can } from '@/lib/permissions';
-import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays } from 'date-fns';
+import {
+  startOfDay,
+  endOfDay,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  subDays,
+} from 'date-fns';
 
 // Local type definitions (replacing Prisma types)
 type Order = {
@@ -34,18 +42,53 @@ type Branch = {
 
 // Mock data for reports
 const mockOrders: Order[] = [
-  { id: 'ord-1', orderNumber: 'ORD-001', total: 150.00, status: 'FULFILLED', createdAt: new Date(), branchId: 'branch-1' },
-  { id: 'ord-2', orderNumber: 'ORD-002', total: 250.00, status: 'CONFIRMED', createdAt: subDays(new Date(), 1), branchId: 'branch-1' },
-  { id: 'ord-3', orderNumber: 'ORD-003', total: 100.00, status: 'FULFILLED', createdAt: subDays(new Date(), 2), branchId: 'branch-2' },
-  { id: 'ord-4', orderNumber: 'ORD-004', total: 350.00, status: 'PENDING', createdAt: subDays(new Date(), 3), branchId: 'branch-1' },
-  { id: 'ord-5', orderNumber: 'ORD-005', total: 200.00, status: 'CANCELLED', createdAt: subDays(new Date(), 4), branchId: 'branch-2' },
+  {
+    id: 'ord-1',
+    orderNumber: 'ORD-001',
+    total: 150.0,
+    status: 'FULFILLED',
+    createdAt: new Date(),
+    branchId: 'branch-1',
+  },
+  {
+    id: 'ord-2',
+    orderNumber: 'ORD-002',
+    total: 250.0,
+    status: 'CONFIRMED',
+    createdAt: subDays(new Date(), 1),
+    branchId: 'branch-1',
+  },
+  {
+    id: 'ord-3',
+    orderNumber: 'ORD-003',
+    total: 100.0,
+    status: 'FULFILLED',
+    createdAt: subDays(new Date(), 2),
+    branchId: 'branch-2',
+  },
+  {
+    id: 'ord-4',
+    orderNumber: 'ORD-004',
+    total: 350.0,
+    status: 'PENDING',
+    createdAt: subDays(new Date(), 3),
+    branchId: 'branch-1',
+  },
+  {
+    id: 'ord-5',
+    orderNumber: 'ORD-005',
+    total: 200.0,
+    status: 'CANCELLED',
+    createdAt: subDays(new Date(), 4),
+    branchId: 'branch-2',
+  },
 ];
 
 const mockOrderItems: OrderItem[] = [
-  { id: 'oi-1', productId: 'prod-1', quantity: 5, subtotal: 17.50, orderId: 'ord-1' },
-  { id: 'oi-2', productId: 'prod-2', quantity: 10, subtotal: 25.00, orderId: 'ord-1' },
-  { id: 'oi-3', productId: 'prod-3', quantity: 3, subtotal: 18.00, orderId: 'ord-2' },
-  { id: 'oi-4', productId: 'prod-4', quantity: 20, subtotal: 40.00, orderId: 'ord-3' },
+  { id: 'oi-1', productId: 'prod-1', quantity: 5, subtotal: 17.5, orderId: 'ord-1' },
+  { id: 'oi-2', productId: 'prod-2', quantity: 10, subtotal: 25.0, orderId: 'ord-1' },
+  { id: 'oi-3', productId: 'prod-3', quantity: 3, subtotal: 18.0, orderId: 'ord-2' },
+  { id: 'oi-4', productId: 'prod-4', quantity: 20, subtotal: 40.0, orderId: 'ord-3' },
 ];
 
 const mockProducts: Product[] = [
@@ -197,8 +240,8 @@ export async function GET(request: Request) {
         session.user.role === 'superadmin'
           ? true
           : session.user.branchId
-          ? branch.id === session.user.branchId
-          : false
+            ? branch.id === session.user.branchId
+            : false
       )
       .map((branch) => {
         const branchOrders = nonCancelledOrders.filter((o) => o.branchId === branch.id);

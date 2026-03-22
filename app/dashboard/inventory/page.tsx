@@ -2,7 +2,12 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getInventory, getBranchesForInventory, createInventory, getProductsForInventory } from '@/app/actions/inventory';
+import {
+  getInventory,
+  getBranchesForInventory,
+  createInventory,
+  getProductsForInventory,
+} from '@/app/actions/inventory';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -131,18 +136,14 @@ export default function InventoryPage() {
             <form onSubmit={handleSubmit}>
               <DialogHeader>
                 <DialogTitle>Add New Inventory Record</DialogTitle>
-                <DialogDescription>
-                  Add stock for a product at a specific branch.
-                </DialogDescription>
+                <DialogDescription>Add stock for a product at a specific branch.</DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
                   <Label htmlFor="product">Product</Label>
                   <Select
                     value={formData.productId}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, productId: value })
-                    }
+                    onValueChange={(value) => setFormData({ ...formData, productId: value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a product" />
@@ -160,9 +161,7 @@ export default function InventoryPage() {
                   <Label htmlFor="branch">Branch</Label>
                   <Select
                     value={formData.branchId}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, branchId: value })
-                    }
+                    onValueChange={(value) => setFormData({ ...formData, branchId: value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a branch" />
@@ -183,9 +182,7 @@ export default function InventoryPage() {
                     type="number"
                     min="0"
                     value={formData.quantity}
-                    onChange={(e) =>
-                      setFormData({ ...formData, quantity: Number(e.target.value) })
-                    }
+                    onChange={(e) => setFormData({ ...formData, quantity: Number(e.target.value) })}
                   />
                 </div>
                 <div className="grid gap-2">
@@ -202,11 +199,7 @@ export default function InventoryPage() {
                 </div>
               </div>
               <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsAddDialogOpen(false)}
-                >
+                <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
                   Cancel
                 </Button>
                 <Button type="submit" disabled={addInventoryMutation.isPending}>

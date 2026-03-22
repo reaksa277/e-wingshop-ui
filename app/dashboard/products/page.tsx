@@ -65,7 +65,11 @@ export default function ProductsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
 
-  const { data: productsData, isLoading, refetch } = useQuery({
+  const {
+    data: productsData,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ['products', search, category, status, page],
     queryFn: () => getProducts(search, category, status, page),
   });
@@ -121,7 +125,7 @@ export default function ProductsPage() {
       costPrice: parseFloat(data.costPrice) || 0,
       sellingPrice: parseFloat(data.sellingPrice) || 0,
     };
-    
+
     if (editingProduct) {
       const result = await updateProduct(editingProduct.id, productData);
       if (result.success) {
@@ -205,9 +209,7 @@ export default function ProductsPage() {
               </DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>
-                    {editingProduct ? 'Edit Product' : 'Add New Product'}
-                  </DialogTitle>
+                  <DialogTitle>{editingProduct ? 'Edit Product' : 'Add New Product'}</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -254,7 +256,10 @@ export default function ProductsPage() {
                               </FormControl>
                               <SelectContent>
                                 {categoriesData?.data?.map((cat: any, index: number) => (
-                                  <SelectItem key={typeof cat === 'string' ? cat : `cat-${index}`} value={typeof cat === 'string' ? cat : String(cat)}>
+                                  <SelectItem
+                                    key={typeof cat === 'string' ? cat : `cat-${index}`}
+                                    value={typeof cat === 'string' ? cat : String(cat)}
+                                  >
                                     {typeof cat === 'string' ? cat : String(cat)}
                                   </SelectItem>
                                 ))}
@@ -320,12 +325,14 @@ export default function ProductsPage() {
                       )}
                     />
                     <div className="flex justify-end gap-2">
-                      <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setIsDialogOpen(false)}
+                      >
                         Cancel
                       </Button>
-                      <Button type="submit">
-                        {editingProduct ? 'Update' : 'Create'}
-                      </Button>
+                      <Button type="submit">{editingProduct ? 'Update' : 'Create'}</Button>
                     </div>
                   </form>
                 </Form>
@@ -358,7 +365,10 @@ export default function ProductsPage() {
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
                 {categoriesData?.data?.map((cat: any, index: number) => (
-                  <SelectItem key={typeof cat === 'string' ? cat : `cat-${index}`} value={typeof cat === 'string' ? cat : String(cat)}>
+                  <SelectItem
+                    key={typeof cat === 'string' ? cat : `cat-${index}`}
+                    value={typeof cat === 'string' ? cat : String(cat)}
+                  >
                     {typeof cat === 'string' ? cat : String(cat)}
                   </SelectItem>
                 ))}
@@ -414,7 +424,15 @@ export default function ProductsPage() {
                     <TableCell>{product.category}</TableCell>
                     <TableCell>${product.sellingPrice.toFixed(2)}</TableCell>
                     <TableCell>
-                      <Badge variant={product.totalStock === 0 ? 'destructive' : product.totalStock <= 10 ? 'warning' : 'default'}>
+                      <Badge
+                        variant={
+                          product.totalStock === 0
+                            ? 'destructive'
+                            : product.totalStock <= 10
+                              ? 'warning'
+                              : 'default'
+                        }
+                      >
                         {product.totalStock}
                       </Badge>
                     </TableCell>
@@ -426,11 +444,7 @@ export default function ProductsPage() {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <RoleGuard permission="manage_products">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleEdit(product)}
-                          >
+                          <Button variant="ghost" size="icon" onClick={() => handleEdit(product)}>
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button

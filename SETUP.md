@@ -43,15 +43,15 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ## Role Permissions
 
-| Permission | Superadmin | Manager | Staff | Viewer |
-|------------|------------|---------|-------|--------|
-| Manage users & roles | ✅ | ❌ | ❌ | ❌ |
-| Manage branches | ✅ | ✅ | ❌ | ❌ |
-| Manage products | ✅ | ✅ | ✅ | ❌ |
-| View inventory | ✅ | ✅ | ✅ | ✅ |
-| Process orders | ✅ | ✅ | ✅ | ❌ |
-| View sales reports | ✅ | ✅ | ❌ | ❌ |
-| Dismiss expiry alerts | ✅ | ✅ | ❌ | ❌ |
+| Permission            | Superadmin | Manager | Staff | Viewer |
+| --------------------- | ---------- | ------- | ----- | ------ |
+| Manage users & roles  | ✅         | ❌      | ❌    | ❌     |
+| Manage branches       | ✅         | ✅      | ❌    | ❌     |
+| Manage products       | ✅         | ✅      | ✅    | ❌     |
+| View inventory        | ✅         | ✅      | ✅    | ✅     |
+| Process orders        | ✅         | ✅      | ✅    | ❌     |
+| View sales reports    | ✅         | ✅      | ❌    | ❌     |
+| Dismiss expiry alerts | ✅         | ✅      | ❌    | ❌     |
 
 ## Project Structure
 
@@ -89,39 +89,46 @@ npm run format  # Format code with Prettier
 ## Key Features
 
 ### Role-Based Access Control
+
 - Enforcement at middleware level (route protection)
 - Permission checks on API responses
 - Client-side `RoleGuard` component for UI elements
 
 ### Product Management
+
 - Searchable, filterable data table
 - CRUD operations with validation
 - Bulk actions (activate, deactivate, delete)
 - CSV export
 
 ### Branch Management
+
 - Card grid view with stats
 - Manager assignment
 - Branch detail page with inventory and orders
 
 ### Inventory Tracking
+
 - Real-time stock levels per branch
 - Low-stock alerts
 - Stock transfer between branches
 - Audit logging
 
 ### Order Processing
+
 - Status workflow (Pending → Confirmed → Fulfilled)
 - Inventory deduction on fulfillment
 - Transaction-based operations
 
 ### Sales Reports
+
 - Revenue charts (daily/weekly/monthly)
 - Top products by revenue
 - Sales by branch comparison
 - Date range filtering
 
 ### Expiry Alerts
+
 - Color-coded urgency (red ≤7 days, amber 8-30 days)
 - Dismiss functionality with audit log
 - Notification bell with count badge
@@ -129,6 +136,7 @@ npm run format  # Format code with Prettier
 ## API Integration
 
 All data is fetched from the Spring Boot backend:
+
 - Products, branches, inventory, orders via REST endpoints
 - Authentication handled by backend
 - Role-based permissions enforced by backend responses

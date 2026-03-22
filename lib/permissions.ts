@@ -32,14 +32,8 @@ export const rolePermissions: Record<Role, Permission[]> = {
     'view_sales_reports',
     'dismiss_expiry_alerts',
   ],
-  staff: [
-    'manage_products',
-    'view_inventory',
-    'process_orders',
-  ],
-  viewer: [
-    'view_inventory',
-  ],
+  staff: ['manage_products', 'view_inventory', 'process_orders'],
+  viewer: ['view_inventory'],
 };
 
 /**
@@ -60,12 +54,12 @@ export function getPermissionsForRole(role: Role): Permission[] {
  * Check if user has any of the specified permissions
  */
 export function canAny(role: Role, permissions: Permission[]): boolean {
-  return permissions.some(permission => can(role, permission));
+  return permissions.some((permission) => can(role, permission));
 }
 
 /**
  * Check if user has all of the specified permissions
  */
 export function canAll(role: Role, permissions: Permission[]): boolean {
-  return permissions.every(permission => can(role, permission));
+  return permissions.every((permission) => can(role, permission));
 }
