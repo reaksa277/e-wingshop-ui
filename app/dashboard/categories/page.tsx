@@ -249,8 +249,8 @@ export default function CategoriesPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                categoriesData?.data?.map((category: any) => (
-                  <TableRow key={category.id}>
+                categoriesData?.data?.map((category: any, index: number) => (
+                  <TableRow key={category?.id || category?.name || `cat-${index}`}>
                     <TableCell className="font-medium">{category.name}</TableCell>
                     <TableCell className="max-w-md">
                       <p className="text-muted-foreground truncate">

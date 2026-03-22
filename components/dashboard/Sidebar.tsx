@@ -14,6 +14,7 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  Menu,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -40,7 +41,7 @@ export function Sidebar({ role }: SidebarProps) {
 
   const navItems: NavItem[] = [
     { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { title: 'Categories', href: '/dashboard/categories', icon: BarChart3, permission: 'manage_categories' },
+    { title: 'Categories', href: '/dashboard/categories', icon: Menu, permission: 'manage_categories' },
     { title: 'Products', href: '/dashboard/products', icon: Package, permission: 'manage_products' },
     { title: 'Branches', href: '/dashboard/branches', icon: Store, permission: 'manage_branches' },
     { title: 'Inventory', href: '/dashboard/inventory', icon: ClipboardList, permission: 'view_inventory' },
