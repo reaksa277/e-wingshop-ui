@@ -143,7 +143,7 @@ export async function getBranchById(id: string) {
 export async function createBranch(data: BranchFormData) {
   try {
     const session = await auth();
-    if (!session || !can(session.user.role, 'manage_branches')) {
+    if (!session || session.user.role !== 'superadmin') {
       return { success: false, error: 'Unauthorized' };
     }
 
@@ -178,7 +178,7 @@ export async function createBranch(data: BranchFormData) {
 export async function updateBranch(id: string, data: Partial<BranchFormData>) {
   try {
     const session = await auth();
-    if (!session || !can(session.user.role, 'manage_branches')) {
+    if (!session || session.user.role !== 'superadmin') {
       return { success: false, error: 'Unauthorized' };
     }
 
@@ -228,5 +228,34 @@ export async function getManagers() {
   } catch (error) {
     console.error('Error fetching managers:', error);
     return { success: false, error: 'Failed to fetch managers' };
+  }
+}
+
+export async function deleteBranch(id: string) {
+  try {
+    const session = await auth();
+    if (!session || session.user.role !== 'superadmin') {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    // TODO: Replace with Spring Boot API call
+    // DELETE /api/branches/{id}
+
+    const branchIndex = mockBranches.findIndex((b) => b.id === id);
+    if (branchIndex === -1) {
+      return { success: false, error: 'Branch not found' };
+    }
+
+    // Remove from mock data (in production, this would be done via API)
+    mockBranches.splice(branchIndex, 1);
+
+    // TODO: Create audit log via Spring Boot API
+    // POST /api/audit-logs with action data
+
+    revalidatePath('/dashboard/branches');
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting branch:', error);
+    return { success: false, error: 'Failed to delete branch' };
   }
 }
