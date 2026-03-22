@@ -1,5 +1,5 @@
 import { auth } from '@/lib/auth';
-import { can } from '@/lib/permissions';
+import { can, type Permission } from '@/lib/permissions';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -49,7 +49,7 @@ export async function middleware(request: NextRequest) {
   for (const [route, requiredPermissions] of Object.entries(routePermissions)) {
     if (pathname.startsWith(route)) {
       const hasPermission = requiredPermissions.some(permission =>
-        can(userRole, permission as any)
+        can(userRole, permission as Permission)
       );
 
       if (!hasPermission) {

@@ -1,8 +1,9 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
-import { findUserByEmail } from './mock-users';
+import { findUserByEmail, type MockUser } from './mock-users';
 import { z } from 'zod';
+import type { Role } from './permissions';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -56,9 +57,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (user) {
-        token.id = (user as any).id;
-        token.role = (user as any).role;
-        token.branchId = (user as any).branchId ?? null;
+        const mockUser = user as MockUser;
+        token.id = mockUser.id;
+        token.role = mockUser.role;
+        token.branchId = mockUser.branchId ?? null;
       }
 
       // Handle session updates
@@ -71,15 +73,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
-        session.user.role = token.role as any;
+        session.user.role = token.role as Role;
         session.user.branchId = token.branchId as string | null;
       }
       return session;
     },
   },
   pages: {
-    signIn: '/auth/login',
-    error: '/auth/error',
+    signIn: '/login',
+    error: '/error',
   },
   secret: process.env.NEXTAUTH_SECRET,
 });
