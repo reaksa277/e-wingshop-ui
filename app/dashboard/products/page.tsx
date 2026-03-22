@@ -253,9 +253,9 @@ export default function ProductsPage() {
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                {categoriesData?.data?.map((cat: string) => (
-                                  <SelectItem key={cat} value={cat}>
-                                    {cat}
+                                {categoriesData?.data?.map((cat: any, index: number) => (
+                                  <SelectItem key={typeof cat === 'string' ? cat : `cat-${index}`} value={typeof cat === 'string' ? cat : String(cat)}>
+                                    {typeof cat === 'string' ? cat : String(cat)}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -357,9 +357,9 @@ export default function ProductsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
-                {categoriesData?.data?.map((cat: string) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
+                {categoriesData?.data?.map((cat: any, index: number) => (
+                  <SelectItem key={typeof cat === 'string' ? cat : `cat-${index}`} value={typeof cat === 'string' ? cat : String(cat)}>
+                    {typeof cat === 'string' ? cat : String(cat)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -407,8 +407,8 @@ export default function ProductsPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                productsData?.data?.products?.map((product: any) => (
-                  <TableRow key={`${product.sku}-${product.id}`}>
+                productsData?.data?.products?.map((product: any, index: number) => (
+                  <TableRow key={product?.sku || product?.id || `product-${index}`}>
                     <TableCell className="font-mono text-sm">{product.sku}</TableCell>
                     <TableCell className="font-medium">{product.name}</TableCell>
                     <TableCell>{product.category}</TableCell>
