@@ -149,9 +149,9 @@ export async function updateCategory(id: string, data: Partial<CategoryFormData>
     }
 
     // Check if name is being changed and if it already exists
-    if (validated.name) {
+    if (validated.name && typeof validated.name === 'string') {
       const existing = mockCategories.find(
-        (c) => c.id !== id && c.name.toLowerCase() === validated.name.toLowerCase()
+        (c) => c.id !== id && c.name.toLowerCase() === validated.name!.toLowerCase()
       );
 
       if (existing) {
