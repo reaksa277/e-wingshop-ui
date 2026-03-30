@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth';
 import { can } from '@/lib/permissions';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
+import { apiGet, apiPost, apiPut, apiDelete } from '@/lib/api-client';
 
 // Category type definition
 export type Category = {
@@ -11,41 +12,21 @@ export type Category = {
   name: string;
   description?: string | null;
   productCount?: number;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt?: string;
+  updatedAt?: string;
 };
-
-// Mock data for categories
-const mockCategories: Category[] = [
-  {
-    id: 'cat-1',
-    name: 'Dairy',
-    description: 'Milk, cheese, yogurt and dairy products',
-    productCount: 15,
-  },
-  {
-    id: 'cat-2',
-    name: 'Bakery',
-    description: 'Fresh bread, pastries and baked goods',
-    productCount: 8,
-  },
-  {
-    id: 'cat-3',
-    name: 'Beverages',
-    description: 'Juices, sodas, water and drinks',
-    productCount: 12,
-  },
-  { id: 'cat-4', name: 'Snacks', description: 'Chips, cookies and snack items', productCount: 20 },
-  { id: 'cat-5', name: 'Frozen', description: 'Frozen foods and ice cream', productCount: 10 },
-];
 
 const categorySchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
-  description: z.string().optional(),
+  description: z.string().optional().nullable(),
 });
 
 export type CategoryFormData = z.infer<typeof categorySchema>;
 
+/**
+ * Get all categories
+ * GET /api/v1/categories
+ */
 export async function getCategories() {
   try {
     const session = await auth();
@@ -53,16 +34,74 @@ export async function getCategories() {
       return { success: false, error: 'Unauthorized' };
     }
 
-    // TODO: Replace with Spring Boot API call
-    // GET /api/categories
+    const result = await apiGet<Category[]>('/categories');
 
-    return { success: true, data: mockCategories };
+    if (!result.success) {
+      return { success: false, error: result.error };
+    }
+
+    return { success: true, data: result.data };
   } catch (error) {
     console.error('Error fetching categories:', error);
     return { success: false, error: 'Failed to fetch categories' };
   }
 }
 
+/**
+ * Get categories with pagination and filtering
+ * GET /api/v1/categories?page=0&size=10&search=xxx
+ */
+export async function getCategoriesPaginated(
+  page: number = 0,
+  size: number = 10,
+  search?: string,
+  sort?: string
+) {
+  try {
+    const session = await auth();
+    if (!session) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    const params: Record<string, string | number> = {
+      page,
+      size,
+    };
+
+    if (search) {
+      params.search = search;
+    }
+
+    if (sort) {
+      params.sort = sort;
+    }
+
+    const result = await apiGet<any>('/categories', params);
+
+    if (!result.success) {
+      return { success: false, error: result.error };
+    }
+
+    return {
+      success: true,
+      data: {
+        categories: result.data.content || [],
+        totalElements: result.data.totalElements,
+        totalPages: result.data.totalPages,
+        currentPage: result.data.pageable.pageNumber,
+        pageSize: result.data.pageable.pageSize,
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    return { success: false, error: 'Failed to fetch categories' };
+  }
+}
+
+/**
+ * Get a single category by ID
+ * GET /api/v1/categories/{id}
+ */
 export async function getCategoryById(id: string) {
   try {
     const session = await auth();
@@ -70,22 +109,23 @@ export async function getCategoryById(id: string) {
       return { success: false, error: 'Unauthorized' };
     }
 
-    // TODO: Replace with Spring Boot API call
-    // GET /api/categories/{id}
+    const result = await apiGet<Category>(`/categories/${id}`);
 
-    const category = mockCategories.find((c) => c.id === id);
-
-    if (!category) {
-      return { success: false, error: 'Category not found' };
+    if (!result.success) {
+      return { success: false, error: result.error || 'Category not found' };
     }
 
-    return { success: true, data: category };
+    return { success: true, data: result.data };
   } catch (error) {
     console.error('Error fetching category:', error);
     return { success: false, error: 'Failed to fetch category' };
   }
 }
 
+/**
+ * Create a new category
+ * POST /api/v1/categories
+ */
 export async function createCategory(data: CategoryFormData) {
   try {
     const session = await auth();
@@ -95,33 +135,17 @@ export async function createCategory(data: CategoryFormData) {
 
     const validated = categorySchema.parse(data);
 
-    // TODO: Replace with Spring Boot API call
-    // POST /api/categories with body { name, description }
-
-    // Check if category name already exists
-    const existing = mockCategories.find(
-      (c) => c.name.toLowerCase() === validated.name.toLowerCase()
-    );
-
-    if (existing) {
-      return { success: false, error: 'Category with this name already exists' };
-    }
-
-    const newCategory: Category = {
-      id: `cat-${Date.now()}`,
+    const result = await apiPost<Category>('/categories', {
       name: validated.name,
       description: validated.description || null,
-      productCount: 0,
-    };
+    });
 
-    // Add to mock data (in production, this would be done via API)
-    mockCategories.push(newCategory);
-
-    // TODO: Create audit log via Spring Boot API
-    // POST /api/audit-logs with action data
+    if (!result.success) {
+      return { success: false, error: result.error };
+    }
 
     revalidatePath('/dashboard/categories');
-    return { success: true, data: newCategory };
+    return { success: true, data: result.data };
   } catch (error) {
     console.error('Error creating category:', error);
     if (error instanceof z.ZodError) {
@@ -131,6 +155,10 @@ export async function createCategory(data: CategoryFormData) {
   }
 }
 
+/**
+ * Update an existing category
+ * PUT /api/v1/categories/{id}
+ */
 export async function updateCategory(id: string, data: Partial<CategoryFormData>) {
   try {
     const session = await auth();
@@ -140,38 +168,17 @@ export async function updateCategory(id: string, data: Partial<CategoryFormData>
 
     const validated = categorySchema.partial().parse(data);
 
-    // TODO: Replace with Spring Boot API call
-    // PUT /api/categories/{id} with body { name, description }
+    const result = await apiPut<Category>(`/categories/${id}`, {
+      name: validated.name,
+      description: validated.description ?? null,
+    });
 
-    const categoryIndex = mockCategories.findIndex((c) => c.id === id);
-    if (categoryIndex === -1) {
-      return { success: false, error: 'Category not found' };
+    if (!result.success) {
+      return { success: false, error: result.error };
     }
-
-    // Check if name is being changed and if it already exists
-    if (validated.name && typeof validated.name === 'string') {
-      const existing = mockCategories.find(
-        (c) => c.id !== id && c.name.toLowerCase() === validated.name!.toLowerCase()
-      );
-
-      if (existing) {
-        return { success: false, error: 'Category with this name already exists' };
-      }
-    }
-
-    const updatedCategory: Category = {
-      ...mockCategories[categoryIndex],
-      ...validated,
-    };
-
-    // Update mock data (in production, this would be done via API)
-    mockCategories[categoryIndex] = updatedCategory;
-
-    // TODO: Create audit log via Spring Boot API
-    // POST /api/audit-logs with action data
 
     revalidatePath('/dashboard/categories');
-    return { success: true, data: updatedCategory };
+    return { success: true, data: result.data };
   } catch (error) {
     console.error('Error updating category:', error);
     if (error instanceof z.ZodError) {
@@ -181,6 +188,10 @@ export async function updateCategory(id: string, data: Partial<CategoryFormData>
   }
 }
 
+/**
+ * Delete a category
+ * DELETE /api/v1/categories/{id}
+ */
 export async function deleteCategory(id: string) {
   try {
     const session = await auth();
@@ -188,29 +199,18 @@ export async function deleteCategory(id: string) {
       return { success: false, error: 'Unauthorized' };
     }
 
-    // TODO: Replace with Spring Boot API call
-    // DELETE /api/categories/{id}
+    const result = await apiDelete(`/categories/${id}`);
 
-    const categoryIndex = mockCategories.findIndex((c) => c.id === id);
-    if (categoryIndex === -1) {
-      return { success: false, error: 'Category not found' };
+    if (!result.success) {
+      // Check if error is about having products
+      if (result.error?.includes('product') || result.error?.includes('assigned')) {
+        return {
+          success: false,
+          error: 'Cannot delete category with products. Please reassign or delete products first.',
+        };
+      }
+      return { success: false, error: result.error };
     }
-
-    const category = mockCategories[categoryIndex];
-
-    // Check if category has products
-    if (category.productCount && category.productCount > 0) {
-      return {
-        success: false,
-        error: `Cannot delete category with ${category.productCount} products. Please reassign or delete products first.`,
-      };
-    }
-
-    // Remove from mock data (in production, this would be done via API)
-    mockCategories.splice(categoryIndex, 1);
-
-    // TODO: Create audit log via Spring Boot API
-    // POST /api/audit-logs with action data
 
     revalidatePath('/dashboard/categories');
     return { success: true };

@@ -194,7 +194,7 @@ export default function CategoriesPage() {
                   <Textarea
                     id="description"
                     placeholder="Brief description of this category..."
-                    value={formData.description}
+                    value={formData.description || ''}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     disabled={createMutation.isPending || updateMutation.isPending}
                     rows={3}
