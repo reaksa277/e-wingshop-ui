@@ -1,87 +1,118 @@
+/**
+ * lib/auth.ts
+ * NextAuth v5 — credentials provider calls Spring Boot directly
+ */
+
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import bcrypt from 'bcryptjs';
-import { findUserByEmail, type MockUser } from './mock-users';
-import { z } from 'zod';
+import { apiPost, setAccessToken } from './api-client';
 import type { Role } from './permissions';
 
-const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
-});
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+export interface BackendUser {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  branchId?: string | null;
+  image?: string;
+}
+
+export interface LoginResponse {
+  accessToken: string;
+  refreshToken?: string;
+  tokenType: string;
+  userId: number | string;
+  email: string;
+  fullName: string;
+  role: string;
+  expiresIn?: number;
+}
+
+// ─── NextAuth ─────────────────────────────────────────────────────────────────
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Credentials({
       name: 'credentials',
       credentials: {
-        email: { label: 'Email', type: 'email' },
+        email:    { label: 'Email',    type: 'email'    },
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        const parsed = loginSchema.safeParse(credentials);
+        if (!credentials?.email || !credentials?.password) return null;
 
-        if (!parsed.success) {
-          throw new Error(parsed.error.issues[0].message);
+        // Call Spring Boot — single source of truth
+        const result = await apiPost<LoginResponse>(
+          '/auth/login',
+          { email: credentials.email, password: credentials.password },
+          true // noAuth — no Bearer token on login
+        );
+
+        if (!result.success) {
+          console.error('[AUTHORIZE] Backend login failed:', result);
+          return null;
         }
 
-        const { email, password } = parsed.data;
-
-        const user = findUserByEmail(email);
-
-        if (!user) {
-          throw new Error('Invalid email or password');
+        if (!result.data) {
+          console.error('[AUTHORIZE] No data in response:', result);
+          return null;
         }
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        const { accessToken, expiresIn = 86400, userId, email, fullName, role } = result.data;
 
-        if (!isPasswordValid) {
-          throw new Error('Invalid email or password');
-        }
+        // Store JWT in httpOnly cookie for API calls
+        await setAccessToken(accessToken, expiresIn);
 
         return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          branchId: user.branchId,
-          image: user.image,
+          id:       String(userId),
+          email:    email,
+          name:     fullName,
+          role:     role,
+          branchId: null,
+          image:    undefined,
         };
       },
     }),
   ],
+
   session: {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
+
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (user) {
-        const mockUser = user as MockUser;
-        token.id = mockUser.id;
-        token.role = mockUser.role;
-        token.branchId = mockUser.branchId ?? null;
+        token.id       = user.id || token.id;
+        token.role     = (user as any).role || token.role;
+        token.branchId = (user as any).branchId ?? token.branchId ?? null;
+        token.email    = user.email || token.email;
+        token.name     = user.name || token.name;
       }
-
-      // Handle session updates
       if (trigger === 'update' && session) {
         return { ...token, ...session };
       }
-
       return token;
     },
+
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as Role;
-        session.user.branchId = token.branchId as string | null;
+      if (session.user && token) {
+        session.user.id       = (token.id as string) || '';
+        session.user.role     = (token.role as Role) || 'viewer';
+        session.user.branchId = (token.branchId as string | null) ?? null;
+        session.user.email    = (token.email as string) || '';
+        session.user.name     = (token.name as string) || '';
       }
       return session;
     },
   },
+
   pages: {
-    signIn: '/login',
-    error: '/error',
+    signIn: '/auth/login',
+    error:  '/error',
   },
+
   secret: process.env.NEXTAUTH_SECRET,
 });

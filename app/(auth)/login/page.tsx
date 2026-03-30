@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, Suspense } from 'react';
-import { signIn } from 'next-auth/react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -10,14 +8,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
+  Card, CardContent, CardDescription,
+  CardFooter, CardHeader, CardTitle,
 } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { loginWithBackend } from '@/app/actions/auth';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -26,18 +21,7 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>;
 
-// Mock user credentials for quick testing
-const mockCredentials = [
-  { role: 'Superadmin', email: 'superadmin@ewingshop.com' },
-  { role: 'Manager', email: 'manager1@ewingshop.com' },
-  { role: 'Staff', email: 'staff1@ewingshop.com' },
-  { role: 'Viewer', email: 'viewer@ewingshop.com' },
-];
-
 function LoginForm() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -51,33 +35,28 @@ function LoginForm() {
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true);
     try {
-      const result = await signIn('credentials', {
-        email: data.email,
-        password: data.password,
-        redirect: false,
-      });
+      const formData = new FormData();
+      formData.append('email', data.email);
+      formData.append('password', data.password);
 
-      if (result?.error) {
-        toast.error(result.error);
-      } else {
-        toast.success('Login successful!');
-        router.push(callbackUrl);
+      const result = await loginWithBackend(formData);
+
+      // Only reach here if the server action didn't redirect (i.e. login failed)
+      if (!result.success) {
+        toast.error(result.error ?? 'Login failed');
       }
     } catch (error) {
+      // next/navigation `redirect()` throws internally — re-throw it
+      // so Next.js can handle the redirect correctly
+      if (
+        error instanceof Error &&
+        error.message === 'NEXT_REDIRECT'
+      ) {
+        throw error;
+      }
       toast.error('An unexpected error occurred');
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const fillCredentials = (email: string) => {
-    // Auto-fill password for testing
-    const form = document.querySelector('form');
-    if (form) {
-      const emailInput = form.querySelector('input[type="email"]') as HTMLInputElement;
-      const passwordInput = form.querySelector('input[type="password"]') as HTMLInputElement;
-      if (emailInput) emailInput.value = email;
-      if (passwordInput) passwordInput.value = 'password123';
     }
   };
 
@@ -93,49 +72,19 @@ function LoginForm() {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              disabled={isLoading}
-              {...register('email')}
-            />
-            {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
+            <Input id="email" type="email" placeholder="you@example.com"
+              disabled={isLoading} {...register('email')} />
+            {errors.email && (
+              <p className="text-sm text-destructive">{errors.email.message}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              disabled={isLoading}
-              {...register('password')}
-            />
+            <Input id="password" type="password" placeholder="••••••••"
+              disabled={isLoading} {...register('password')} />
             {errors.password && (
               <p className="text-sm text-destructive">{errors.password.message}</p>
             )}
-          </div>
-
-          {/* Quick test credentials */}
-          <div className="pt-2">
-            <p className="text-sm text-muted-foreground mb-2">
-              Quick test accounts (password: password123)
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              {mockCredentials.map((cred) => (
-                <Button
-                  key={cred.email}
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={isLoading}
-                  onClick={() => fillCredentials(cred.email)}
-                  className="text-xs"
-                >
-                  {cred.role}
-                </Button>
-              ))}
-            </div>
           </div>
         </CardContent>
         <CardFooter>
