@@ -1,4 +1,3 @@
-import { auth } from '@/lib/auth';
 import { can, type Permission } from '@/lib/permissions';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
