@@ -6,6 +6,7 @@ export type Permission =
   | 'manage_branches'
   | 'manage_products'
   | 'manage_categories'
+  | 'manage_inventory'
   | 'view_inventory'
   | 'process_orders'
   | 'view_sales_reports'
@@ -18,6 +19,7 @@ export const rolePermissions: Record<Role, Permission[]> = {
     'manage_branches',
     'manage_products',
     'manage_categories',
+    'manage_inventory',
     'view_inventory',
     'process_orders',
     'view_sales_reports',
@@ -27,12 +29,13 @@ export const rolePermissions: Record<Role, Permission[]> = {
     'manage_branches',
     'manage_products',
     'manage_categories',
+    'manage_inventory',
     'view_inventory',
     'process_orders',
     'view_sales_reports',
     'dismiss_expiry_alerts',
   ],
-  staff: ['manage_products', 'view_inventory', 'process_orders'],
+  staff: ['manage_products', 'manage_inventory', 'view_inventory', 'process_orders'],
   viewer: ['view_inventory'],
 };
 

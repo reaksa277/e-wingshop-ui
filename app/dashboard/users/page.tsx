@@ -52,6 +52,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 import { Plus, Search, Filter, Edit, Trash2, Download, User as UserIcon } from 'lucide-react';
 import { RoleGuard } from '@/components/dashboard/RoleGuard';
+import { formatRoleNameBadge, getRoleBadgeVariant } from '@/lib/role-utils';
 import Papa from 'papaparse';
 
 const userFormSchema = z.object({
@@ -176,21 +177,6 @@ export default function UsersPage() {
     a.click();
     URL.revokeObjectURL(url);
     toast.success('Users exported successfully');
-  };
-
-  const getRoleBadgeVariant = (role: string) => {
-    switch (role) {
-      case 'superadmin':
-        return 'destructive';
-      case 'manager':
-        return 'default';
-      case 'staff':
-        return 'secondary';
-      case 'viewer':
-        return 'outline';
-      default:
-        return 'secondary';
-    }
   };
 
   return (
@@ -446,7 +432,7 @@ export default function UsersPage() {
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
                       <Badge variant={getRoleBadgeVariant(user.role)}>
-                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                        {formatRoleNameBadge(user.role)}
                       </Badge>
                     </TableCell>
                     <TableCell>

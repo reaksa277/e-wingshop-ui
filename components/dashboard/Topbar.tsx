@@ -18,16 +18,27 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useQuery } from '@tanstack/react-query';
 import { authService } from '@/services/auth.service';
 import { tokenStore } from '@/lib/api-client';
+import { useEffect, useState } from 'react';
+import { userService } from '@/services/user.service';
+import { formatRoleName } from '@/lib/role-utils';
 
 export function Topbar() {
   const router = useRouter();
   const { unreadAlertsCount } = useNotificationStore();
+  const [hasToken, setHasToken] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Get token after hydration
+  useEffect(() => {
+    setIsHydrated(true);
+    setHasToken(!!tokenStore.getAccess());
+  }, []);
 
   // Fetch current user
   const { data: userData, isLoading: userLoading } = useQuery({
     queryKey: ['user', 'me'],
-    queryFn: () => authService.me(),
-    enabled: !!tokenStore.getAccess(),
+    queryFn: () => userService.me(),
+    enabled: hasToken,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
@@ -100,7 +111,7 @@ export function Topbar() {
               <div className="hidden flex-col text-left text-sm md:flex">
                 <span className="font-medium">{userLoading ? 'Loading...' : userData?.fullName || 'User'}</span>
                 <span className="text-xs text-muted-foreground">
-                  {userData && userData.role ? String(userData.role).toLowerCase() : 'user'}
+                  {formatRoleName(userData?.role)}
                 </span>
               </div>
               <ChevronDown className="h-4 w-4" />
@@ -115,7 +126,7 @@ export function Topbar() {
             </div>
             <div className="px-2 py-1.5 text-xs">
               <p className="text-muted-foreground font-medium">Role</p>
-              <p className="text-foreground capitalize">{userData && userData.role ? String(userData.role).toLowerCase() : 'N/A'}</p>
+              <p className="text-foreground capitalize">{formatRoleName(userData?.role)}</p>
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem>

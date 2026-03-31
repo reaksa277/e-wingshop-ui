@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { can, type Role } from '@/lib/permissions';
 import { Permission } from '@/lib/permissions';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { authService } from '@/services/auth.service';
 import { tokenStore } from '@/lib/api-client';
 import type { UserResponse, RoleName } from '@/types';
@@ -11,9 +11,9 @@ import type { UserResponse, RoleName } from '@/types';
 // Map API RoleName to internal Role type
 function mapRoleNameToRole(roleName: RoleName): Role {
   const roleMap: Record<RoleName, Role> = {
-    OWNER: 'superadmin',
+    SUPERADMIN: 'superadmin',
     ADMIN: 'manager',
-    CUSTOMER: 'viewer',
+    STAFF: 'staff',
   };
   return roleMap[roleName];
 }
@@ -25,7 +25,11 @@ interface RoleGuardProps {
 }
 
 export function RoleGuard({ children, permission, fallback = null }: RoleGuardProps) {
-  const isAuthenticated = !!tokenStore.getAccess();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    setIsAuthenticated(!!tokenStore.getAccess());
+  }, []);
 
   const { data: userData } = useQuery<UserResponse | undefined>({
     queryKey: ['user', 'me'],

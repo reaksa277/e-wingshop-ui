@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { authService } from "@/services/auth.service";
 import { queryKeys } from "@/lib/query-keys";
 import { LoginRequest, RegisterRequest } from "@/types";
@@ -9,10 +10,16 @@ import { tokenStore } from "@/lib/api-client";
 // ── Current user ──────────────────────────────────────────────────────────────
 
 export function useMe() {
+  const [hasToken, setHasToken] = useState(false);
+
+  useEffect(() => {
+    setHasToken(!!tokenStore.getAccess());
+  }, []);
+
   return useQuery({
     queryKey:  queryKeys.users.me(),
     queryFn:   authService.me,
-    enabled:   !!tokenStore.getAccess(),
+    enabled:   hasToken,
     staleTime: 5 * 60 * 1000,   // 5 minutes
     retry:     false,
   });

@@ -10,9 +10,14 @@ import { orderService } from '@/services/order.service';
 import { branchService } from '@/services/branch.service';
 import { authService } from '@/services/auth.service';
 import { tokenStore } from '@/lib/api-client';
+import { useEffect, useState } from 'react';
 
 export default function DashboardPage() {
-  const isAuthenticated = !!tokenStore.getAccess();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    setIsAuthenticated(!!tokenStore.getAccess());
+  }, []);
 
   // Fetch current user
   const { data: userData } = useQuery({

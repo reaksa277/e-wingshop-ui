@@ -8,7 +8,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useSidebarStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { tokenStore } from '@/lib/api-client';
 import { useQuery } from '@tanstack/react-query';
 import { authService } from '@/services/auth.service';
@@ -18,9 +18,9 @@ import type { RoleName } from '@/types';
 // Map API RoleName to internal Role type
 function mapRoleNameToRole(roleName: RoleName): Role {
   const roleMap: Record<RoleName, Role> = {
-    OWNER: 'superadmin',
+    SUPERADMIN: 'superadmin',
     ADMIN: 'manager',
-    CUSTOMER: 'viewer',
+    STAFF: 'staff',
   };
   return roleMap[roleName];
 }
@@ -29,10 +29,18 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { isOpen } = useSidebarStore();
   const hasCheckedAuth = useRef(false);
-  const token = tokenStore.getAccess();
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
+
+  // Check hydration and get token after mount
+  useEffect(() => {
+    setIsHydrated(true);
+    const accessToken = tokenStore.getAccess();
+    setToken(accessToken);
+  }, []);
 
   // Fetch current user
-  const { data: userData } = useQuery({
+  const { data: userData, isLoading: userLoading } = useQuery({
     queryKey: ['user', 'me'],
     queryFn: () => authService.me(),
     enabled: !!token,
@@ -41,7 +49,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   // Check authentication on mount
   useEffect(() => {
-    if (hasCheckedAuth.current) return;
+    if (hasCheckedAuth.current || !isHydrated) return;
     hasCheckedAuth.current = true;
 
     console.log('[Dashboard Auth Check]', { hasToken: !!token });
@@ -50,16 +58,25 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       console.warn('[Dashboard] No authentication token found, redirecting to login');
       router.push('/auth/login');
     }
-  }, [router, token]);
+  }, [router, token, isHydrated]);
 
-  // Return null while checking auth or if no token
-  // The effect will handle navigation if needed
+  // Render nothing during hydration to match server output
+  if (!isHydrated) {
+    return null;
+  }
+
+  // Return null if no token (user will be redirected to login)
   if (!token) {
     return null;
   }
 
+  // Wait for user data to load before rendering sidebar with role-based nav
+  if (userLoading || !userData?.role) {
+    return null;
+  }
+
   // Get mapped role for Sidebar
-  const role = userData?.role ? mapRoleNameToRole(userData.role) : 'viewer';
+  const role = mapRoleNameToRole(userData.role);
 
   return (
     <ReactQueryProvider>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { MapPin, Phone, Plus, Edit, Trash2, Search } from 'lucide-react';
@@ -49,7 +49,11 @@ const branchFormSchema = z.object({
 type BranchFormData = z.infer<typeof branchFormSchema>;
 
 export default function BranchesPage() {
-  const isAuthenticated = !!tokenStore.getAccess();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    setIsAuthenticated(!!tokenStore.getAccess());
+  }, []);
 
   const { data: userData } = useQuery({
     queryKey: ['user', 'me'],
