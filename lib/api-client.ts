@@ -1,174 +1,156 @@
-/**
- * lib/api-client.ts
- * Base HTTP client for Spring Boot API
- * Base URL: http://localhost:8080/api/v1
- */
+import { ApiError } from "@/types";
 
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api/v1';
-const TOKEN_COOKIE = 'access_token';
+// ── Token storage helpers ─────────────────────────────────────────────────────
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+export const tokenStore = {
+  getAccess:    () => (typeof window !== "undefined" ? localStorage.getItem("access_token")  : null),
+  getRefresh:   () => (typeof window !== "undefined" ? localStorage.getItem("refresh_token") : null),
+  setTokens: (access: string, refresh: string) => {
+    localStorage.setItem("access_token",  access);
+    localStorage.setItem("refresh_token", refresh);
+  },
+  clear: () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+  },
+};
 
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  status?: number;
+// ── Core fetch wrapper ────────────────────────────────────────────────────────
+
+type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
+interface RequestOptions {
+  method?:    HttpMethod;
+  body?:      unknown;
+  params?:    Record<string, string | number | boolean | undefined | null>;
+  auth?:      boolean;   // default true
+  signal?:    AbortSignal;
 }
 
-export interface PaginatedResponse<T> {
-  content: T[];
-  totalElements: number;
-  totalPages: number;
-  pageNumber: number;
-  pageSize: number;
-  first: boolean;
-  last: boolean;
-  empty: boolean;
-}
+let isRefreshing   = false;
+let refreshQueue:  Array<(token: string) => void> = [];
 
-export type QueryParams = Record<string, string | number | boolean | null | undefined>;
+async function performRefresh(): Promise<string | null> {
+  const refreshToken = tokenStore.getRefresh();
+  if (!refreshToken) return null;
 
-// ─── Token helpers ────────────────────────────────────────────────────────────
-
-export async function getAccessToken(): Promise<string | null> {
   try {
-    const cookieStore = await cookies();
-    return cookieStore.get(TOKEN_COOKIE)?.value ?? null;
+    const res = await fetch(`${BASE_URL}/api/v1/auth/refresh`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ refreshToken }),
+    });
+    if (!res.ok) { tokenStore.clear(); return null; }
+    const data = await res.json();
+    tokenStore.setTokens(data.accessToken, data.refreshToken);
+    return data.accessToken;
   } catch {
+    tokenStore.clear();
     return null;
   }
 }
 
-export async function setAccessToken(token: string, expiresInSeconds: number): Promise<void> {
-  const cookieStore = await cookies();
-  cookieStore.set(TOKEN_COOKIE, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: expiresInSeconds,
-    path: '/',
-  });
-}
+export async function apiRequest<T>(
+  path: string,
+  options: RequestOptions = {}
+): Promise<T> {
+  const { method = "GET", body, params, auth = true, signal } = options;
 
-export async function removeAccessToken(): Promise<void> {
-  const cookieStore = await cookies();
-  cookieStore.delete(TOKEN_COOKIE);
-}
-
-// ─── URL builder ──────────────────────────────────────────────────────────────
-
-function buildUrl(endpoint: string, params?: QueryParams): string {
-  const url = new URL(
-    endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`
-  );
+  // Build URL with query params
+  const url = new URL(`${BASE_URL}${path}`);
   if (params) {
     Object.entries(params).forEach(([k, v]) => {
-      if (v !== null && v !== undefined) url.searchParams.append(k, String(v));
+      if (v !== undefined && v !== null) url.searchParams.set(k, String(v));
     });
   }
-  return url.toString();
-}
 
-// ─── Response handler ─────────────────────────────────────────────────────────
-
-async function handleResponse<T>(res: Response): Promise<ApiResponse<T>> {
-  // 204 No Content
-  if (res.status === 204) return { success: true, status: 204 };
-
-  let data: any;
-  try {
-    data = await res.json();
-  } catch {
-    return { success: false, error: 'Failed to parse response', status: res.status };
+  // Build headers
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (auth) {
+    const token = tokenStore.getAccess();
+    if (token) headers["Authorization"] = `Bearer ${token}`;
   }
 
-  console.log('[API Response]', { status: res.status, ok: res.ok, data });
-
-  if (!res.ok) {
-    return {
-      success: false,
-      error: data?.message || data?.error || `Request failed (${res.status})`,
-      status: res.status,
-    };
-  }
-
-  return { success: true, data: data as T, status: res.status };
-}
-
-// ─── Auth header ──────────────────────────────────────────────────────────────
-
-async function authHeaders(): Promise<Record<string, string>> {
-  const token = await getAccessToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
-
-// ─── Core request ─────────────────────────────────────────────────────────────
-
-async function request<T>(
-  method: string,
-  endpoint: string,
-  options: {
-    body?: unknown;
-    params?: QueryParams;
-    headers?: Record<string, string>;
-    noAuth?: boolean;
-  } = {}
-): Promise<ApiResponse<T>> {
-  try {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      ...(options.noAuth ? {} : await authHeaders()),
-      ...options.headers,
-    };
-
-    const url = buildUrl(endpoint, options.params);
-    console.log(`[API] ${method} ${url}`, options.body);
-
-    const res = await fetch(url, {
+  const makeRequest = () =>
+    fetch(url.toString(), {
       method,
       headers,
-      body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
-      cache: 'no-store',
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+      signal,
     });
 
-    const result = await handleResponse<T>(res);
+  let response = await makeRequest();
 
-    // Auto-redirect on 401
-    if (result.status === 401) {
-      await removeAccessToken();
-      redirect('/auth/login?error=session_expired');
+  // ── Auto-refresh on 401 ───────────────────────────────────────────────────
+  if (response.status === 401 && auth) {
+    if (!isRefreshing) {
+      isRefreshing = true;
+      const newToken = await performRefresh();
+      isRefreshing = false;
+      refreshQueue.forEach((cb) => cb(newToken ?? ""));
+      refreshQueue = [];
+
+      if (newToken) {
+        headers["Authorization"] = `Bearer ${newToken}`;
+        response = await makeRequest();
+      } else {
+        tokenStore.clear();
+        if (typeof window !== "undefined") window.location.href = "/login";
+        throw new Error("Session expired. Please log in again.");
+      }
+    } else {
+      // Queue subsequent calls while refresh is in flight
+      await new Promise<void>((resolve) => {
+        refreshQueue.push((token) => {
+          if (token) headers["Authorization"] = `Bearer ${token}`;
+          resolve();
+        });
+      });
+      response = await makeRequest();
     }
-
-    return result;
-  } catch (error: any) {
-    // Re-throw Next.js redirect — never swallow it
-    if (error?.message === 'NEXT_REDIRECT') throw error;
-
-    console.error(`[API] ${method} ${endpoint}`, error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Network error',
-    };
   }
+
+  // ── Parse response ────────────────────────────────────────────────────────
+  if (response.status === 204 || response.headers.get("content-length") === "0") {
+    return undefined as T;
+  }
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    const err = data as ApiError;
+    throw Object.assign(new Error(err.message ?? "Request failed"), {
+      status:  response.status,
+      details: err.details,
+      apiError: err,
+    });
+  }
+
+  return data as T;
 }
 
-// ─── Public API ───────────────────────────────────────────────────────────────
+// ── Convenience methods ───────────────────────────────────────────────────────
 
-export const apiGet = <T>(endpoint: string, params?: QueryParams) =>
-  request<T>('GET', endpoint, { params });
+export const api = {
+  get: <T>(path: string, params?: RequestOptions["params"], signal?: AbortSignal) =>
+    apiRequest<T>(path, { method: "GET", params, signal }),
 
-export const apiPost = <T>(endpoint: string, body?: unknown, noAuth = false) =>
-  request<T>('POST', endpoint, { body, noAuth });
+  post: <T>(path: string, body?: unknown, params?: RequestOptions["params"]) =>
+    apiRequest<T>(path, { method: "POST", body, params }),
 
-export const apiPut = <T>(endpoint: string, body?: unknown) =>
-  request<T>('PUT', endpoint, { body });
+  put: <T>(path: string, body?: unknown) =>
+    apiRequest<T>(path, { method: "PUT", body }),
 
-export const apiPatch = <T>(endpoint: string, body?: unknown) =>
-  request<T>('PATCH', endpoint, { body });
+  patch: <T>(path: string, body?: unknown, params?: RequestOptions["params"]) =>
+    apiRequest<T>(path, { method: "PATCH", body, params }),
 
-export const apiDelete = <T>(endpoint: string) =>
-  request<T>('DELETE', endpoint);
+  delete: <T>(path: string, params?: RequestOptions["params"]) =>
+    apiRequest<T>(path, { method: "DELETE", params }),
+
+  postPublic: <T>(path: string, body?: unknown) =>
+    apiRequest<T>(path, { method: "POST", body, auth: false }),
+};
