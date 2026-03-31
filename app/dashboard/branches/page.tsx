@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useSession } from 'next-auth/react';
 import {
   getBranches,
   createBranch,
@@ -51,6 +50,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { authService } from '@/services/auth.service';
+import { tokenStore } from '@/lib/api-client';
 
 const branchFormSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -62,7 +63,15 @@ const branchFormSchema = z.object({
 
 export default function BranchesPage() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const isAuthenticated = !!tokenStore.getAccess();
+
+  const { data: userData } = useQuery({
+    queryKey: ['user', 'me'],
+    queryFn: () => authService.me(),
+    enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000,
+  });
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBranch, setEditingBranch] = useState<any>(null);
   const [search, setSearch] = useState('');
@@ -93,7 +102,7 @@ export default function BranchesPage() {
     },
   });
 
-  const isSuperadmin = session?.user?.role === 'superadmin';
+  const isSuperadmin = userData?.role === 'OWNER' || userData?.role === 'ADMIN';
 
   // Filter branches based on search and status
   const filteredBranches = branchesData?.data?.filter((branch: any) => {

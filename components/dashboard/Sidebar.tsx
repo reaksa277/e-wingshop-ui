@@ -21,14 +21,14 @@ import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
-import type { Role } from '@/lib/permissions';
+import type { Role, Permission } from '@/lib/permissions';
 import { can } from '@/lib/permissions';
 
 interface NavItem {
   title: string;
   href: string;
   icon: React.ElementType;
-  permission?: string;
+  permission?: Permission;
 }
 
 interface SidebarProps {
@@ -77,7 +77,7 @@ export function Sidebar({ role }: SidebarProps) {
   ];
 
   const visibleNavItems = navItems.filter(
-    (item) => !item.permission || can(role, item.permission as any)
+    (item) => !item.permission || can(role, item.permission)
   );
 
   return (

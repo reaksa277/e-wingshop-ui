@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { Suspense } from 'react';
 import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -12,7 +13,7 @@ import {
   CardFooter, CardHeader, CardTitle,
 } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { loginWithBackend } from '@/app/actions/auth';
+import { useLogin } from '@/hooks/use-auth';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -22,7 +23,8 @@ const loginSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>;
 
 function LoginForm() {
-  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const { mutate: login, isPending: isLoading } = useLogin();
 
   const {
     register,
@@ -32,32 +34,20 @@ function LoginForm() {
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = async (data: LoginForm) => {
-    setIsLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append('email', data.email);
-      formData.append('password', data.password);
-
-      const result = await loginWithBackend(formData);
-
-      // Only reach here if the server action didn't redirect (i.e. login failed)
-      if (!result.success) {
-        toast.error(result.error ?? 'Login failed');
-      }
-    } catch (error) {
-      // next/navigation `redirect()` throws internally — re-throw it
-      // so Next.js can handle the redirect correctly
-      if (
-        error instanceof Error &&
-        error.message === 'NEXT_REDIRECT'
-      ) {
-        throw error;
-      }
-      toast.error('An unexpected error occurred');
-    } finally {
-      setIsLoading(false);
-    }
+  const onSubmit = (data: LoginForm) => {
+    login(data, {
+      onSuccess: () => {
+        toast.success('Login successful!');
+        // Give tokens time to save to localStorage before redirecting
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 500);
+      },
+      onError: (err) => {
+        const errorMessage = err instanceof Error ? err.message : 'Login failed';
+        toast.error(errorMessage);
+      },
+    });
   };
 
   return (

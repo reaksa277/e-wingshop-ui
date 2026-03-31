@@ -1,111 +1,93 @@
-import { auth } from '@/lib/auth';
+'use client';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Package, Store, ShoppingCart, AlertTriangle, TrendingUp } from 'lucide-react';
+import { Package, Store, ShoppingCart, TrendingUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
+import { productService } from '@/services/product.service';
+import { orderService } from '@/services/order.service';
+import { branchService } from '@/services/branch.service';
+import { authService } from '@/services/auth.service';
+import { tokenStore } from '@/lib/api-client';
 
-// Local type definitions (replacing Prisma types)
-type Order = {
-  id: string;
-  orderNumber: string;
-  total: number;
-  status: string;
-  branchId: string;
-  branch: { id: string; name: string };
-};
+export default function DashboardPage() {
+  const isAuthenticated = !!tokenStore.getAccess();
 
-// Mock data for dashboard
-const mockOrders: Order[] = [
-  {
-    id: 'ord-1',
-    orderNumber: 'ORD-001',
-    total: 150.0,
-    status: 'FULFILLED',
-    branchId: 'branch-1',
-    branch: { id: 'branch-1', name: 'Main Branch' },
-  },
-  {
-    id: 'ord-2',
-    orderNumber: 'ORD-002',
-    total: 250.0,
-    status: 'CONFIRMED',
-    branchId: 'branch-1',
-    branch: { id: 'branch-1', name: 'Main Branch' },
-  },
-  {
-    id: 'ord-3',
-    orderNumber: 'ORD-003',
-    total: 100.0,
-    status: 'PENDING',
-    branchId: 'branch-2',
-    branch: { id: 'branch-2', name: 'North Branch' },
-  },
-  {
-    id: 'ord-4',
-    orderNumber: 'ORD-004',
-    total: 350.0,
-    status: 'FULFILLED',
-    branchId: 'branch-1',
-    branch: { id: 'branch-1', name: 'Main Branch' },
-  },
-  {
-    id: 'ord-5',
-    orderNumber: 'ORD-005',
-    total: 200.0,
-    status: 'CANCELLED',
-    branchId: 'branch-2',
-    branch: { id: 'branch-2', name: 'North Branch' },
-  },
-];
+  // Fetch current user
+  const { data: userData } = useQuery({
+    queryKey: ['user', 'me'],
+    queryFn: () => authService.me(),
+    enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000,
+  });
 
-export default async function DashboardPage() {
-  const session = await auth();
+  // Fetch products count
+  const { data: productsData, isLoading: productsLoading } = useQuery({
+    queryKey: ['products', 'count'],
+    queryFn: async () => {
+      const data = await productService.search({ page: 0, size: 1 });
+      return data;
+    },
+    enabled: isAuthenticated,
+  });
 
-  // TODO: Replace with Spring Boot API calls
-  // GET /api/dashboard/stats
+  // Fetch branches
+  const { data: branchesData, isLoading: branchesLoading } = useQuery({
+    queryKey: ['branches'],
+    queryFn: () => branchService.getAll(),
+    enabled: isAuthenticated,
+  });
 
-  // Mock stats data
-  const productCount = 25;
-  const branchCount = session?.user?.role === 'superadmin' ? 3 : 1;
-  const orderCount = 150;
-  const alertCount = 3;
+  // Fetch recent orders
+  const { data: ordersData, isLoading: ordersLoading } = useQuery({
+    queryKey: ['orders', 'recent'],
+    queryFn: async () => {
+      return orderService.myOrders(0, 5);
+    },
+    enabled: isAuthenticated,
+  });
 
-  // Get recent orders (mock data)
-  const recentOrders = mockOrders.slice(0, 5);
+  // Fetch alerts count from server action
+//   const { data: alertsData, isLoading: alertsLoading } = useQuery({
+//     queryKey: ['alerts', 'count'],
+//     queryFn: async () => {
+//       const result = await getExpiryAlertsCount();
+//       return result.success ? { count: result.count } : { count: 0 };
+//     },
+//     enabled: !!session,
+//     refetchInterval: 60000, // Refetch every minute
+//   });
 
+  // Prepare stats
   const stats = [
     {
       title: 'Total Products',
-      value: productCount,
+      value: productsLoading ? '-' : productsData?.totalElements || 0,
       icon: Package,
       description: 'Active products',
     },
     {
       title: 'Branches',
-      value: branchCount,
+      value: branchesLoading ? '-' : branchesData?.length || 0,
       icon: Store,
       description: 'Active locations',
     },
     {
       title: 'Total Orders',
-      value: orderCount,
+      value: ordersLoading ? '-' : ordersData?.totalElements || 0,
       icon: ShoppingCart,
       description: 'All time orders',
     },
-    {
-      title: 'Expiry Alerts',
-      value: alertCount,
-      icon: AlertTriangle,
-      description: 'Active alerts',
-      variant: alertCount > 0 ? 'warning' : 'default',
-    },
   ];
+
+  const recentOrders = ordersData?.content || [];
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Welcome back, {session?.user?.name}!</h1>
-        <p className="text-muted-foreground">Here's what's happening with your business today.</p>
+        <h1 className="text-3xl font-bold">Welcome back, {userData?.fullName || 'User'}!</h1>
+        <p className="text-muted-foreground">Here&apos;s what&apos;s happening with your business today.</p>
       </div>
 
       {/* Stats Grid */}
@@ -135,7 +117,11 @@ export default async function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {recentOrders.length === 0 ? (
+            {ordersLoading ? (
+              <div className="flex h-32 items-center justify-center">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              </div>
+            ) : recentOrders.length === 0 ? (
               <p className="text-center text-muted-foreground py-4">No orders yet</p>
             ) : (
               recentOrders.map((order) => (
@@ -144,13 +130,15 @@ export default async function DashboardPage() {
                   className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0"
                 >
                   <div className="space-y-1">
-                    <p className="font-medium">{order.orderNumber}</p>
-                    <p className="text-sm text-muted-foreground">{order.branch.name}</p>
+                    {/* <p className="font-medium">{order.orderNumber}</p> */}
+                    <p className="text-sm text-muted-foreground">
+                      {order.branch?.name || 'Branch'}
+                    </p>
                   </div>
                   <div className="flex items-center gap-4">
                     <Badge
                       variant={
-                        order.status === 'FULFILLED'
+                        order.status === 'DELIVERED'
                           ? 'success'
                           : order.status === 'CANCELLED'
                             ? 'destructive'
@@ -161,7 +149,7 @@ export default async function DashboardPage() {
                     >
                       {order.status}
                     </Badge>
-                    <span className="font-medium">${order.total.toFixed(2)}</span>
+                    <span className="font-medium">${order.totalAmount?.toFixed(2) || '0.00'}</span>
                   </div>
                 </div>
               ))

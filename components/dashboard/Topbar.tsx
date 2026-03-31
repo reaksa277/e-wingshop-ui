@@ -2,7 +2,7 @@
 
 import { Bell, ChevronDown, LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback} from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,42 +12,31 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { useSession } from 'next-auth/react';
-import { signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useNotificationStore } from '@/lib/store';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { authService } from '@/services/auth.service';
+import { tokenStore } from '@/lib/api-client';
 
 export function Topbar() {
-  const { data: session } = useSession();
   const router = useRouter();
-  const { unreadAlertsCount, setUnreadAlertsCount } = useNotificationStore();
+  const { unreadAlertsCount } = useNotificationStore();
 
-  // Fetch unread alerts count
-  const { data: alertsData } = useQuery({
-    queryKey: ['alerts-count'],
-    queryFn: async () => {
-      const res = await fetch('/api/alerts/count');
-      if (!res.ok) return { count: 0 };
-      return res.json();
-    },
-    refetchInterval: 60000, // Refetch every minute
+  // Fetch current user
+  const { data: userData, isLoading: userLoading } = useQuery({
+    queryKey: ['user', 'me'],
+    queryFn: () => authService.me(),
+    enabled: !!tokenStore.getAccess(),
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  useEffect(() => {
-    if (alertsData?.count !== undefined) {
-      setUnreadAlertsCount(alertsData.count);
-    }
-  }, [alertsData, setUnreadAlertsCount]);
-
-  const handleSignOut = async () => {
-    await signOut({ callbackUrl: '/login' });
+  const handleSignOut = () => {
+    authService.logout();
   };
 
-  const userInitials = session?.user?.name
-    ? session.user.name
+  const userInitials = userData?.fullName
+    ? userData.fullName
         .split(' ')
         .map((n) => n[0])
         .join('')
@@ -106,13 +95,12 @@ export function Topbar() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="gap-2">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={session?.user?.image || ''} />
                 <AvatarFallback>{userInitials}</AvatarFallback>
               </Avatar>
               <div className="hidden flex-col text-left text-sm md:flex">
-                <span className="font-medium">{session?.user?.name}</span>
+                <span className="font-medium">{userLoading ? 'Loading...' : userData?.fullName || 'User'}</span>
                 <span className="text-xs text-muted-foreground">
-                  {session?.user?.role?.toLowerCase()}
+                  {userData && userData.role ? String(userData.role).toLowerCase() : 'user'}
                 </span>
               </div>
               <ChevronDown className="h-4 w-4" />
@@ -120,6 +108,15 @@ export function Topbar() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <div className="px-2 py-1.5 text-xs">
+              <p className="text-muted-foreground font-medium">Email</p>
+              <p className="text-foreground wrap-break-word">{userData?.email}</p>
+            </div>
+            <div className="px-2 py-1.5 text-xs">
+              <p className="text-muted-foreground font-medium">Role</p>
+              <p className="text-foreground capitalize">{userData && userData.role ? String(userData.role).toLowerCase() : 'N/A'}</p>
+            </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <User className="mr-2 h-4 w-4" />
