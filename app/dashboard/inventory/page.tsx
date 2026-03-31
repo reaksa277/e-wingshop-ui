@@ -2,12 +2,6 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  getInventory,
-  getBranchesForInventory,
-  createInventory,
-  getProductsForInventory,
-} from '@/app/actions/inventory';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';

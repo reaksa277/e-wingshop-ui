@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getExpiryAlerts, dismissExpiryAlert } from '@/app/actions/alerts';
+import { getExpiryAlerts, dismissExpiryAlert, type ExpiryAlert } from '@/app/actions/alerts';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -26,13 +26,12 @@ import { CheckCircle2 } from 'lucide-react';
 import { RoleGuard } from '@/components/dashboard/RoleGuard';
 
 export default function AlertsPage() {
-  const [branchId, setBranchId] = useState('');
   const [status, setStatus] = useState('all');
   const queryClient = useQueryClient();
 
   const { data: alertsData, isLoading } = useQuery({
-    queryKey: ['alerts', branchId, status],
-    queryFn: () => getExpiryAlerts(branchId || undefined, status),
+    queryKey: ['alerts', status],
+    queryFn: () => getExpiryAlerts(undefined, status),
   });
 
   const dismissMutation = useMutation({
@@ -143,7 +142,7 @@ export default function AlertsPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                alertsData?.data?.alerts?.map((alert: any) => (
+                alertsData?.data?.alerts?.map((alert: ExpiryAlert) => (
                   <TableRow key={alert.id}>
                     <TableCell className="font-medium">{alert.product.name}</TableCell>
                     <TableCell>{alert.branch.name}</TableCell>

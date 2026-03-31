@@ -2,18 +2,8 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import {
-  getBranches,
-  createBranch,
-  updateBranch,
-  deleteBranch,
-  getManagers,
-  type BranchFormData,
-} from '@/app/actions/branches';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { MapPin, Phone, User, Plus, Edit, Trash2, Search, Filter } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { MapPin, Phone, Plus, Edit, Trash2, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -34,13 +24,6 @@ import {
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { toast } from 'sonner';
 import {
   Table,
@@ -52,17 +35,20 @@ import {
 } from '@/components/ui/table';
 import { authService } from '@/services/auth.service';
 import { tokenStore } from '@/lib/api-client';
+import type { BranchResponse, BranchRequest } from '@/types';
+import { useBranches, useCreateBranch, useUpdateBranch, useDeleteBranch } from '@/hooks/use-branches';
 
 const branchFormSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   address: z.string().min(1, 'Address is required'),
   phone: z.string().min(1, 'Phone is required'),
-  managerId: z.string().optional(),
-  isActive: z.boolean().default(true),
+  latitude: z.coerce.number().optional(),
+  longitude: z.coerce.number().optional(),
 });
 
+type BranchFormData = z.infer<typeof branchFormSchema>;
+
 export default function BranchesPage() {
-  const router = useRouter();
   const isAuthenticated = !!tokenStore.getAccess();
 
   const { data: userData } = useQuery({
@@ -73,92 +59,86 @@ export default function BranchesPage() {
   });
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingBranch, setEditingBranch] = useState<any>(null);
+  const [editingBranch, setEditingBranch] = useState<BranchResponse | null>(null);
   const [search, setSearch] = useState('');
-  const [status, setStatus] = useState('all');
 
   const {
     data: branchesData,
     isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ['branches'],
-    queryFn: () => getBranches(),
-  });
+  } = useBranches();
 
-  const { data: managersData } = useQuery({
-    queryKey: ['managers'],
-    queryFn: () => getManagers(),
-  });
+  const createBranchMutation = useCreateBranch();
+  const updateBranchMutation = useUpdateBranch(editingBranch?.id || 0);
+  const deleteBranchMutation = useDeleteBranch();
 
   const form = useForm({
-    resolver: zodResolver(branchFormSchema) as any,
+    resolver: zodResolver(branchFormSchema),
     defaultValues: {
       name: '',
       address: '',
       phone: '',
-      managerId: '',
-      isActive: true,
+      latitude: undefined,
+      longitude: undefined,
     },
   });
 
   const isSuperadmin = userData?.role === 'OWNER' || userData?.role === 'ADMIN';
 
-  // Filter branches based on search and status
-  const filteredBranches = branchesData?.data?.filter((branch: any) => {
+  // Filter branches based on search
+  const filteredBranches = branchesData?.filter((branch: BranchResponse) => {
     const matchesSearch =
       branch.name.toLowerCase().includes(search.toLowerCase()) ||
       branch.address.toLowerCase().includes(search.toLowerCase()) ||
-      branch.phone.includes(search);
-    const matchesStatus =
-      status === 'all' ||
-      (status === 'active' && branch.isActive) ||
-      (status === 'inactive' && !branch.isActive);
-    return matchesSearch && matchesStatus;
+      (branch.phone && branch.phone.includes(search));
+    return matchesSearch;
   });
 
   const onSubmit = async (data: BranchFormData) => {
+    const branchRequest: BranchRequest = {
+      name: data.name,
+      address: data.address,
+      phone: data.phone,
+      latitude: data.latitude,
+      longitude: data.longitude,
+    };
+
     if (editingBranch) {
-      const result = await updateBranch(editingBranch.id, data);
-      if (result.success) {
-        toast.success('Branch updated successfully');
-        setIsDialogOpen(false);
-        setEditingBranch(null);
-        refetch();
-      } else {
-        toast.error(result.error || 'Failed to update branch');
-      }
+      updateBranchMutation.mutate(branchRequest, {
+        onSuccess: () => {
+          toast.success('Branch updated successfully');
+          setIsDialogOpen(false);
+          setEditingBranch(null);
+        },
+        onError: () => toast.error('Failed to update branch'),
+      });
     } else {
-      const result = await createBranch(data);
-      if (result.success) {
-        toast.success('Branch created successfully');
-        setIsDialogOpen(false);
-        refetch();
-      } else {
-        toast.error(result.error || 'Failed to create branch');
-      }
+      createBranchMutation.mutate(branchRequest, {
+        onSuccess: () => {
+          toast.success('Branch created successfully');
+          setIsDialogOpen(false);
+          form.reset();
+        },
+        onError: () => toast.error('Failed to create branch'),
+      });
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     if (!confirm('Are you sure you want to delete this branch?')) return;
-    const result = await deleteBranch(id);
-    if (result.success) {
-      toast.success('Branch deleted successfully');
-      refetch();
-    } else {
-      toast.error(result.error || 'Failed to delete branch');
-    }
+    deleteBranchMutation.mutate(id, {
+      onSuccess: () => toast.success('Branch deleted successfully'),
+      onError: () => toast.error('Failed to delete branch'),
+    });
   };
 
-  const handleEdit = (branch: any) => {
+  const handleEdit = (branch: BranchResponse) => {
     setEditingBranch(branch);
     form.reset({
       name: branch.name,
       address: branch.address,
-      phone: branch.phone,
-      managerId: branch.managerId || '',
-      isActive: branch.isActive,
+      phone: branch.phone || '',
+      latitude: branch.latitude,
+      longitude: branch.longitude,
     });
     setIsDialogOpen(true);
   };
@@ -231,54 +211,7 @@ export default function BranchesPage() {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="managerId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Manager (Optional)</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a manager" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {managersData?.data?.map((manager: any) => (
-                              <SelectItem key={manager.id} value={manager.id}>
-                                {manager.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="isActive"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Status</FormLabel>
-                        <Select
-                          onValueChange={(value) => field.onChange(value === 'true')}
-                          defaultValue={String(field.value)}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="true">Active</SelectItem>
-                            <SelectItem value="false">Inactive</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+
                   <div className="flex justify-end gap-2">
                     <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                       Cancel
@@ -296,7 +229,7 @@ export default function BranchesPage() {
       <Card>
         <CardContent className="pt-6">
           <div className="flex gap-4 flex-wrap">
-            <div className="flex-1 min-w-[200px]">
+            <div className="flex-1 min-w-50">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -307,17 +240,7 @@ export default function BranchesPage() {
                 />
               </div>
             </div>
-            <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger className="w-[150px]">
-                <Filter className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
+
           </div>
         </CardContent>
       </Card>
@@ -331,8 +254,7 @@ export default function BranchesPage() {
                 <TableHead>Name</TableHead>
                 <TableHead>Address</TableHead>
                 <TableHead>Phone</TableHead>
-                <TableHead>Manager</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>Created</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -345,12 +267,12 @@ export default function BranchesPage() {
                 </TableRow>
               ) : filteredBranches?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">
+                  <TableCell colSpan={5} className="text-center py-8">
                     No branches found
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredBranches?.map((branch: any) => (
+                filteredBranches?.map((branch: BranchResponse) => (
                   <TableRow key={branch.id}>
                     <TableCell className="font-medium">{branch.name}</TableCell>
                     <TableCell>
@@ -362,24 +284,10 @@ export default function BranchesPage() {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Phone className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">{branch.phone}</span>
+                        <span className="text-sm text-muted-foreground">{branch.phone || '—'}</span>
                       </div>
                     </TableCell>
-                    <TableCell>
-                      {branch.manager ? (
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-muted-foreground" />
-                          <span>{branch.manager.name}</span>
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={branch.isActive ? 'success' : 'secondary'}>
-                        {branch.isActive ? 'Active' : 'Inactive'}
-                      </Badge>
-                    </TableCell>
+                    <TableCell>{new Date(branch.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell className="text-right">
                       {isSuperadmin && (
                         <div className="flex justify-end gap-2">
