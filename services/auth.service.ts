@@ -7,13 +7,13 @@ import { AuthResponse, LoginRequest, RegisterRequest, UserResponse } from "@/typ
 
 export const authService = {
   login: async (data: LoginRequest): Promise<AuthResponse> => {
-    const res = await api.postPublic<AuthResponse>("/api/v1/auth/login", data);
+    const res = await api.postPublic<AuthResponse>("/auth/login", data);
     tokenStore.setTokens(res.accessToken, res.refreshToken);
     return res;
   },
 
   register: async (data: RegisterRequest): Promise<AuthResponse> => {
-    const res = await api.postPublic<AuthResponse>("/api/v1/auth/register", data);
+    const res = await api.postPublic<AuthResponse>("/auth/register", data);
     tokenStore.setTokens(res.accessToken, res.refreshToken);
     return res;
   },
@@ -23,5 +23,5 @@ export const authService = {
     if (typeof window !== "undefined") window.location.href = "/login";
   },
 
-  me: () => api.get<UserResponse>("/api/v1/users/me"),
+  me: () => api.get<UserResponse>("/users/me"),
 };

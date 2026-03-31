@@ -14,20 +14,20 @@ export interface ProductSearchParams {
 
 export const productService = {
   search: (params?: ProductSearchParams) =>
-    api.get<PageResponse<ProductResponse>>("/api/v1/products", params),
+    api.get<PageResponse<ProductResponse>>("/products", params),
 
   getById: (id: number) =>
-    api.get<ProductResponse>(`/api/v1/products/${id}`),
+    api.get<ProductResponse>(`/products/${id}`),
 
   getByBarcode: (barcode: string) =>
-    api.get<ProductResponse>(`/api/v1/products/barcode/${encodeURIComponent(barcode)}`),
+    api.get<ProductResponse>(`/products/barcode/${encodeURIComponent(barcode)}`),
 
   create: (data: ProductRequest) =>
-    api.post<ProductResponse>("/api/v1/products", data),
+    api.post<ProductResponse>("/products", data),
 
   update: (id: number, data: ProductRequest) =>
-    api.put<ProductResponse>(`/api/v1/products/${id}`, data),
+    api.put<ProductResponse>(`/products/${id}`, data),
 
   delete: (id: number) =>
-    api.delete<void>(`/api/v1/products/${id}`),
+    api.delete<void>(`/products/${id}`),
 };

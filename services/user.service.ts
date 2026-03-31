@@ -5,23 +5,23 @@ import { CreateStaffRequest, PageResponse, RoleName, UserResponse } from "@/type
 
 export const userService = {
   list: (page = 0, size = 20) =>
-    api.get<PageResponse<UserResponse>>("/api/v1/users", { page, size }),
+    api.get<PageResponse<UserResponse>>("/users", { page, size }),
 
   getById: (id: number) =>
-    api.get<UserResponse>(`/api/v1/users/${id}`),
+    api.get<UserResponse>(`/users/${id}`),
 
   me: () =>
-    api.get<UserResponse>("/api/v1/users/me"),
+    api.get<UserResponse>("/users/me"),
 
   updateMe: (data: { fullName?: string; phone?: string }) =>
-    api.patch<UserResponse>("/api/v1/users/me", data),
+    api.patch<UserResponse>("/users/me", data),
 
   createStaff: (data: CreateStaffRequest) =>
-    api.post<UserResponse>("/api/v1/users/staff", data),
+    api.post<UserResponse>("/users/staff", data),
 
   changeRole: (id: number, role: RoleName) =>
-    api.patch<UserResponse>(`/api/v1/users/${id}/role`, { role }),
+    api.patch<UserResponse>(`/users/${id}/role`, { role }),
 
   resetPassword: (id: number, password: string) =>
-    api.patch<void>(`/api/v1/users/${id}/reset-password`, { password }),
+    api.patch<void>(`/users/${id}/reset-password`, { password }),
 };

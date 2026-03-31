@@ -5,27 +5,27 @@ import { OrderResponse, OrderStatus, PageResponse, PlaceOrderRequest } from "@/t
 
 export const orderService = {
   place: (data: PlaceOrderRequest) =>
-    api.post<OrderResponse>("/api/v1/orders", data),
+    api.post<OrderResponse>("/orders", data),
 
   myOrders: (page = 0, size = 10) =>
-    api.get<PageResponse<OrderResponse>>("/api/v1/orders/my", { page, size }),
+    api.get<PageResponse<OrderResponse>>("/orders/my", { page, size }),
 
   getByBranch: (branchId: number, status?: OrderStatus, page = 0, size = 20) =>
-    api.get<PageResponse<OrderResponse>>(`/api/v1/orders/branch/${branchId}`, {
+    api.get<PageResponse<OrderResponse>>(`/orders/branch/${branchId}`, {
       status,
       page,
       size,
     }),
 
   getById: (id: number) =>
-    api.get<OrderResponse>(`/api/v1/orders/${id}`),
+    api.get<OrderResponse>(`/orders/${id}`),
 
   confirm: (id: number) =>
-    api.patch<OrderResponse>(`/api/v1/orders/${id}/confirm`),
+    api.patch<OrderResponse>(`/orders/${id}/confirm`),
 
   deliver: (id: number) =>
-    api.patch<OrderResponse>(`/api/v1/orders/${id}/deliver`),
+    api.patch<OrderResponse>(`/orders/${id}/deliver`),
 
   cancel: (id: number) =>
-    api.patch<OrderResponse>(`/api/v1/orders/${id}/cancel`),
+    api.patch<OrderResponse>(`/orders/${id}/cancel`),
 };
