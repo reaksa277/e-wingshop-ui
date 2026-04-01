@@ -22,6 +22,16 @@ export function useInventoryByBranch(branchId: number, page = 0, size = 50) {
   });
 }
 
+// ── List all inventory ────────────────────────────────────────────────────────
+
+export function useListAllInventory(page = 0, size = 20, branchId?: number) {
+  return useQuery({
+    queryKey: queryKeys.inventory.all(page, size, branchId),
+    queryFn:  () => inventoryService.listAll(page, size, branchId),
+    staleTime: 30 * 1000,
+  });
+}
+
 // ── Low stock ─────────────────────────────────────────────────────────────────
 
 export function useLowStock(branchId?: number) {
@@ -63,6 +73,7 @@ export function useUpsertInventory() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.inventory.byBranch(vars.branchId),
       });
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.all() });
       queryClient.invalidateQueries({ queryKey: ["inventory", "low-stock"] });
       queryClient.invalidateQueries({ queryKey: ["inventory", "expiring-soon"] });
     },
@@ -79,6 +90,7 @@ export function useAdjustStock() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.inventory.byBranch(vars.branchId),
       });
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.all() });
       queryClient.invalidateQueries({ queryKey: ["inventory", "low-stock"] });
     },
   });
@@ -97,6 +109,7 @@ export function useTransferStock() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.inventory.byBranch(vars.toBranchId),
       });
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.all() });
       queryClient.invalidateQueries({ queryKey: ["inventory", "low-stock"] });
     },
   });

@@ -12,15 +12,22 @@ import {
 export const inventoryService = {
   getByBranch: (branchId: number, page = 0, size = 50) =>
     api.get<PageResponse<InventoryResponse>>(
-      `/api/v1/inventory/branch/${branchId}`,
+      `/inventory/branch/${branchId}`,
       { page, size }
     ),
 
+  listAll: (page = 0, size = 20, branchId?: number) =>
+    api.get<PageResponse<InventoryResponse>>("/inventory", {
+      page,
+      size,
+      ...(branchId && { branchId }),
+    }),
+
   upsert: (data: InventoryRequest) =>
-    api.post<InventoryResponse>("/api/v1/inventory", data),
+    api.post<InventoryResponse>("/inventory", data),
 
   adjust: ({ branchId, productId, delta, reason }: AdjustStockParams) =>
-    api.patch<InventoryResponse>("/api/v1/inventory/adjust", undefined, {
+    api.patch<InventoryResponse>("/inventory/adjust", undefined, {
       branchId,
       productId,
       delta,
@@ -28,7 +35,7 @@ export const inventoryService = {
     }),
 
   transfer: ({ fromBranchId, toBranchId, productId, quantity }: TransferStockParams) =>
-    api.post<void>("/api/v1/inventory/transfer", undefined, {
+    api.post<void>("/inventory/transfer", undefined, {
       fromBranchId,
       toBranchId,
       productId,
@@ -36,14 +43,14 @@ export const inventoryService = {
     } as any),
 
   getLowStock: (branchId?: number) =>
-    api.get<InventoryResponse[]>("/api/v1/inventory/low-stock", { branchId }),
+    api.get<InventoryResponse[]>("/inventory/low-stock", { branchId }),
 
   getExpiringSoon: (branchId?: number, daysAhead = 30) =>
-    api.get<InventoryResponse[]>("/api/v1/inventory/expiring-soon", {
+    api.get<InventoryResponse[]>("/inventory/expiring-soon", {
       branchId,
       daysAhead,
     }),
 
   getExpired: () =>
-    api.get<InventoryResponse[]>("/api/v1/inventory/expired"),
+    api.get<InventoryResponse[]>("/inventory/expired"),
 };
