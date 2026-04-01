@@ -1,19 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
-  getUsers,
-  getUserById,
-  createUser,
-  updateUser,
-  deleteUser,
-  getBranchesForUserForm,
-  type UserFormData,
-} from '@/app/actions/users';
+  useUsers,
+  useCreateStaff,
+  useChangeRole,
+  useResetPassword,
+} from '@/hooks/use-users';
+import { userService } from '@/services/user.service';
+import { RoleName, CreateStaffRequest } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -50,107 +48,113 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
-import { Plus, Search, Filter, Edit, Trash2, Download, User as UserIcon } from 'lucide-react';
-import { RoleGuard } from '@/components/dashboard/RoleGuard';
+import { Plus, Search, Edit, Trash2, Download, User as UserIcon, Loader2 } from 'lucide-react';
 import { formatRoleNameBadge, getRoleBadgeVariant } from '@/lib/role-utils';
 import Papa from 'papaparse';
 
 const userFormSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
+  fullName: z.string().min(1, 'Name is required'),
   email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters').optional(),
-  role: z.enum(['superadmin', 'manager', 'staff', 'viewer']),
-  branchId: z.string().optional().nullable(),
-  image: z.string().url('Invalid URL').optional().or(z.literal('')),
+  password: z
+    .string()
+    .min(6, 'Password must be at least 6 characters')
+    .optional()
+    .or(z.literal('')),
+  phone: z.string().optional().or(z.literal('')),
+  role: z.enum(['SUPERADMIN', 'MANAGER', 'STAFF']),
 });
 
 export default function UsersPage() {
   const [search, setSearch] = useState('');
-  const [role, setRole] = useState('all');
-  const [branchId, setBranchId] = useState('all');
-  const [page, setPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
 
-  const {
-    data: usersData,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ['users', search, role, branchId, page],
-    queryFn: () => getUsers(search, role, branchId, page),
-  });
+  const PAGE_SIZE = 20;
 
-  const { data: branchesData } = useQuery({
-    queryKey: ['branches-for-users'],
-    queryFn: () => getBranchesForUserForm(),
-  });
+  const { data: usersData, isLoading, refetch: refetchUsers } = useUsers(currentPage, PAGE_SIZE);
+  const createStaffMutation = useCreateStaff();
+  const changeRoleMutation = useChangeRole();
+  const resetPasswordMutation = useResetPassword();
 
-  const form = useForm({
-    resolver: zodResolver(userFormSchema) as any,
+  const form = useForm<z.infer<typeof userFormSchema>>({
+    resolver: zodResolver(userFormSchema),
     defaultValues: {
-      name: '',
+      fullName: '',
       email: '',
       password: '',
-      role: 'staff',
-      branchId: null,
-      image: '',
+      phone: '',
+      role: 'STAFF',
     },
   });
 
   useEffect(() => {
     if (editingUser) {
       form.reset({
-        name: editingUser.name,
+        fullName: editingUser.fullName,
         email: editingUser.email,
         password: '',
+        phone: editingUser.phone || '',
         role: editingUser.role,
-        branchId: editingUser.branchId,
-        image: editingUser.image || '',
       });
     } else {
       form.reset({
-        name: '',
+        fullName: '',
         email: '',
         password: '',
-        role: 'staff',
-        branchId: null,
-        image: '',
+        phone: '',
+        role: 'STAFF',
       });
     }
   }, [editingUser, form]);
 
-  const onSubmit = async (data: any) => {
-    if (editingUser) {
-      const result = await updateUser(editingUser.id, data);
-      if (result.success) {
+  const onSubmit = async (data: z.infer<typeof userFormSchema>) => {
+    try {
+      if (editingUser) {
+        // Update role if changed
+        if (data.role !== editingUser.role) {
+          await changeRoleMutation.mutateAsync({
+            id: editingUser.id,
+            role: data.role as RoleName,
+          });
+        }
+        // Reset password if provided
+        if (data.password) {
+          await resetPasswordMutation.mutateAsync({
+            id: editingUser.id,
+            password: data.password,
+          });
+        }
         toast.success('User updated successfully');
-        setIsDialogOpen(false);
-        setEditingUser(null);
-        refetch();
       } else {
-        toast.error(result.error || 'Failed to update user');
-      }
-    } else {
-      const result = await createUser(data);
-      if (result.success) {
+        // Create new staff member
+        const createData: CreateStaffRequest = {
+          fullName: data.fullName,
+          email: data.email,
+          password: data.password || '',
+          phone: data.phone,
+          role: data.role as RoleName,
+        };
+        await createStaffMutation.mutateAsync(createData);
         toast.success('User created successfully');
-        setIsDialogOpen(false);
-        refetch();
-      } else {
-        toast.error(result.error || 'Failed to create user');
       }
+      setIsDialogOpen(false);
+      setEditingUser(null);
+      refetchUsers();
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to save user');
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (userId: number) => {
     if (!confirm('Are you sure you want to delete this user?')) return;
-    const result = await deleteUser(id);
-    if (result.success) {
+    try {
+      // Delete user - you may need to add this method to userService
+      await userService.deleteUser(userId);
       toast.success('User deleted successfully');
-      refetch();
-    } else {
-      toast.error(result.error || 'Failed to delete user');
+      refetchUsers();
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to delete user');
     }
   };
 
@@ -160,20 +164,20 @@ export default function UsersPage() {
   };
 
   const handleExport = () => {
-    if (!usersData?.data?.users) return;
+    if (!usersData?.content?.length) return;
     const csv = Papa.unparse(
-      usersData.data.users.map((u: any) => ({
-        Name: u.name,
+      usersData.content.map((u: any) => ({
+        Name: u.fullName,
         Email: u.email,
         Role: u.role,
-        Branch: u.branchId || 'N/A',
+        Phone: u.phone || 'N/A',
       }))
     );
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'users.csv';
+    a.download = `users-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success('Users exported successfully');
@@ -191,14 +195,13 @@ export default function UsersPage() {
             <Download className="mr-2 h-4 w-4" />
             Export CSV
           </Button>
-          <RoleGuard permission="manage_users">
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button onClick={() => setEditingUser(null)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add User
-                </Button>
-              </DialogTrigger>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger>
+              <Button onClick={() => setEditingUser(null)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add User
+              </Button>
+            </DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>{editingUser ? 'Edit User' : 'Add New User'}</DialogTitle>
@@ -208,10 +211,10 @@ export default function UsersPage() {
                     <div className="grid grid-cols-2 gap-4">
                       <FormField
                         control={form.control}
-                        name="name"
+                        name="fullName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Name</FormLabel>
+                            <FormLabel>Full Name</FormLabel>
                             <FormControl>
                               <Input {...field} placeholder="John Doe" />
                             </FormControl>
@@ -260,72 +263,40 @@ export default function UsersPage() {
                       />
                       <FormField
                         control={form.control}
-                        name="role"
+                        name="phone"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Role</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select role" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="superadmin">Super Admin</SelectItem>
-                                <SelectItem value="manager">Manager</SelectItem>
-                                <SelectItem value="staff">Staff</SelectItem>
-                                <SelectItem value="viewer">Viewer</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="branchId"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Branch</FormLabel>
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value || ''}
-                              value={field.value || ''}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select branch" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="none">No Branch</SelectItem>
-                                {branchesData?.data?.map((branch: any) => (
-                                  <SelectItem key={branch.id} value={branch.id}>
-                                    {branch.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="image"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Avatar URL (optional)</FormLabel>
+                            <FormLabel>Phone (optional)</FormLabel>
                             <FormControl>
-                              <Input {...field} placeholder="https://..." />
+                              <Input {...field} placeholder="+1 (555) 123-4567" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
                     </div>
+                    <FormField
+                      control={form.control}
+                      name="role"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Role</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select role" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="SUPERADMIN">Super Admin</SelectItem>
+                              <SelectItem value="MANAGER">Manager</SelectItem>
+                              <SelectItem value="STAFF">Staff</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     <div className="flex justify-end gap-2">
                       <Button
                         type="button"
@@ -334,13 +305,32 @@ export default function UsersPage() {
                       >
                         Cancel
                       </Button>
-                      <Button type="submit">{editingUser ? 'Update' : 'Create'}</Button>
+                      <Button 
+                        type="submit"
+                        disabled={
+                          createStaffMutation.isPending ||
+                          changeRoleMutation.isPending ||
+                          resetPasswordMutation.isPending
+                        }
+                      >
+                        {createStaffMutation.isPending ||
+                        changeRoleMutation.isPending ||
+                        resetPasswordMutation.isPending ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Saving...
+                          </>
+                        ) : editingUser ? (
+                          'Update'
+                        ) : (
+                          'Create'
+                        )}
+                      </Button>
                     </div>
                   </form>
                 </Form>
               </DialogContent>
             </Dialog>
-          </RoleGuard>
         </div>
       </div>
 
@@ -352,39 +342,16 @@ export default function UsersPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search users..."
+                  placeholder="Search by name or email..."
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setCurrentPage(0);
+                  }}
                   className="pl-10"
                 />
               </div>
             </div>
-            <Select value={role} onValueChange={setRole}>
-              <SelectTrigger className="w-45">
-                <Filter className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Roles</SelectItem>
-                <SelectItem value="superadmin">Super Admin</SelectItem>
-                <SelectItem value="manager">Manager</SelectItem>
-                <SelectItem value="staff">Staff</SelectItem>
-                <SelectItem value="viewer">Viewer</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={branchId} onValueChange={setBranchId}>
-              <SelectTrigger className="w-45">
-                <SelectValue placeholder="Branch" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Branches</SelectItem>
-                {branchesData?.data?.map((branch: any) => (
-                  <SelectItem key={branch.id} value={branch.id}>
-                    {branch.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
         </CardContent>
       </Card>
@@ -397,8 +364,8 @@ export default function UsersPage() {
               <TableRow>
                 <TableHead>User</TableHead>
                 <TableHead>Email</TableHead>
+                <TableHead>Phone</TableHead>
                 <TableHead>Role</TableHead>
-                <TableHead>Branch</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -406,59 +373,65 @@ export default function UsersPage() {
               {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-8">
-                    Loading...
+                    <div className="flex items-center justify-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Loading users...
+                    </div>
                   </TableCell>
                 </TableRow>
-              ) : usersData?.data?.users?.length === 0 ? (
+              ) : !usersData?.content || usersData.content.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-8">
-                    No users found
+                    <div className="text-muted-foreground">
+                      <UserIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      No users found
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : (
-                usersData?.data?.users?.map((user: any) => (
+                usersData.content.map((user: any) => (
                   <TableRow key={user.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar className="h-9 w-9">
-                          <AvatarImage src={user.image} alt={user.name} />
                           <AvatarFallback>
-                            <UserIcon className="h-4 w-4" />
+                            {user.fullName
+                              .split(' ')
+                              .map((n: string) => n[0])
+                              .join('')
+                              .toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
-                        <span className="font-medium">{user.name}</span>
+                        <span className="font-medium">{user.fullName}</span>
                       </div>
                     </TableCell>
-                    <TableCell>{user.email}</TableCell>
+                    <TableCell className="text-muted-foreground">{user.email}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {user.phone || '-'}
+                    </TableCell>
                     <TableCell>
                       <Badge variant={getRoleBadgeVariant(user.role)}>
                         {formatRoleNameBadge(user.role)}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      {user.branchId ? (
-                        <Badge variant="outline">
-                          {branchesData?.data?.find((b: any) => b.id === user.branchId)?.name ||
-                            user.branchId}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground">No Branch</span>
-                      )}
-                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <RoleGuard permission="manage_users">
-                          <Button variant="ghost" size="icon" onClick={() => handleEdit(user)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDelete(user.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </RoleGuard>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEdit(user)}
+                          title="Edit user"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDelete(user.id)}
+                          title="Delete user"
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -470,25 +443,32 @@ export default function UsersPage() {
       </Card>
 
       {/* Pagination */}
-      {usersData?.data && usersData.data.totalPages > 1 && (
-        <div className="flex justify-center gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-          >
-            Previous
-          </Button>
-          <span className="flex items-center px-4">
-            Page {page} of {usersData.data.totalPages}
-          </span>
-          <Button
-            variant="outline"
-            onClick={() => setPage((p) => Math.min(usersData.data.totalPages, p + 1))}
-            disabled={page === usersData.data.totalPages}
-          >
-            Next
-          </Button>
+      {usersData && usersData.totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            Showing {usersData.content.length} of {usersData.totalElements} users
+          </p>
+          <div className="flex justify-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
+              disabled={currentPage === 0}
+            >
+              Previous
+            </Button>
+            <span className="flex items-center px-4 text-sm">
+              Page {currentPage + 1} of {usersData.totalPages}
+            </span>
+            <Button
+              variant="outline"
+              onClick={() =>
+                setCurrentPage((p) => Math.min(usersData.totalPages - 1, p + 1))
+              }
+              disabled={currentPage >= usersData.totalPages - 1}
+            >
+              Next
+            </Button>
+          </div>
         </div>
       )}
     </div>

@@ -24,4 +24,7 @@ export const userService = {
 
   resetPassword: (id: number, password: string) =>
     api.patch<void>(`/users/${id}/reset-password`, { password }),
+
+  deleteUser: (id: number) =>
+    api.delete<void>(`/users/${id}`),
 };
