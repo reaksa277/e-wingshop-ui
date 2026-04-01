@@ -10,6 +10,7 @@ export interface ProductSearchParams {
   keyword?:    string;
   page?:       number;
   size?:       number;
+  [key: string]: string | number | boolean | undefined | null;
 }
 
 export const productService = {

@@ -5,7 +5,7 @@
 
 // ── Enums ────────────────────────────────────────────────────────────────────
 
-export type RoleName    = "SUPERADMIN" | "ADMIN" | "STAFF";
+export type RoleName    = "SUPERADMIN" | "MANAGER" | "STAFF";
 export type OrderStatus = "PENDING" | "CONFIRMED" | "DELIVERED" | "CANCELLED";
 export type PaymentMethod = "CASH" | "QR";
 export type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "REFUNDED";
