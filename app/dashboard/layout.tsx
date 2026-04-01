@@ -1,31 +1,46 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import {
+  LayoutDashboard,
+  Package,
+  Store,
+  ClipboardList,
+  BarChart3,
+  Users,
+  BookOpen,
+  Settings,
+  LogOut,
+} from "lucide-react";
 
 import { useAuth } from "@/lib/auth-context";
 import { useLogout } from "@/hooks";
 import { clearAuth } from "@/lib/auth-helpers";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarInset,
+} from "@/components/ui/sidebar";
 
 // ── Nav items ─────────────────────────────────────────────────────────────────
 
 const NAV_ITEMS = [
-  { label: "Dashboard", href: "/dashboard", roles: ["OWNER", "ADMIN", "CUSTOMER"] },
-  { label: "Products", href: "/dashboard/products", roles: ["OWNER", "ADMIN", "CUSTOMER"] },
-  { label: "Branches", href: "/dashboard/branches", roles: ["OWNER", "ADMIN"] },
-  { label: "Inventory", href: "/dashboard/inventory", roles: ["OWNER", "ADMIN"] },
-  { label: "Orders", href: "/dashboard/orders", roles: ["OWNER", "ADMIN", "CUSTOMER"] },
-  { label: "Discounts", href: "/dashboard/discounts", roles: ["OWNER", "ADMIN"] },
-  { label: "Reports", href: "/dashboard/reports", roles: ["OWNER", "ADMIN"] },
-  { label: "Users", href: "/dashboard/users", roles: ["OWNER", "ADMIN"] },
-  { label: "Audit log", href: "/dashboard/audit", roles: ["OWNER", "ADMIN"] },
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: ["SUPERADMIN", "MANAGER", "STAFF"] },
+  { label: "Products", href: "/dashboard/products", icon: Package, roles: ["SUPERADMIN", "MANAGER", "STAFF"] },
+  { label: "Branches", href: "/dashboard/branches", icon: Store, roles: ["SUPERADMIN", "MANAGER"] },
+  { label: "Inventory", href: "/dashboard/inventory", icon: ClipboardList, roles: ["SUPERADMIN", "MANAGER"] },
+  { label: "Reports", href: "/dashboard/reports", icon: BarChart3, roles: ["SUPERADMIN", "MANAGER"] },
+  { label: "Users", href: "/dashboard/users", icon: Users, roles: ["SUPERADMIN", "MANAGER"] },
+  { label: "Audit log", href: "/dashboard/audit", icon: BookOpen, roles: ["SUPERADMIN", "MANAGER"] },
 ] as const;
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
@@ -61,70 +76,87 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   );
 
   return (
-    <div className="flex min-h-screen bg-muted/30">
-      {/* Sidebar */}
-      <aside className="hidden w-64 border-r bg-background md:flex md:flex-col">
-        <div className="flex h-16 items-center px-6">
-          <Link href="/dashboard" className="text-lg font-bold tracking-tight">
-            🛒 FreshMart
-          </Link>
+    <SidebarProvider>
+      <AppSidebar user={user} role={role ?? null} pathname={pathname} visibleNav={visibleNav} onLogout={handleLogout} logoutPending={logout.isPending} />
+      <SidebarInset>
+        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+          {children}
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
+  );
+}
+
+// ── Sidebar Component ─────────────────────────────────────────────────────────
+
+type NavItem = (typeof NAV_ITEMS)[number];
+
+interface AppSidebarProps {
+  user: any;
+  role: string | null;
+  pathname: string;
+  visibleNav: NavItem[];
+  onLogout: () => void;
+  logoutPending: boolean;
+}
+
+function AppSidebar({ user, role, pathname, visibleNav, onLogout, logoutPending }: AppSidebarProps) {
+  return (
+    <Sidebar>
+      <SidebarHeader className="flex items-center gap-2 py-4">
+        <div className="flex items-center gap-2 font-bold text-lg tracking-tight">
+          🛒 FreshMart
         </div>
+      </SidebarHeader>
 
-        <Separator />
+      <SidebarContent>
+        <SidebarMenu>
+          {visibleNav.map((item) => {
+            const Icon = item.icon;
+            const isActive =
+              pathname === item.href ||
+              (item.href !== "/dashboard" && pathname.startsWith(item.href));
 
-        <ScrollArea className="flex-1">
-          <nav className="grid gap-1 p-3">
-            {visibleNav.map((item) => {
-              const isActive =
-                pathname === item.href ||
-                (item.href !== "/dashboard" && pathname.startsWith(item.href));
-
-              return (
-                <Button
-                  key={item.href}
-                  asChild
-                  variant={isActive ? "secondary" : "ghost"}
-                  className="justify-start"
+            return (
+              <SidebarMenuItem key={item.href}>
+                <SidebarMenuButton
+                  onClick={() => window.location.href = item.href}
+                  isActive={isActive}
+                  tooltip={item.label}
                 >
-                  <Link href={item.href}>{item.label}</Link>
-                </Button>
-              );
-            })}
-          </nav>
-        </ScrollArea>
+                  <Icon className="h-4 w-4" />
+                  <span>{item.label}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
+        </SidebarMenu>
+      </SidebarContent>
 
-        <Separator />
-
-        <div className="p-4">
-          <Card className="shadow-none">
-            <CardContent className="space-y-3 p-4">
-              <div>
-                <p className="text-sm font-medium">{user?.fullName}</p>
-                <p className="text-xs text-muted-foreground">Signed in</p>
-              </div>
-
-              <Badge variant="secondary" className="w-fit">
+      <SidebarFooter>
+        <div className="flex flex-col gap-3 border-t pt-4">
+          {user && (
+            <div className="flex flex-col gap-2">
+              <p className="text-sm font-medium">{user.fullName}</p>
+              <Badge variant="secondary" className="w-fit text-xs">
                 {role}
               </Badge>
-
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full"
-                onClick={handleLogout}
-                disabled={logout.isPending}
+            </div>
+          )}
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                onClick={onLogout}
+                disabled={logoutPending}
+                tooltip="Sign out"
               >
-                {logout.isPending ? "Signing out…" : "Sign out"}
-              </Button>
-            </CardContent>
-          </Card>
+                <LogOut className="h-4 w-4" />
+                <span>{logoutPending ? "Signing out…" : "Sign out"}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
         </div>
-      </aside>
-
-      {/* Main content */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-6">
-        {children}
-      </main>
-    </div>
+      </SidebarFooter>
+    </Sidebar>
   );
 }
