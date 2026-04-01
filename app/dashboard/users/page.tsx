@@ -300,7 +300,7 @@ export default function UsersPage() {
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                <SelectItem value="">No Branch</SelectItem>
+                                <SelectItem value="none">No Branch</SelectItem>
                                 {branchesData?.data?.map((branch: any) => (
                                   <SelectItem key={branch.id} value={branch.id}>
                                     {branch.name}

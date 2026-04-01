@@ -4,6 +4,7 @@ import './globals.css';
 import { ReactQueryProvider } from '@/components/providers/ReactQueryProvider';
 import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
+import { AuthProvider } from '@/lib/auth-context';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -30,8 +31,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <ReactQueryProvider>
-            {children}
-            <Toaster position="top-right" richColors />
+            <AuthProvider>
+              {children}
+              <Toaster position="top-right" richColors />
+            </AuthProvider>
           </ReactQueryProvider>
         </ThemeProvider>
       </body>

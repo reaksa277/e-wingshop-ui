@@ -1,206 +1,233 @@
-'use client';
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Package, Store, ShoppingCart, TrendingUp } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
-import { productService } from '@/services/product.service';
-import { orderService } from '@/services/order.service';
-import { branchService } from '@/services/branch.service';
-import { authService } from '@/services/auth.service';
-import { tokenStore } from '@/lib/api-client';
-import { useEffect, useState } from 'react';
+import Link from "next/link";
+import { useLowStock, useExpiringSoon, useReportSummary, useActiveDiscounts } from "@/hooks";
+import { useAuth } from "@/lib/auth-context";
 
-export default function DashboardPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
-  useEffect(() => {
-    setIsAuthenticated(!!tokenStore.getAccess());
-  }, []);
+// Last 30 days
+const today = () => new Date().toISOString().split("T")[0];
+const daysAgo = (n: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d.toISOString().split("T")[0];
+};
 
-  // Fetch current user
-  const { data: userData } = useQuery({
-    queryKey: ['user', 'me'],
-    queryFn: () => authService.me(),
-    enabled: isAuthenticated,
-    staleTime: 5 * 60 * 1000,
-  });
+export default function DashboardHome() {
+  const { user, canManage } = useAuth();
 
-  // Fetch products count
-  const { data: productsData, isLoading: productsLoading } = useQuery({
-    queryKey: ['products', 'count'],
-    queryFn: async () => {
-      const data = await productService.search({ page: 0, size: 1 });
-      return data;
-    },
-    enabled: isAuthenticated,
-  });
-
-  // Fetch branches
-  const { data: branchesData, isLoading: branchesLoading } = useQuery({
-    queryKey: ['branches'],
-    queryFn: () => branchService.getAll(),
-    enabled: isAuthenticated,
-  });
-
-  // Fetch recent orders
-  const { data: ordersData, isLoading: ordersLoading } = useQuery({
-    queryKey: ['orders', 'recent'],
-    queryFn: async () => {
-      return orderService.myOrders(0, 5);
-    },
-    enabled: isAuthenticated,
-  });
-
-  // Fetch alerts count from server action
-//   const { data: alertsData, isLoading: alertsLoading } = useQuery({
-//     queryKey: ['alerts', 'count'],
-//     queryFn: async () => {
-//       const result = await getExpiryAlertsCount();
-//       return result.success ? { count: result.count } : { count: 0 };
-//     },
-//     enabled: !!session,
-//     refetchInterval: 60000, // Refetch every minute
-//   });
-
-  // Prepare stats
-  const stats = [
-    {
-      title: 'Total Products',
-      value: productsLoading ? '-' : productsData?.totalElements || 0,
-      icon: Package,
-      description: 'Active products',
-    },
-    {
-      title: 'Branches',
-      value: branchesLoading ? '-' : branchesData?.length || 0,
-      icon: Store,
-      description: 'Active locations',
-    },
-    {
-      title: 'Total Orders',
-      value: ordersLoading ? '-' : ordersData?.totalElements || 0,
-      icon: ShoppingCart,
-      description: 'All time orders',
-    },
-  ];
-
-  const recentOrders = ordersData?.content || [];
+  const { data: summary } = useReportSummary({ from: daysAgo(30), to: today() });
+  const { data: lowStock } = useLowStock();
+  const { data: expiring } = useExpiringSoon(undefined, 7);
+  const { data: discounts } = useActiveDiscounts(undefined, 0, 5);
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Welcome back, {userData?.fullName || 'User'}!</h1>
-        <p className="text-muted-foreground">Here&apos;s what&apos;s happening with your business today.</p>
+        <h1 className="text-3xl font-bold tracking-tight">
+          Welcome back, {user?.fullName} 👋
+        </h1>
+        <p className="mt-1 text-muted-foreground">
+          {`Here's what's happening across all branches today.`}
+        </p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={stat.title}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-                <Icon className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground">{stat.description}</p>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+      {/* KPI row — admin/owner only */}
+      {canManage && summary && (
+        <div className="grid gap-4 md:grid-cols-3">
+          <KpiCard
+            label="Revenue (30d)"
+            value={`$${Number(summary.totalRevenue).toFixed(2)}`}
+          />
+          <KpiCard
+            label="Orders (30d)"
+            value={String(summary.totalOrders)}
+          />
+          <KpiCard
+            label="Avg order value"
+            value={`$${Number(summary.averageOrderValue).toFixed(2)}`}
+          />
+        </div>
+      )}
 
-      {/* Recent Orders */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Orders</CardTitle>
-          <CardDescription>Latest orders across all branches</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {ordersLoading ? (
-              <div className="flex h-32 items-center justify-center">
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-              </div>
-            ) : recentOrders.length === 0 ? (
-              <p className="text-center text-muted-foreground py-4">No orders yet</p>
-            ) : (
-              recentOrders.map((order) => (
-                <div
-                  key={order.id}
-                  className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0"
-                >
-                  <div className="space-y-1">
-                    {/* <p className="font-medium">{order.orderNumber}</p> */}
-                    <p className="text-sm text-muted-foreground">
-                      {order.branch?.name || 'Branch'}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <Badge
-                      variant={
-                        order.status === 'DELIVERED'
-                          ? 'success'
-                          : order.status === 'CANCELLED'
-                            ? 'destructive'
-                            : order.status === 'CONFIRMED'
-                              ? 'warning'
-                              : 'default'
-                      }
-                    >
-                      {order.status}
-                    </Badge>
-                    <span className="font-medium">${order.totalAmount?.toFixed(2) || '0.00'}</span>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-          <Link
-            href="/dashboard/orders"
-            className="text-sm text-primary hover:underline mt-4 inline-block"
+      {/* Alert row */}
+      {canManage && (
+        <div className="grid gap-4 lg:grid-cols-2">
+          <AlertCard
+            title="⚠ Low stock items"
+            count={lowStock?.length ?? 0}
+            href="/dashboard/inventory?tab=low"
           >
-            View all orders →
-          </Link>
-        </CardContent>
-      </Card>
+            <div className="space-y-2">
+              {lowStock?.slice(0, 4).map((inv) => (
+                <div
+                  key={inv.id}
+                  className="border-b pb-2 text-sm last:border-b-0 last:pb-0"
+                >
+                  <span className="font-semibold">{inv.productName}</span>
+                  <span className="text-muted-foreground">
+                    {" "}
+                    — {inv.branchName}:{" "}
+                  </span>
+                  <span className="font-semibold text-amber-600">
+                    {inv.quantity}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {" "}
+                    left (threshold: {inv.lowStockThreshold})
+                  </span>
+                </div>
+              ))}
+            </div>
+          </AlertCard>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>Common tasks to get you started</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Link
-              href="/dashboard/products"
-              className="flex items-center gap-3 rounded-lg border p-4 hover:bg-muted/50 transition-colors"
-            >
-              <Package className="h-5 w-5" />
-              <span>Add New Product</span>
-            </Link>
-            <Link
-              href="/dashboard/orders"
-              className="flex items-center gap-3 rounded-lg border p-4 hover:bg-muted/50 transition-colors"
-            >
-              <ShoppingCart className="h-5 w-5" />
-              <span>Create Order</span>
-            </Link>
-            <Link
-              href="/dashboard/inventory"
-              className="flex items-center gap-3 rounded-lg border p-4 hover:bg-muted/50 transition-colors"
-            >
-              <TrendingUp className="h-5 w-5" />
-              <span>Check Inventory</span>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+          <AlertCard
+            title="⏰ Expiring within 7 days"
+            count={expiring?.length ?? 0}
+            href="/dashboard/inventory?tab=expiring"
+          >
+            <div className="space-y-2">
+              {expiring?.slice(0, 4).map((inv) => (
+                <div
+                  key={inv.id}
+                  className="border-b pb-2 text-sm last:border-b-0 last:pb-0"
+                >
+                  <span className="font-semibold">{inv.productName}</span>
+                  <span className="text-muted-foreground">
+                    {" "}
+                    — {inv.branchName}:{" "}
+                  </span>
+                  <span className="font-semibold text-red-600">
+                    {inv.daysUntilExpiry}d left
+                  </span>
+                  <span className="text-muted-foreground">
+                    {" "}
+                    ({inv.quantity} units)
+                  </span>
+                </div>
+              ))}
+            </div>
+          </AlertCard>
+        </div>
+      )}
+
+      {/* Active discounts snapshot */}
+      {canManage && discounts && discounts.totalElements > 0 && (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+            <div>
+              <CardTitle>🏷 Active discounts</CardTitle>
+              <CardDescription>
+                Current branch discounts and promotional pricing
+              </CardDescription>
+            </div>
+
+            <Button asChild variant="link" className="px-0">
+              <Link href="/dashboard/discounts">
+                View all ({discounts.totalElements}) →
+              </Link>
+            </Button>
+          </CardHeader>
+
+          <CardContent className="space-y-3">
+            {discounts.content.map((d) => (
+              <div
+                key={d.id}
+                className="flex flex-col justify-between gap-2 border-b pb-3 text-sm last:border-b-0 last:pb-0 sm:flex-row sm:items-center"
+              >
+                <span>
+                  <span className="font-semibold">{d.productName}</span>
+                  <span className="text-muted-foreground"> — {d.branchName}</span>
+                </span>
+
+                <span className="flex items-center gap-2">
+                  <span className="text-muted-foreground line-through">
+                    ${d.originalPrice.toFixed(2)}
+                  </span>
+                  <span className="font-semibold text-green-600">
+                    ${d.discountedPrice.toFixed(2)}
+                  </span>
+                  <Badge variant="destructive">-{d.discountPct}%</Badge>
+                </span>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Quick links */}
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        {[
+          { label: "Browse products", href: "/dashboard/products" },
+          { label: "Place an order", href: "/dashboard/orders/new" },
+          ...(canManage
+            ? [
+                { label: "Manage inventory", href: "/dashboard/inventory" },
+                { label: "Sales reports", href: "/dashboard/reports" },
+                { label: "Manage discounts", href: "/dashboard/discounts" },
+              ]
+            : []),
+        ].map((link) => (
+          <Button key={link.href} asChild variant="outline" className="h-12 w-full justify-center">
+            <Link href={link.href}>{link.label}</Link>
+          </Button>
+        ))}
+      </div>
     </div>
+  );
+}
+
+function KpiCard({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <Card>
+      <CardContent className="pt-6">
+        <div className="text-sm text-muted-foreground">{label}</div>
+        <div className="mt-2 text-3xl font-bold tracking-tight">{value}</div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function AlertCard({
+  title,
+  count,
+  href,
+  children,
+}: {
+  title: string;
+  count: number;
+  href: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0">
+        <CardTitle className="text-base">{title}</CardTitle>
+        <Badge variant={count === 0 ? "secondary" : "destructive"}>{count}</Badge>
+      </CardHeader>
+
+      <CardContent>
+        {count === 0 ? (
+          <p className="text-sm text-muted-foreground">No issues right now 🎉</p>
+        ) : (
+          children
+        )}
+
+        {count > 4 && (
+          <Button asChild variant="link" className="mt-3 h-auto p-0">
+            <Link href={href}>View all {count} →</Link>
+          </Button>
+        )}
+      </CardContent>
+    </Card>
   );
 }
