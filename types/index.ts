@@ -112,6 +112,7 @@ export interface CategoryRequest {
 // ── Products ──────────────────────────────────────────────────────────────────
 
 export interface ProductResponse {
+  updatedAt: string;
   id:           number;
   name:         string;
   description?: string;

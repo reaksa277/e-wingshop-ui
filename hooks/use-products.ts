@@ -2,10 +2,10 @@
 // hooks/use-products.ts
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query";
 import { productService, ProductSearchParams } from "@/services/product.service";
 import { queryKeys } from "@/lib/query-keys";
-import { ProductRequest } from "@/types";
+import { ProductRequest, ProductResponse } from "@/types";
 
 // ── List / search ─────────────────────────────────────────────────────────────
 
@@ -19,7 +19,7 @@ export function useProducts(params?: ProductSearchParams) {
 
 // ── Single product ────────────────────────────────────────────────────────────
 
-export function useProduct(id: number) {
+export function useProduct(id: number): UseQueryResult<ProductResponse | undefined> {
   return useQuery({
     queryKey: queryKeys.products.detail(id),
     queryFn:  () => productService.getById(id),

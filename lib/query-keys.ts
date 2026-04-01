@@ -42,6 +42,8 @@ export const queryKeys = {
 
   // ── Inventory ─────────────────────────────────────────────────────────────
   inventory: {
+    all:           (page?: number, size?: number, branchId?: number) =>
+      ["inventory", "all", { page, size, branchId }] as const,
     byBranch:      (branchId: number, page?: number, size?: number) =>
       ["inventory", "branch", branchId, { page, size }] as const,
     lowStock:      (branchId?: number) => ["inventory", "low-stock", { branchId }] as const,
