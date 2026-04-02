@@ -13,7 +13,11 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useAlertsByCategory, useMarkAlertAsRead, useMarkAllAlertsAsRead } from '@/hooks/use-alerts';
+import {
+  useAlertsByCategory,
+  useMarkAlertAsRead,
+  useMarkAllAlertsAsRead,
+} from '@/hooks/use-alerts';
 import { getRelativeTime } from '@/lib/utils';
 
 export function DashboardHeader() {
@@ -171,7 +175,8 @@ export function DashboardHeader() {
                             {alert.category === 'EXPIRED' && 'Expired'}
                           </Badge>
                           <span className="text-muted-foreground">
-                            {new Date(alert.expiryDate).toLocaleDateString()} • {alert.daysRemaining || 0}d
+                            {new Date(alert.expiryDate).toLocaleDateString()} •{' '}
+                            {alert.daysRemaining || 0}d
                           </span>
                         </div>
                       </div>

@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useEffect, type ReactNode } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useEffect, type ReactNode } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   Package,
@@ -12,15 +12,15 @@ import {
   BookOpen,
   LogOut,
   Percent,
-} from "lucide-react";
+} from 'lucide-react';
 
-import { useAuth } from "@/lib/auth-context";
-import { useLogout } from "@/hooks";
-import { clearAuth } from "@/lib/auth-helpers";
-import { DashboardHeader } from "@/components/dashboard/Header";
+import { useAuth } from '@/lib/auth-context';
+import { useLogout } from '@/hooks';
+import { clearAuth } from '@/lib/auth-helpers';
+import { DashboardHeader } from '@/components/dashboard/Header';
 
-import { Badge } from "@/components/ui/badge";
-import type { UserResponse } from "@/types";
+import { Badge } from '@/components/ui/badge';
+import type { UserResponse } from '@/types';
 import {
   Sidebar,
   SidebarContent,
@@ -31,20 +31,55 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarInset,
-} from "@/components/ui/sidebar";
+} from '@/components/ui/sidebar';
 
 // ── Nav items ─────────────────────────────────────────────────────────────────
 
 const NAV_ITEMS = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: ["SUPERADMIN", "MANAGER", "STAFF"] },
-  { label: "Categories", href: "/dashboard/categories", icon: Package, roles: ["SUPERADMIN", "MANAGER"] },
-  { label: "Products", href: "/dashboard/products", icon: Package, roles: ["SUPERADMIN", "MANAGER", "STAFF"] },
-  { label: "Branches", href: "/dashboard/branches", icon: Store, roles: ["SUPERADMIN", "MANAGER"] },
-  { label: "Inventory", href: "/dashboard/inventory", icon: ClipboardList, roles: ["SUPERADMIN", "MANAGER"] },
-  { label: "Discounts", href: "/dashboard/discounts", icon: Percent, roles: ["SUPERADMIN", "MANAGER"] },
-  { label: "Reports", href: "/dashboard/reports", icon: BarChart3, roles: ["SUPERADMIN", "MANAGER"] },
-  { label: "Users", href: "/dashboard/users", icon: Users, roles: ["SUPERADMIN", "MANAGER"] },
-  { label: "Audit log", href: "/dashboard/audit", icon: BookOpen, roles: ["SUPERADMIN", "MANAGER"] },
+  {
+    label: 'Dashboard',
+    href: '/dashboard',
+    icon: LayoutDashboard,
+    roles: ['SUPERADMIN', 'MANAGER', 'STAFF'],
+  },
+  {
+    label: 'Categories',
+    href: '/dashboard/categories',
+    icon: Package,
+    roles: ['SUPERADMIN', 'MANAGER'],
+  },
+  {
+    label: 'Products',
+    href: '/dashboard/products',
+    icon: Package,
+    roles: ['SUPERADMIN', 'MANAGER', 'STAFF'],
+  },
+  { label: 'Branches', href: '/dashboard/branches', icon: Store, roles: ['SUPERADMIN', 'MANAGER'] },
+  {
+    label: 'Inventory',
+    href: '/dashboard/inventory',
+    icon: ClipboardList,
+    roles: ['SUPERADMIN', 'MANAGER'],
+  },
+  {
+    label: 'Discounts',
+    href: '/dashboard/discounts',
+    icon: Percent,
+    roles: ['SUPERADMIN', 'MANAGER'],
+  },
+  {
+    label: 'Reports',
+    href: '/dashboard/reports',
+    icon: BarChart3,
+    roles: ['SUPERADMIN', 'MANAGER'],
+  },
+  { label: 'Users', href: '/dashboard/users', icon: Users, roles: ['SUPERADMIN', 'MANAGER'] },
+  {
+    label: 'Audit log',
+    href: '/dashboard/audit',
+    icon: BookOpen,
+    roles: ['SUPERADMIN', 'MANAGER'],
+  },
 ] as const;
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
@@ -55,14 +90,14 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!isLoading && !isLoggedIn) {
-      router.replace("/login");
+      router.replace('/login');
     }
   }, [isLoading, isLoggedIn, router]);
 
   async function handleLogout() {
     await logout.mutateAsync();
     clearAuth();
-    router.push("/login");
+    router.push('/login');
   }
 
   if (isLoading) {
@@ -81,12 +116,17 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   return (
     <SidebarProvider>
-      <AppSidebar user={user} role={role ?? null} pathname={pathname} visibleNav={visibleNav} onLogout={handleLogout} logoutPending={logout.isPending} />
+      <AppSidebar
+        user={user}
+        role={role ?? null}
+        pathname={pathname}
+        visibleNav={visibleNav}
+        onLogout={handleLogout}
+        logoutPending={logout.isPending}
+      />
       <SidebarInset>
         <DashboardHeader />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );
@@ -105,13 +145,18 @@ interface AppSidebarProps {
   logoutPending: boolean;
 }
 
-function AppSidebar({ user, role, pathname, visibleNav, onLogout, logoutPending }: AppSidebarProps) {
+function AppSidebar({
+  user,
+  role,
+  pathname,
+  visibleNav,
+  onLogout,
+  logoutPending,
+}: AppSidebarProps) {
   return (
     <Sidebar>
       <SidebarHeader className="flex items-center gap-2 py-4">
-        <div className="flex items-center gap-2 font-bold text-lg tracking-tight">
-          🛒 FreshMart
-        </div>
+        <div className="flex items-center gap-2 font-bold text-lg tracking-tight">🛒 FreshMart</div>
       </SidebarHeader>
 
       <SidebarContent>
@@ -120,12 +165,12 @@ function AppSidebar({ user, role, pathname, visibleNav, onLogout, logoutPending 
             const Icon = item.icon;
             const isActive =
               pathname === item.href ||
-              (item.href !== "/dashboard" && pathname.startsWith(item.href));
+              (item.href !== '/dashboard' && pathname.startsWith(item.href));
 
             return (
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
-                  onClick={() => window.location.href = item.href}
+                  onClick={() => (window.location.href = item.href)}
                   isActive={isActive}
                   tooltip={item.label}
                 >
@@ -150,13 +195,9 @@ function AppSidebar({ user, role, pathname, visibleNav, onLogout, logoutPending 
           )}
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton
-                onClick={onLogout}
-                disabled={logoutPending}
-                tooltip="Sign out"
-              >
+              <SidebarMenuButton onClick={onLogout} disabled={logoutPending} tooltip="Sign out">
                 <LogOut className="h-4 w-4" />
-                <span>{logoutPending ? "Signing out…" : "Sign out"}</span>
+                <span>{logoutPending ? 'Signing out…' : 'Sign out'}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

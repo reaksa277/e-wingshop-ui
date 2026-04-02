@@ -30,7 +30,12 @@ import { DataTable } from '@/components/ui/data-table';
 import { authService } from '@/services/auth.service';
 import { tokenStore } from '@/lib/api-client';
 import type { BranchResponse, BranchRequest } from '@/types';
-import { useBranches, useCreateBranch, useUpdateBranch, useDeleteBranch } from '@/hooks/use-branches';
+import {
+  useBranches,
+  useCreateBranch,
+  useUpdateBranch,
+  useDeleteBranch,
+} from '@/hooks/use-branches';
 
 const branchFormSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -55,10 +60,7 @@ export default function BranchesPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBranch, setEditingBranch] = useState<BranchResponse | null>(null);
 
-  const {
-    data: branchesData,
-    isLoading,
-  } = useBranches();
+  const { data: branchesData, isLoading } = useBranches();
 
   const createBranchMutation = useCreateBranch();
   const updateBranchMutation = useUpdateBranch(editingBranch?.id || 0);
@@ -82,9 +84,7 @@ export default function BranchesPage() {
     {
       accessorKey: 'name',
       header: 'Name',
-      cell: ({ row }) => (
-        <span className="font-medium">{row.getValue('name')}</span>
-      ),
+      cell: ({ row }) => <span className="font-medium">{row.getValue('name')}</span>,
     },
     {
       accessorKey: 'address',
@@ -122,11 +122,7 @@ export default function BranchesPage() {
             <Button variant="ghost" size="icon" onClick={() => handleEdit(branch)}>
               <Edit className="h-4 w-4" />
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handleDelete(branch.id)}
-            >
+            <Button variant="ghost" size="icon" onClick={() => handleDelete(branch.id)}>
               <Trash2 className="h-4 w-4 text-destructive" />
             </Button>
           </div>

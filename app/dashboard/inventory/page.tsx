@@ -1,19 +1,6 @@
 "use client";
 
-<<<<<<< HEAD
-import { useState, useEffect } from "react";
-import { 
-  useInventoryByBranch, 
-  useListAllInventory,
-  useLowStock, 
-  useExpiringSoon, 
-  useExpiredInventory, 
-  useAdjustStock, 
-  useTransferStock, 
-  useBranches,
-  useMe
-=======
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { type ColumnDef } from "@tanstack/react-table";
 import {
   useInventoryByBranch,
@@ -23,8 +10,8 @@ import {
   useExpiredInventory,
   useAdjustStock,
   useTransferStock,
-  useBranches
->>>>>>> 5f5db961e31b3e809010577b2a69b4471ca2c1af
+  useBranches,
+  useMe
 } from "@/hooks";
 
 // Shadcn UI Components

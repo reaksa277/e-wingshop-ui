@@ -2,20 +2,17 @@
 // hooks/use-discounts.ts
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { discountService } from "@/services/discount.service";
-import { queryKeys } from "@/lib/query-keys";
-import {
-  AutoApplyDiscountRequest,
-  CreateDiscountRequest,
-} from "@/types";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { discountService } from '@/services/discount.service';
+import { queryKeys } from '@/lib/query-keys';
+import { AutoApplyDiscountRequest, CreateDiscountRequest } from '@/types';
 
 // ── Active discounts (paginated, optional branch filter) ──────────────────────
 
 export function useActiveDiscounts(branchId?: number, page = 0, size = 20) {
   return useQuery({
     queryKey: queryKeys.discounts.active(branchId, page, size),
-    queryFn:  () => discountService.getActive(branchId, page, size),
+    queryFn: () => discountService.getActive(branchId, page, size),
     staleTime: 60 * 1000,
   });
 }
@@ -25,8 +22,8 @@ export function useActiveDiscounts(branchId?: number, page = 0, size = 20) {
 export function useDiscount(id: number) {
   return useQuery({
     queryKey: queryKeys.discounts.detail(id),
-    queryFn:  () => discountService.getById(id),
-    enabled:  !!id,
+    queryFn: () => discountService.getById(id),
+    enabled: !!id,
   });
 }
 
@@ -35,8 +32,8 @@ export function useDiscount(id: number) {
 export function useDiscountHistory(inventoryId: number) {
   return useQuery({
     queryKey: queryKeys.discounts.byInventory(inventoryId),
-    queryFn:  () => discountService.getByInventory(inventoryId),
-    enabled:  !!inventoryId,
+    queryFn: () => discountService.getByInventory(inventoryId),
+    enabled: !!inventoryId,
   });
 }
 
@@ -45,9 +42,9 @@ export function useDiscountHistory(inventoryId: number) {
 export function useActiveDiscountForInventory(inventoryId: number) {
   return useQuery({
     queryKey: queryKeys.discounts.activeInventory(inventoryId),
-    queryFn:  () => discountService.getActiveForInventory(inventoryId),
-    enabled:  !!inventoryId,
-    retry:    false,    // 204 No Content = no active discount, not an error
+    queryFn: () => discountService.getActiveForInventory(inventoryId),
+    enabled: !!inventoryId,
+    retry: false, // 204 No Content = no active discount, not an error
   });
 }
 
@@ -56,8 +53,8 @@ export function useActiveDiscountForInventory(inventoryId: number) {
 export function useDiscountTiers() {
   return useQuery({
     queryKey: queryKeys.discounts.tiers(),
-    queryFn:  discountService.getTiers,
-    staleTime: Infinity,   // tiers never change at runtime
+    queryFn: discountService.getTiers,
+    staleTime: Infinity, // tiers never change at runtime
   });
 }
 
@@ -70,12 +67,9 @@ export function useCreateDiscount() {
     mutationFn: (data: CreateDiscountRequest) => discountService.create(data),
     onSuccess: (created) => {
       // Invalidate the active list for that branch
-      queryClient.invalidateQueries({ queryKey: ["discounts", "active"] });
+      queryClient.invalidateQueries({ queryKey: ['discounts', 'active'] });
       // Update the specific inventory's active discount cache
-      queryClient.setQueryData(
-        queryKeys.discounts.activeInventory(created.inventoryId),
-        created
-      );
+      queryClient.setQueryData(queryKeys.discounts.activeInventory(created.inventoryId), created);
       // Invalidate history for that inventory
       queryClient.invalidateQueries({
         queryKey: queryKeys.discounts.byInventory(created.inventoryId),
@@ -93,8 +87,8 @@ export function useAutoApplyDiscounts() {
     mutationFn: (data: AutoApplyDiscountRequest) => discountService.autoApply(data),
     onSuccess: () => {
       // Broad invalidation — multiple inventory records may now have discounts
-      queryClient.invalidateQueries({ queryKey: ["discounts"] });
-      queryClient.invalidateQueries({ queryKey: ["inventory"] });
+      queryClient.invalidateQueries({ queryKey: ['discounts'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory'] });
     },
   });
 }
@@ -109,7 +103,7 @@ export function useRevokeDiscount() {
       discountService.revoke(id, reason),
     onSuccess: (revoked) => {
       queryClient.setQueryData(queryKeys.discounts.detail(revoked.id), revoked);
-      queryClient.invalidateQueries({ queryKey: ["discounts", "active"] });
+      queryClient.invalidateQueries({ queryKey: ['discounts', 'active'] });
       queryClient.invalidateQueries({
         queryKey: queryKeys.discounts.activeInventory(revoked.inventoryId),
       });

@@ -102,17 +102,27 @@ export const alertService = {
       ]);
 
       // Categorize alerts
-      const oneMonth = this._convertToAlerts(expiring30Days.filter(i => (i.daysUntilExpiry || 0) > 14), 'EXPIRING')
-        .map(a => ({ ...a, category: 'ONE_MONTH' as ExpiryCategory }));
-      
-      const twoWeeks = this._convertToAlerts(expiring14Days.filter(i => (i.daysUntilExpiry || 0) > 7 && (i.daysUntilExpiry || 0) <= 14), 'EXPIRING')
-        .map(a => ({ ...a, category: 'TWO_WEEKS' as ExpiryCategory }));
-      
-      const oneWeek = this._convertToAlerts(expiring7Days.filter(i => (i.daysUntilExpiry || 0) > 0 && (i.daysUntilExpiry || 0) <= 7), 'EXPIRING')
-        .map(a => ({ ...a, category: 'ONE_WEEK' as ExpiryCategory }));
-      
-      const expiredAlerts = this._convertToAlerts(expired, 'EXPIRED')
-        .map(a => ({ ...a, category: 'EXPIRED' as ExpiryCategory }));
+      const oneMonth = this._convertToAlerts(
+        expiring30Days.filter((i) => (i.daysUntilExpiry || 0) > 14),
+        'EXPIRING'
+      ).map((a) => ({ ...a, category: 'ONE_MONTH' as ExpiryCategory }));
+
+      const twoWeeks = this._convertToAlerts(
+        expiring14Days.filter(
+          (i) => (i.daysUntilExpiry || 0) > 7 && (i.daysUntilExpiry || 0) <= 14
+        ),
+        'EXPIRING'
+      ).map((a) => ({ ...a, category: 'TWO_WEEKS' as ExpiryCategory }));
+
+      const oneWeek = this._convertToAlerts(
+        expiring7Days.filter((i) => (i.daysUntilExpiry || 0) > 0 && (i.daysUntilExpiry || 0) <= 7),
+        'EXPIRING'
+      ).map((a) => ({ ...a, category: 'ONE_WEEK' as ExpiryCategory }));
+
+      const expiredAlerts = this._convertToAlerts(expired, 'EXPIRED').map((a) => ({
+        ...a,
+        category: 'EXPIRED' as ExpiryCategory,
+      }));
 
       return {
         oneMonth,
@@ -244,7 +254,7 @@ export const alertService = {
     return (items || []).map((item, index) => {
       const daysRemaining = item.daysUntilExpiry || 0;
       let category: ExpiryCategory = 'ONE_MONTH';
-      
+
       if (daysRemaining <= 0) {
         category = 'EXPIRED';
       } else if (daysRemaining <= 7) {

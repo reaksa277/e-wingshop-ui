@@ -1,6 +1,6 @@
 /**
  * Example: Categories Management Component
- * 
+ *
  * This demonstrates how to use the Spring Boot API client
  * with React Query for data fetching, caching, and mutations.
  */
@@ -113,8 +113,7 @@ export default function CategoriesExample() {
 
   // Mutation: Update category
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: CategoryFormData }) =>
-      updateCategory(id, data),
+    mutationFn: ({ id, data }: { id: string; data: CategoryFormData }) => updateCategory(id, data),
     onSuccess: (result) => {
       if (result.success) {
         toast.success('Category updated successfully');
@@ -178,9 +177,7 @@ export default function CategoriesExample() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>
-                {editingCategory ? 'Edit Category' : 'Add New Category'}
-              </DialogTitle>
+              <DialogTitle>{editingCategory ? 'Edit Category' : 'Add New Category'}</DialogTitle>
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -215,11 +212,7 @@ export default function CategoriesExample() {
                   )}
                 />
                 <div className="flex justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsDialogOpen(false)}
-                  >
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Cancel
                   </Button>
                   <Button
@@ -290,11 +283,7 @@ export default function CategoriesExample() {
                     <TableCell>{category.productCount || 0}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEdit(category)}
-                        >
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(category)}>
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button

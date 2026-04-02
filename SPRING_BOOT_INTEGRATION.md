@@ -71,11 +71,11 @@ import { apiGet } from '@/lib/api-client';
 
 export default async function UsersPage() {
   const result = await apiGet<User[]>('/users');
-  
+
   if (!result.success) {
     return <div>Error: {result.error}</div>;
   }
-  
+
   return (
     <div>
       {result.data.map(user => (
@@ -99,13 +99,13 @@ import { revalidatePath } from 'next/cache';
 export async function createUser(data: UserData) {
   const session = await auth();
   if (!session) return { success: false, error: 'Unauthorized' };
-  
+
   const result = await apiPost<User>('/users', data);
-  
+
   if (!result.success) {
     return { success: false, error: result.error };
   }
-  
+
   revalidatePath('/dashboard/users');
   return { success: true, data: result.data };
 }
@@ -113,13 +113,13 @@ export async function createUser(data: UserData) {
 export async function deleteUser(id: string) {
   const session = await auth();
   if (!session) return { success: false, error: 'Unauthorized' };
-  
+
   const result = await apiDelete(`/users/${id}`);
-  
+
   if (!result.success) {
     return { success: false, error: result.error };
   }
-  
+
   revalidatePath('/dashboard/users');
   return { success: true };
 }
@@ -136,13 +136,13 @@ import { toast } from 'sonner';
 
 export default function CategoriesPage() {
   const queryClient = useQueryClient();
-  
+
   // Query
   const { data, isLoading } = useQuery({
     queryKey: ['categories'],
     queryFn: getCategories,
   });
-  
+
   // Mutation
   const createMutation = useMutation({
     mutationFn: createCategory,
@@ -155,9 +155,9 @@ export default function CategoriesPage() {
       }
     },
   });
-  
+
   if (isLoading) return <div>Loading...</div>;
-  
+
   return (
     <div>
       {data.data.map(cat => (
@@ -262,14 +262,14 @@ await apiGet('/products', {
   category: 'electronics',
   sort: 'name,asc',
   page: 0,
-  size: 20
+  size: 20,
 });
 
 // Null/undefined values are automatically excluded
 await apiGet('/orders', {
   status: 'pending',
   userId: null, // This will be excluded
-  minAmount: 100
+  minAmount: 100,
 });
 ```
 
@@ -290,9 +290,9 @@ Your Spring Boot backend should:
 @RequestMapping("/api/v1/categories")
 @RequiredArgsConstructor
 public class CategoryController {
-    
+
     private final CategoryService categoryService;
-    
+
     @GetMapping
     public ResponseEntity<Page<Category>> getCategories(
         @RequestParam(defaultValue = "0") int page,
@@ -300,17 +300,17 @@ public class CategoryController {
     ) {
         return ResponseEntity.ok(categoryService.findAll(page, size));
     }
-    
+
     @GetMapping("/{id}")
     public ResponseEntity<Category> getCategory(@PathVariable String id) {
         return ResponseEntity.ok(categoryService.findById(id));
     }
-    
+
     @PostMapping
     public ResponseEntity<Category> createCategory(@RequestBody CategoryDTO dto) {
         return ResponseEntity.status(201).body(categoryService.create(dto));
     }
-    
+
     @PutMapping("/{id}")
     public ResponseEntity<Category> updateCategory(
         @PathVariable String id,
@@ -318,7 +318,7 @@ public class CategoryController {
     ) {
         return ResponseEntity.ok(categoryService.update(id, dto));
     }
-    
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCategory(@PathVariable String id) {
         categoryService.delete(id);

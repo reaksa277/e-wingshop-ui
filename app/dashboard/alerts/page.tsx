@@ -17,18 +17,20 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { 
-  CheckCircle2, 
-  AlertCircle, 
-  Package, 
-  Calendar, 
-  Clock, 
+import {
+  CheckCircle2,
+  AlertCircle,
+  Package,
+  Calendar,
+  Clock,
   AlertTriangle,
-  XCircle 
+  XCircle,
 } from 'lucide-react';
 
 export default function AlertsPage() {
-  const [category, setCategory] = useState<'all' | 'ONE_MONTH' | 'TWO_WEEKS' | 'ONE_WEEK' | 'EXPIRED'>('all');
+  const [category, setCategory] = useState<
+    'all' | 'ONE_MONTH' | 'TWO_WEEKS' | 'ONE_WEEK' | 'EXPIRED'
+  >('all');
   const [branchId, setBranchId] = useState<number | undefined>();
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -90,9 +92,7 @@ export default function AlertsPage() {
       );
     } else if (days <= 7) {
       return (
-        <Badge className="bg-red-500 hover:bg-red-600 w-20 justify-center">
-          {days}d left
-        </Badge>
+        <Badge className="bg-red-500 hover:bg-red-600 w-20 justify-center">{days}d left</Badge>
       );
     } else if (days <= 14) {
       return (

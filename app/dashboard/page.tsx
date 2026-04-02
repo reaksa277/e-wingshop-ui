@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import { useLowStock, useExpiringSoon, useReportSummary, useActiveDiscounts } from "@/hooks";
-import { useAuth } from "@/lib/auth-context";
+import { useLowStock, useExpiringSoon, useReportSummary, useActiveDiscounts } from '@/hooks';
+import { useAuth } from '@/lib/auth-context';
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 // Last 30 days
-const today = () => new Date().toISOString().split("T")[0];
+const today = () => new Date().toISOString().split('T')[0];
 const daysAgo = (n: number) => {
   const d = new Date();
   d.setDate(d.getDate() - n);
-  return d.toISOString().split("T")[0];
+  return d.toISOString().split('T')[0];
 };
 
 export default function DashboardHome() {
@@ -26,9 +26,7 @@ export default function DashboardHome() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">
-          Welcome back, {user?.fullName} 👋
-        </h1>
+        <h1 className="text-3xl font-bold tracking-tight">Welcome back, {user?.fullName} 👋</h1>
         <p className="mt-1 text-muted-foreground">
           {`Here's what's happening across all branches today.`}
         </p>
@@ -37,14 +35,8 @@ export default function DashboardHome() {
       {/* KPI row — admin/owner only */}
       {canManage && summary && (
         <div className="grid gap-4 md:grid-cols-3">
-          <KpiCard
-            label="Revenue (30d)"
-            value={`$${Number(summary.totalRevenue).toFixed(2)}`}
-          />
-          <KpiCard
-            label="Orders (30d)"
-            value={String(summary.totalOrders)}
-          />
+          <KpiCard label="Revenue (30d)" value={`$${Number(summary.totalRevenue).toFixed(2)}`} />
+          <KpiCard label="Orders (30d)" value={String(summary.totalOrders)} />
           <KpiCard
             label="Avg order value"
             value={`$${Number(summary.averageOrderValue).toFixed(2)}`}
@@ -62,20 +54,12 @@ export default function DashboardHome() {
           >
             <div className="space-y-2">
               {lowStock?.slice(0, 4).map((inv) => (
-                <div
-                  key={inv.id}
-                  className="border-b pb-2 text-sm last:border-b-0 last:pb-0"
-                >
+                <div key={inv.id} className="border-b pb-2 text-sm last:border-b-0 last:pb-0">
                   <span className="font-semibold">{inv.productName}</span>
+                  <span className="text-muted-foreground"> — {inv.branchName}: </span>
+                  <span className="font-semibold text-amber-600">{inv.quantity}</span>
                   <span className="text-muted-foreground">
-                    {" "}
-                    — {inv.branchName}:{" "}
-                  </span>
-                  <span className="font-semibold text-amber-600">
-                    {inv.quantity}
-                  </span>
-                  <span className="text-muted-foreground">
-                    {" "}
+                    {' '}
                     left (threshold: {inv.lowStockThreshold})
                   </span>
                 </div>
@@ -90,22 +74,11 @@ export default function DashboardHome() {
           >
             <div className="space-y-2">
               {expiring?.slice(0, 4).map((inv) => (
-                <div
-                  key={inv.id}
-                  className="border-b pb-2 text-sm last:border-b-0 last:pb-0"
-                >
+                <div key={inv.id} className="border-b pb-2 text-sm last:border-b-0 last:pb-0">
                   <span className="font-semibold">{inv.productName}</span>
-                  <span className="text-muted-foreground">
-                    {" "}
-                    — {inv.branchName}:{" "}
-                  </span>
-                  <span className="font-semibold text-red-600">
-                    {inv.daysUntilExpiry}d left
-                  </span>
-                  <span className="text-muted-foreground">
-                    {" "}
-                    ({inv.quantity} units)
-                  </span>
+                  <span className="text-muted-foreground"> — {inv.branchName}: </span>
+                  <span className="font-semibold text-red-600">{inv.daysUntilExpiry}d left</span>
+                  <span className="text-muted-foreground"> ({inv.quantity} units)</span>
                 </div>
               ))}
             </div>
@@ -119,12 +92,14 @@ export default function DashboardHome() {
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
               <CardTitle>🏷 Active discounts</CardTitle>
-              <CardDescription>
-                Current branch discounts and promotional pricing
-              </CardDescription>
+              <CardDescription>Current branch discounts and promotional pricing</CardDescription>
             </div>
 
-            <Button variant="link" className="px-0" onClick={() => window.location.href = '/dashboard/discounts'}>
+            <Button
+              variant="link"
+              className="px-0"
+              onClick={() => (window.location.href = '/dashboard/discounts')}
+            >
               View all ({discounts?.totalElements}) →
             </Button>
           </CardHeader>
@@ -158,17 +133,22 @@ export default function DashboardHome() {
       {/* Quick links */}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         {[
-          { label: "Browse products", href: "/dashboard/products" },
-          { label: "Place an order", href: "/dashboard/orders/new" },
+          { label: 'Browse products', href: '/dashboard/products' },
+          { label: 'Place an order', href: '/dashboard/orders/new' },
           ...(canManage
             ? [
-                { label: "Manage inventory", href: "/dashboard/inventory" },
-                { label: "Sales reports", href: "/dashboard/reports" },
-                { label: "Manage discounts", href: "/dashboard/discounts" },
+                { label: 'Manage inventory', href: '/dashboard/inventory' },
+                { label: 'Sales reports', href: '/dashboard/reports' },
+                { label: 'Manage discounts', href: '/dashboard/discounts' },
               ]
             : []),
         ].map((link) => (
-          <Button key={link.href} variant="outline" className="h-12 w-full justify-center" onClick={() => window.location.href = link.href}>
+          <Button
+            key={link.href}
+            variant="outline"
+            className="h-12 w-full justify-center"
+            onClick={() => (window.location.href = link.href)}
+          >
             {link.label}
           </Button>
         ))}
@@ -177,13 +157,7 @@ export default function DashboardHome() {
   );
 }
 
-function KpiCard({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function KpiCard({ label, value }: { label: string; value: string }) {
   return (
     <Card>
       <CardContent className="pt-6">
@@ -209,7 +183,7 @@ function AlertCard({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <CardTitle className="text-base">{title}</CardTitle>
-        <Badge variant={count === 0 ? "secondary" : "destructive"}>{count}</Badge>
+        <Badge variant={count === 0 ? 'secondary' : 'destructive'}>{count}</Badge>
       </CardHeader>
 
       <CardContent>
@@ -220,7 +194,11 @@ function AlertCard({
         )}
 
         {count > 4 && (
-          <Button variant="link" className="mt-3 h-auto p-0" onClick={() => window.location.href = href}>
+          <Button
+            variant="link"
+            className="mt-3 h-auto p-0"
+            onClick={() => (window.location.href = href)}
+          >
             View all {count} →
           </Button>
         )}

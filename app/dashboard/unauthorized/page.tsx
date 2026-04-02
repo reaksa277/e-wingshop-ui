@@ -11,7 +11,7 @@ export default function UnauthorizedPage() {
         <CardDescription>{"You don't have permission to access this page."}</CardDescription>
       </CardHeader>
       <CardContent>
-        <Button className="w-full" onClick={() => window.location.href = '/dashboard'}>
+        <Button className="w-full" onClick={() => (window.location.href = '/dashboard')}>
           Go to Dashboard
         </Button>
       </CardContent>
