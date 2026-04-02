@@ -8,9 +8,32 @@ export function useAlertsCount() {
     queryFn: async () => {
       try {
         const result = await alertService.getCount();
-        return result.count || 0;
+        return result?.count || 0;
       } catch {
         return 0;
+      }
+    },
+    staleTime: 30 * 1000, // 30 seconds
+    refetchInterval: 60 * 1000, // Refetch every 60 seconds
+  });
+}
+
+// Hook to fetch alerts categorized by expiry time
+export function useAlertsByCategory(branchId?: number) {
+  return useQuery({
+    queryKey: ['alerts-by-category', branchId],
+    queryFn: async () => {
+      try {
+        const result = await alertService.getByCategory(branchId);
+        return result;
+      } catch {
+        return {
+          oneMonth: [],
+          twoWeeks: [],
+          oneWeek: [],
+          expired: [],
+          totals: { oneMonth: 0, twoWeeks: 0, oneWeek: 0, expired: 0, total: 0 },
+        };
       }
     },
     staleTime: 30 * 1000, // 30 seconds
@@ -22,7 +45,10 @@ export function useAlertsCount() {
 export function useRecentAlerts(limit = 5) {
   return useQuery({
     queryKey: ['alerts-recent', limit],
-    queryFn: () => alertService.getRecent(limit),
+    queryFn: async () => {
+      const result = await alertService.getRecent(limit);
+      return result || { data: { alerts: [] } };
+    },
     staleTime: 20 * 1000, // 20 seconds
     refetchInterval: 60 * 1000, // Refetch every 60 seconds
   });

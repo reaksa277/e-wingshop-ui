@@ -28,7 +28,6 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
 // Assets & Types
-import { SkeletonPage } from "@/components/ui/Skeleton";
 import { ErrorMessage } from "@/components/ui/ErrorMessage";
 import { 
   ChevronLeft, 
@@ -55,7 +54,16 @@ export default function ProductDetailPage() {
   const updateProduct = useUpdateProduct(productId);
   const deleteProduct = useDeleteProduct();
 
-  if (isLoading) return <SkeletonPage />;
+  if (isLoading) return (
+    <div className="space-y-6">
+      <div className="h-10 bg-muted rounded animate-pulse" />
+      <div className="grid grid-cols-4 gap-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="h-20 bg-muted rounded animate-pulse" />
+        ))}
+      </div>
+    </div>
+  );
   if (isError) return <ErrorMessage error={error} retry={refetch} />;
   if (!product) return <ErrorMessage error={new Error("Product not found")} />;
 
@@ -91,7 +99,7 @@ export default function ProductDetailPage() {
     : "0";
 
   return (
-    <div className="container max-w-5xl py-6 space-y-6">
+    <div className="w-full space-y-6">
       {/* Header Navigation */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
