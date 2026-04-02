@@ -158,7 +158,6 @@ export default function ProductDetailPage() {
         </Alert>
       )}
 
-      {/* KPI Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard label="Cost Price" value={`$${Number(product.costPrice).toFixed(2)}`} />
         <StatCard
