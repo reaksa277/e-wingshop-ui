@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { type ColumnDef } from "@tanstack/react-table";
 import {
   useActiveDiscounts,
   useDiscountTiers,
@@ -22,18 +23,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Plus, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { DataTable } from "@/components/ui/data-table";
 
 export default function DiscountsPage() {
   const [branchId, setBranchId] = useState<number | undefined>();
@@ -71,6 +65,115 @@ export default function DiscountsPage() {
 
   const noDiscountCount =
     expiring?.filter((inv) => !discounts?.content.some((d) => d.inventoryId === inv.id)).length ?? 0;
+
+  // Define columns for DataTable
+  const columns: ColumnDef<any>[] = [
+    {
+      accessorKey: "productName",
+      header: "Product",
+      cell: ({ row }) => (
+        <span className="font-medium">{row.getValue("productName")}</span>
+      ),
+    },
+    {
+      accessorKey: "branchName",
+      header: "Branch",
+      cell: ({ row }) => (
+        <span className="text-xs text-muted-foreground">{row.getValue("branchName")}</span>
+      ),
+    },
+    {
+      accessorKey: "currentStock",
+      header: "Stock",
+      cell: ({ row }) => row.getValue("currentStock"),
+    },
+    {
+      accessorKey: "tierLabel",
+      header: "Tier",
+      cell: ({ row }) => (
+        <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+          {row.getValue("tierLabel")}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: "originalPrice",
+      header: "Was",
+      cell: ({ row }) => (
+        <span className="text-muted-foreground line-through">
+          ${Number(row.getValue("originalPrice")).toFixed(2)}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "discountPct",
+      header: "Disc.",
+      cell: ({ row }) => (
+        <span className="font-bold text-destructive">-{row.getValue("discountPct")}%</span>
+      ),
+    },
+    {
+      accessorKey: "discountedPrice",
+      header: "Now",
+      cell: ({ row }) => (
+        <span className="font-bold text-green-600">
+          ${Number(row.getValue("discountedPrice")).toFixed(2)}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "savingsAmount",
+      header: "Saves",
+      cell: ({ row }) => (
+        <span className="text-xs">${Number(row.getValue("savingsAmount")).toFixed(2)}</span>
+      ),
+    },
+    {
+      accessorKey: "expiryDate",
+      header: "Expiry",
+      cell: ({ row }) => {
+        const d = row.original;
+        return (
+          <div className="flex flex-col text-xs">
+            <span>{d.expiryDate ?? "—"}</span>
+            {d.daysUntilExpiry !== undefined && (
+              <span
+                className={`font-bold ${
+                  d.daysUntilExpiry <= 3 ? "text-destructive" : "text-amber-600"
+                }`}
+              >
+                {d.daysUntilExpiry}d left
+              </span>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => {
+        const d = row.original;
+        return (
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => handleRevoke(d.id, d.productName)}
+            disabled={revoke.isPending}
+          >
+            Revoke
+          </Button>
+        );
+      },
+    },
+  ];
+
+  const getRowClass = (row: any) => {
+    if (row.daysUntilExpiry !== undefined && row.daysUntilExpiry <= 3) {
+      return "bg-red-50/50";
+    }
+    return "";
+  };
 
   return (
     <div className="space-y-6 p-6">
@@ -215,71 +318,19 @@ export default function DiscountsPage() {
         </div>
       ) : (
         <div className="rounded-md border bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Product</TableHead>
-                <TableHead>Branch</TableHead>
-                <TableHead>Stock</TableHead>
-                <TableHead>Tier</TableHead>
-                <TableHead>Was</TableHead>
-                <TableHead>Disc.</TableHead>
-                <TableHead>Now</TableHead>
-                <TableHead>Saves</TableHead>
-                <TableHead>Expiry</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {discounts?.content.map((d) => (
-                <TableRow
-                  key={d.id}
-                  className={d.daysUntilExpiry !== undefined && d.daysUntilExpiry <= 3 ? "bg-red-50/50" : ""}
-                >
-                  <TableCell className="font-medium">{d.productName}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{d.branchName}</TableCell>
-                  <TableCell>{d.currentStock}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-                      {d.tierLabel}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground line-through">
-                    ${Number(d.originalPrice).toFixed(2)}
-                  </TableCell>
-                  <TableCell className="font-bold text-destructive">-{d.discountPct}%</TableCell>
-                  <TableCell className="font-bold text-green-600">
-                    ${Number(d.discountedPrice).toFixed(2)}
-                  </TableCell>
-                  <TableCell className="text-xs">${Number(d.savingsAmount).toFixed(2)}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-col text-xs">
-                      <span>{d.expiryDate ?? "—"}</span>
-                      {d.daysUntilExpiry !== undefined && (
-                        <span
-                          className={`font-bold ${
-                            d.daysUntilExpiry <= 3 ? "text-destructive" : "text-amber-600"
-                          }`}
-                        >
-                          {d.daysUntilExpiry}d left
-                        </span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleRevoke(d.id, d.productName)}
-                      disabled={revoke.isPending}
-                    >
-                      Revoke
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable
+            columns={columns}
+            data={discounts?.content ?? []}
+            filterColumn="productName"
+            filterPlaceholder="Search discounts..."
+            isLoading={isLoading}
+            enablePagination={false}
+            emptyState={{
+              title: "No discounts found",
+              description: "No active discounts match your current filters.",
+            }}
+            getRowClass={getRowClass}
+          />
         </div>
       )}
 

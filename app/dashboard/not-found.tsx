@@ -25,13 +25,11 @@ export default function NotFound() {
       </p>
 
       <div className="mt-10 flex flex-col sm:flex-row gap-3">
-        <Button asChild size="lg" className="px-8">
-          <Link href="/dashboard">
-            <Home className="mr-2 h-4 w-4" />
-            Back to dashboard
-          </Link>
+        <Button size="lg" className="px-8" onClick={() => window.location.href = '/dashboard'}>
+          <Home className="mr-2 h-4 w-4" />
+          Back to dashboard
         </Button>
-        
+
         <Button variant="outline" size="lg" onClick={() => window.history.back()}>
           Go back
         </Button>

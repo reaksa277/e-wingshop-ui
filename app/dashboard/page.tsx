@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useLowStock, useExpiringSoon, useReportSummary, useActiveDiscounts } from "@/hooks";
 import { useAuth } from "@/lib/auth-context";
 
@@ -125,10 +124,8 @@ export default function DashboardHome() {
               </CardDescription>
             </div>
 
-            <Button asChild variant="link" className="px-0">
-              <Link href="/dashboard/discounts">
-                View all ({discounts.totalElements}) →
-              </Link>
+            <Button variant="link" className="px-0" onClick={() => window.location.href = '/dashboard/discounts'}>
+              View all ({discounts?.totalElements}) →
             </Button>
           </CardHeader>
 
@@ -171,8 +168,8 @@ export default function DashboardHome() {
               ]
             : []),
         ].map((link) => (
-          <Button key={link.href} asChild variant="outline" className="h-12 w-full justify-center">
-            <Link href={link.href}>{link.label}</Link>
+          <Button key={link.href} variant="outline" className="h-12 w-full justify-center" onClick={() => window.location.href = link.href}>
+            {link.label}
           </Button>
         ))}
       </div>
@@ -223,8 +220,8 @@ function AlertCard({
         )}
 
         {count > 4 && (
-          <Button asChild variant="link" className="mt-3 h-auto p-0">
-            <Link href={href}>View all {count} →</Link>
+          <Button variant="link" className="mt-3 h-auto p-0" onClick={() => window.location.href = href}>
+            View all {count} →
           </Button>
         )}
       </CardContent>

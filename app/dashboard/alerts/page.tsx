@@ -2,18 +2,11 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { type ColumnDef } from '@tanstack/react-table';
 import { getExpiryAlerts, dismissExpiryAlert, type ExpiryAlert } from '@/app/actions/alerts';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import {
   Select,
   SelectContent,
@@ -24,6 +17,7 @@ import {
 import { toast } from 'sonner';
 import { CheckCircle2 } from 'lucide-react';
 import { RoleGuard } from '@/components/dashboard/RoleGuard';
+import { DataTable } from '@/components/ui/data-table';
 
 export default function AlertsPage() {
   const [status, setStatus] = useState('all');
@@ -87,6 +81,65 @@ export default function AlertsPage() {
     }
   };
 
+  // Define columns for DataTable
+  const columns: ColumnDef<ExpiryAlert>[] = [
+    {
+      accessorKey: 'product',
+      header: 'Product',
+      cell: ({ row }) => (
+        <span className="font-medium">{row.original.product.name}</span>
+      ),
+    },
+    {
+      accessorKey: 'branch',
+      header: 'Branch',
+      cell: ({ row }) => row.original.branch.name,
+    },
+    {
+      accessorKey: 'expiryDate',
+      header: 'Expiry Date',
+      cell: ({ row }) => new Date(row.getValue('expiryDate') as string).toLocaleDateString(),
+    },
+    {
+      accessorKey: 'daysRemaining',
+      header: 'Days Remaining',
+      cell: ({ row }) => getDaysRemainingBadge(row.getValue('daysRemaining') as number),
+    },
+    {
+      accessorKey: 'quantity',
+      header: 'Quantity',
+      cell: ({ row }) => row.getValue('quantity'),
+    },
+    {
+      accessorKey: 'status',
+      header: 'Status',
+      cell: ({ row }) => getStatusBadge(row.getValue('status') as string),
+    },
+    {
+      id: 'actions',
+      header: 'Actions',
+      cell: ({ row }) => {
+        const alert = row.original;
+        return (
+          <div className="flex justify-end">
+            {alert.status === 'ACTIVE' && (
+              <RoleGuard permission="dismiss_expiry_alerts">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => dismissMutation.mutate({ alertId: alert.id })}
+                >
+                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                  Dismiss
+                </Button>
+              </RoleGuard>
+            )}
+          </div>
+        );
+      },
+    },
+  ];
+
   return (
     <div className="space-y-6">
       <div>
@@ -116,59 +169,18 @@ export default function AlertsPage() {
       {/* Alerts Table */}
       <Card>
         <CardContent className="pt-6">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Product</TableHead>
-                <TableHead>Branch</TableHead>
-                <TableHead>Expiry Date</TableHead>
-                <TableHead>Days Remaining</TableHead>
-                <TableHead>Quantity</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
-                    Loading...
-                  </TableCell>
-                </TableRow>
-              ) : alertsData?.data?.alerts?.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
-                    No alerts found
-                  </TableCell>
-                </TableRow>
-              ) : (
-                alertsData?.data?.alerts?.map((alert: ExpiryAlert) => (
-                  <TableRow key={alert.id}>
-                    <TableCell className="font-medium">{alert.product.name}</TableCell>
-                    <TableCell>{alert.branch.name}</TableCell>
-                    <TableCell>{new Date(alert.expiryDate).toLocaleDateString()}</TableCell>
-                    <TableCell>{getDaysRemainingBadge(alert.daysRemaining)}</TableCell>
-                    <TableCell>{alert.quantity}</TableCell>
-                    <TableCell>{getStatusBadge(alert.status)}</TableCell>
-                    <TableCell className="text-right">
-                      {alert.status === 'ACTIVE' && (
-                        <RoleGuard permission="dismiss_expiry_alerts">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => dismissMutation.mutate({ alertId: alert.id })}
-                          >
-                            <CheckCircle2 className="mr-2 h-4 w-4" />
-                            Dismiss
-                          </Button>
-                        </RoleGuard>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+          <DataTable
+            columns={columns}
+            data={alertsData?.data?.alerts ?? []}
+            filterColumn="product"
+            filterPlaceholder="Search alerts..."
+            isLoading={isLoading}
+            enablePagination={false}
+            emptyState={{
+              title: 'No alerts found',
+              description: 'No expiry alerts match your current filters.',
+            }}
+          />
         </CardContent>
       </Card>
     </div>
