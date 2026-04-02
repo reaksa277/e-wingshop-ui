@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { type ColumnDef } from '@tanstack/react-table';
 import {
   useUsers,
   useCreateStaff,
@@ -16,14 +17,6 @@ import { userService } from '@/services/user.service';
 import { RoleName, CreateStaffRequest } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -50,9 +43,10 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
-import { Plus, Search, Edit, Trash2, Download, User as UserIcon, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Download, User as UserIcon, Loader2 } from 'lucide-react';
 import { formatRoleNameBadge, getRoleBadgeVariant } from '@/lib/role-utils';
 import Papa from 'papaparse';
+import { DataTable } from '@/components/ui/data-table';
 
 const userFormSchema = z.object({
   fullName: z.string().min(1, 'Name is required'),
@@ -67,7 +61,6 @@ const userFormSchema = z.object({
 });
 
 export default function UsersPage() {
-  const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
@@ -156,7 +149,6 @@ export default function UsersPage() {
   const handleDelete = async (userId: number) => {
     if (!confirm('Are you sure you want to delete this user?')) return;
     try {
-      // Delete user - you may need to add this method to userService
       await userService.deleteUser(userId);
       toast.success('User deleted successfully');
       refetchUsers();
@@ -212,6 +204,81 @@ export default function UsersPage() {
     URL.revokeObjectURL(url);
     toast.success('Users exported successfully');
   };
+
+  // Define columns for DataTable
+  const columns: ColumnDef<any>[] = [
+    {
+      accessorKey: 'fullName',
+      header: 'User',
+      cell: ({ row }) => {
+        const user = row.original;
+        return (
+          <div className="flex items-center gap-3">
+            <Avatar className="h-9 w-9">
+              <AvatarFallback>
+                {user.fullName
+                  .split(' ')
+                  .map((n: string) => n[0])
+                  .join('')
+                  .toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <span className="font-medium">{user.fullName}</span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'email',
+      header: 'Email',
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">{row.getValue('email')}</span>
+      ),
+    },
+    {
+      accessorKey: 'phone',
+      header: 'Phone',
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">{row.getValue('phone') || '-'}</span>
+      ),
+    },
+    {
+      accessorKey: 'role',
+      header: 'Role',
+      cell: ({ row }) => (
+        <Badge variant={getRoleBadgeVariant(row.getValue('role') as string)}>
+          {formatRoleNameBadge(row.getValue('role') as string)}
+        </Badge>
+      ),
+    },
+    {
+      id: 'actions',
+      header: 'Actions',
+      cell: ({ row }) => {
+        const user = row.original;
+        return (
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleEdit(user)}
+              title="Edit user"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleDelete(user.id)}
+              title="Delete user"
+            >
+              <Trash2 className="h-4 w-4 text-destructive" />
+            </Button>
+          </div>
+        );
+      },
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -335,7 +402,7 @@ export default function UsersPage() {
                       >
                         Cancel
                       </Button>
-                      <Button 
+                      <Button
                         type="submit"
                         disabled={
                           createStaffMutation.isPending ||
@@ -411,121 +478,21 @@ export default function UsersPage() {
         </div>
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex gap-4 flex-wrap">
-            <div className="flex-1 min-w-50">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by name or email..."
-                  value={search}
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                    setCurrentPage(0);
-                  }}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Users Table */}
       <Card>
         <CardContent className="pt-6">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>User</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8">
-                    <div className="flex items-center justify-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Loading users...
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : !usersData?.content || usersData.content.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8">
-                    <div className="text-muted-foreground">
-                      <UserIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                      No users found
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                usersData.content.map((user: any) => (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-9 w-9">
-                          <AvatarFallback>
-                            {user.fullName
-                              .split(' ')
-                              .map((n: string) => n[0])
-                              .join('')
-                              .toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="font-medium">{user.fullName}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{user.email}</TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {user.phone || '-'}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={getRoleBadgeVariant(user.role)}>
-                        {formatRoleNameBadge(user.role)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        {user.role === 'MANAGER' && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleAssignManager(user)}
-                            title="Assign branch"
-                          >
-                            Assign Branch
-                          </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEdit(user)}
-                          title="Edit user"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDelete(user.id)}
-                          title="Delete user"
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+          <DataTable
+            columns={columns}
+            data={usersData?.content ?? []}
+            filterColumn="fullName"
+            filterPlaceholder="Search by name or email..."
+            isLoading={isLoading}
+            enablePagination={false}
+            emptyState={{
+              title: 'No users found',
+              description: 'Create your first user to get started.',
+            }}
+          />
         </CardContent>
       </Card>
 

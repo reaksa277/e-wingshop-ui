@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { 
-  useProduct, 
-  useUpdateProduct, 
-  useDeleteProduct, 
-  useCategories 
+import Image from "next/image";
+import {
+  useProduct,
+  useUpdateProduct,
+  useDeleteProduct,
+  useCategories
 } from "@/hooks";
 import { useAuth } from "@/lib/auth-context";
 
@@ -28,15 +29,16 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
 // Assets & Types
+import { SkeletonPage } from "@/components/ui/Skeletonui";
 import { ErrorMessage } from "@/components/ui/ErrorMessage";
-import { 
-  ChevronLeft, 
-  Edit3, 
-  Trash2, 
-  AlertTriangle, 
-  ExternalLink, 
-  Save, 
-  X 
+import {
+  ChevronLeft,
+  Edit3,
+  Trash2,
+  AlertTriangle,
+  ExternalLink,
+  Save,
+  X
 } from "lucide-react";
 import type { ProductRequest } from "@/types";
 
@@ -103,9 +105,9 @@ export default function ProductDetailPage() {
       {/* Header Navigation */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             className="pl-0 text-muted-foreground hover:text-foreground"
             onClick={() => router.push("/dashboard/products")}
           >
@@ -125,16 +127,16 @@ export default function ProductDetailPage() {
 
         {canManage && (
           <div className="flex items-center gap-2">
-            <Button 
-              variant={editMode ? "outline" : "default"} 
+            <Button
+              variant={editMode ? "outline" : "default"}
               onClick={() => { setEditMode(!editMode); setForm({}); }}
             >
               {editMode ? <><X className="mr-2 h-4 w-4" /> Cancel</> : <><Edit3 className="mr-2 h-4 w-4" /> Edit Product</>}
             </Button>
             {isOwner && (
-              <Button 
-                variant="destructive" 
-                onClick={handleDelete} 
+              <Button
+                variant="destructive"
+                onClick={handleDelete}
                 disabled={deleteProduct.isPending || !product.isActive}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
@@ -186,8 +188,8 @@ export default function ProductDetailPage() {
                     </div>
                     <div className="space-y-2">
                       <Label>Category *</Label>
-                      <Select 
-                        defaultValue={product.category?.id?.toString()} 
+                      <Select
+                        defaultValue={product.category?.id?.toString()}
                         onValueChange={(val) => set("categoryId", Number(val))}
                       >
                         <SelectTrigger>
@@ -202,8 +204,8 @@ export default function ProductDetailPage() {
                     </div>
                     <div className="space-y-2">
                       <Label>Status</Label>
-                      <Select 
-                        defaultValue={product.isActive ? "true" : "false"} 
+                      <Select
+                        defaultValue={product.isActive ? "true" : "false"}
                         onValueChange={(val) => set("isActive", val === "true")}
                       >
                         <SelectTrigger>
@@ -224,7 +226,7 @@ export default function ProductDetailPage() {
                       <Input id="selling" type="number" step="0.01" defaultValue={product.sellingPrice} onChange={(e) => set("sellingPrice", Number(e.target.value))} />
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="desc">Description</Label>
                     <Textarea id="desc" rows={4} defaultValue={product.description ?? ""} onChange={(e) => set("description", e.target.value)} />
@@ -257,9 +259,9 @@ export default function ProductDetailPage() {
                   <DetailItem label="Barcode" value={product.barcode ?? "—"} />
                   <DetailItem label="Last Updated" value={new Date(product.updatedAt || product.createdAt).toLocaleString()} />
                 </div>
-                
+
                 <Separator />
-                
+
                 <div className="space-y-2">
                   <h4 className="text-sm font-medium text-muted-foreground">Description</h4>
                   <p className="text-sm leading-relaxed whitespace-pre-wrap italic text-foreground/80">
@@ -278,19 +280,28 @@ export default function ProductDetailPage() {
               <CardTitle>Product Image</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="aspect-square rounded-md border bg-muted flex items-center justify-center overflow-hidden">
+              <div className="aspect-square rounded-md border bg-muted flex items-center justify-center overflow-hidden relative">
                 {product.imageUrl ? (
-                  <img src={product.imageUrl} alt={product.name} className="object-cover w-full h-full" />
+                  <Image
+                    src={product.imageUrl}
+                    alt={product.name}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
                 ) : (
                   <span className="text-muted-foreground text-sm">No image available</span>
                 )}
               </div>
               {product.imageUrl && (
-                <Button variant="link" className="w-full mt-2" asChild>
-                  <a href={product.imageUrl} target="_blank" rel="noreferrer">
-                    <ExternalLink className="mr-2 h-3 w-3" /> View full size
-                  </a>
-                </Button>
+                <a
+                  href={product.imageUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center justify-center w-full mt-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  <ExternalLink className="mr-2 h-3 w-3" /> View full size
+                </a>
               )}
             </CardContent>
           </Card>

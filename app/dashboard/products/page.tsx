@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { type ColumnDef } from "@tanstack/react-table";
+import { Pencil, Trash2 } from "lucide-react";
 
 import {
   useProducts,
@@ -10,23 +12,14 @@ import {
   useDeleteProduct,
 } from "@/hooks";
 import { useAuth } from "@/lib/auth-context";
-import type { ProductRequest } from "@/types";
+import type { ProductResponse, ProductRequest } from "@/types";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-// (Optional but recommended)
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { DataTable } from "@/components/ui/data-table";
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -66,6 +59,88 @@ export default function ProductsPage() {
     setShowForm(false);
     setFormData({});
   }
+
+  // Define columns for DataTable
+  const columns: ColumnDef<ProductResponse>[] = [
+    {
+      accessorKey: "name",
+      header: "Name",
+      cell: ({ row }) => (
+        <button
+          onClick={() => router.push(`/dashboard/products/${row.original.id}`)}
+          className="font-medium text-primary underline-offset-4 hover:underline"
+        >
+          {row.getValue("name")}
+        </button>
+      ),
+    },
+    {
+      accessorKey: "barcode",
+      header: "Barcode",
+      cell: ({ row }) => row.getValue("barcode") ?? "—",
+    },
+    {
+      accessorKey: "category",
+      header: "Category",
+      cell: ({ row }) => (row.original.category?.name ?? "—") as React.ReactNode,
+    },
+    {
+      accessorKey: "costPrice",
+      header: "Cost",
+      cell: ({ row }) => `$${Number(row.getValue("costPrice")).toFixed(2)}`,
+    },
+    {
+      accessorKey: "sellingPrice",
+      header: "Price",
+      cell: ({ row }) => (
+        <span className="font-medium">
+          ${Number(row.getValue("sellingPrice")).toFixed(2)}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "isActive",
+      header: "Status",
+      cell: ({ row }) => (
+        <Badge variant={row.original.isActive ? "default" : "destructive"}>
+          {row.original.isActive ? "Active" : "Inactive"}
+        </Badge>
+      ),
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => {
+        const product = row.original;
+        return (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              onClick={() => router.push(`/dashboard/products/${product.id}`)}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            {isOwner && (
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                className="text-red-500 hover:text-red-600"
+                onClick={() => {
+                  if (confirm(`Deactivate "${product.name}"?`)) {
+                    deleteProduct.mutate(product.id);
+                  }
+                }}
+                disabled={deleteProduct.isPending}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        );
+      },
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -202,98 +277,23 @@ export default function ProductsPage() {
 
       {/* Table */}
       <Card>
-        <CardContent className="p-0">
-          {isLoading ? (
-            <div className="p-4 text-sm text-muted-foreground">Loading…</div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  {["Name", "Barcode", "Category", "Cost", "Price", "Status", "Actions"].map((h) => (
-                    <TableHead key={h}>{h}</TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-
-              <TableBody>
-                {data?.content.map((p) => (
-                  <TableRow key={p.id}>
-                    <TableCell>
-                      <button
-                        onClick={() => router.push(`/dashboard/products/${p.id}`)}
-                        className="font-medium text-primary underline"
-                      >
-                        {p.name}
-                      </button>
-                    </TableCell>
-
-                    <TableCell className="text-muted-foreground">
-                      {p.barcode ?? "—"}
-                    </TableCell>
-
-                    <TableCell>{p.category?.name ?? "—"}</TableCell>
-
-                    <TableCell>
-                      ${Number(p.costPrice).toFixed(2)}
-                    </TableCell>
-
-                    <TableCell className="font-medium">
-                      ${Number(p.sellingPrice).toFixed(2)}
-                    </TableCell>
-
-                    <TableCell>
-                      <Badge variant={p.isActive ? "default" : "destructive"}>
-                        {p.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-
-                    <TableCell>
-                      {isOwner && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-red-500"
-                          onClick={() => deleteProduct.mutate(p.id)}
-                          disabled={deleteProduct.isPending}
-                        >
-                          Deactivate
-                        </Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+        <CardContent className="p-4">
+          <DataTable
+            columns={columns}
+            data={data?.content ?? []}
+            filterColumn="name"
+            filterPlaceholder="Search products..."
+            isLoading={isLoading}
+            enablePagination={false}
+            emptyState={{
+              title: "No products found",
+              description: keyword || categoryId
+                ? "Try adjusting your search or filters."
+                : "Create your first product to get started.",
+            }}
+          />
         </CardContent>
       </Card>
-
-      {/* Pagination */}
-      {data && (
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={data.first}
-            onClick={() => setPage((p) => p - 1)}
-          >
-            ← Prev
-          </Button>
-
-          <span>
-            Page {data.page + 1} of {data.totalPages} ({data.totalElements} products)
-          </span>
-
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={data.last}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Next →
-          </Button>
-        </div>
-      )}
     </div>
   );
 }

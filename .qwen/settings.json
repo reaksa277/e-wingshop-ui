@@ -8,7 +8,8 @@
       "Bash(ss *)",
       "Bash(grep *)",
       "Bash(netstat *)",
-      "Bash(lsof *)"
+      "Bash(lsof *)",
+      "Bash(findstr *)"
     ]
   },
   "$version": 3

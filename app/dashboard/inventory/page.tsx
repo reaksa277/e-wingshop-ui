@@ -1,5 +1,6 @@
 "use client";
 
+<<<<<<< HEAD
 import { useState, useEffect } from "react";
 import { 
   useInventoryByBranch, 
@@ -11,23 +12,28 @@ import {
   useTransferStock, 
   useBranches,
   useMe
+=======
+import { useState } from "react";
+import { type ColumnDef } from "@tanstack/react-table";
+import {
+  useInventoryByBranch,
+  useListAllInventory,
+  useLowStock,
+  useExpiringSoon,
+  useExpiredInventory,
+  useAdjustStock,
+  useTransferStock,
+  useBranches
+>>>>>>> 5f5db961e31b3e809010577b2a69b4471ca2c1af
 } from "@/hooks";
 
 // Shadcn UI Components
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -35,15 +41,16 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogFooter 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
 } from "@/components/ui/dialog";
 import { Loader2, ArrowLeft, ArrowRight } from "lucide-react";
+import { DataTable } from "@/components/ui/data-table";
 
 type Tab = "all" | "low" | "expiring" | "expired";
 
@@ -118,11 +125,11 @@ export default function InventoryPage() {
   const handleAdjustSubmit = async () => {
     const delta = parseInt(adjustData.quantity, 10);
     if (isNaN(delta)) return;
-    await adjustStock.mutateAsync({ 
-      branchId: adjustData.branchId, 
-      productId: adjustData.productId, 
-      delta, 
-      reason: adjustData.reason 
+    await adjustStock.mutateAsync({
+      branchId: adjustData.branchId,
+      productId: adjustData.productId,
+      delta,
+      reason: adjustData.reason
     });
     setAdjustDialogOpen(false);
     setAdjustData({ productId: 0, branchId: 0, productName: "", quantity: "", reason: "Manual" });
@@ -141,23 +148,124 @@ export default function InventoryPage() {
 
   const handleTransferSubmit = async () => {
     if (!transferData.toBranchId || !transferData.quantity) return;
-    await transferStock.mutateAsync({ 
-      fromBranchId: transferData.fromBranchId, 
-      toBranchId: Number(transferData.toBranchId), 
-      productId: transferData.productId, 
-      quantity: Number(transferData.quantity) 
+    await transferStock.mutateAsync({
+      fromBranchId: transferData.fromBranchId,
+      toBranchId: Number(transferData.toBranchId),
+      productId: transferData.productId,
+      quantity: Number(transferData.quantity)
     });
     setTransferDialogOpen(false);
     setTransferData({ productId: 0, fromBranchId: 0, productName: "", toBranchId: "", quantity: "" });
+  };
+
+  // Define columns for DataTable
+  const columns: ColumnDef<any>[] = [
+    {
+      accessorKey: "productName",
+      header: "Product",
+      cell: ({ row }) => (
+        <span className="font-medium">{row.getValue("productName")}</span>
+      ),
+    },
+    {
+      accessorKey: "branchName",
+      header: "Branch",
+      cell: ({ row }) => row.getValue("branchName"),
+    },
+    {
+      accessorKey: "quantity",
+      header: "Qty",
+      cell: ({ row }) => (
+        <span className="font-bold">{row.getValue("quantity")}</span>
+      ),
+    },
+    {
+      accessorKey: "lowStockThreshold",
+      header: "Threshold",
+      cell: ({ row }) => (
+        <span className="text-muted-foreground hidden md:table-cell">
+          {row.getValue("lowStockThreshold")}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "expiryDate",
+      header: "Expiry",
+      cell: ({ row }) => {
+        const inv = row.original;
+        return (
+          <div className="flex flex-col">
+            <span className="text-sm">{inv.expiryDate ?? "—"}</span>
+            {inv.daysUntilExpiry !== undefined && (
+              <span className={`text-xs font-semibold ${
+                inv.daysUntilExpiry < 0 ? "text-red-600" :
+                inv.daysUntilExpiry <= 7 ? "text-orange-600" : "text-muted-foreground"
+              }`}>
+                {inv.daysUntilExpiry < 0 ? `${Math.abs(inv.daysUntilExpiry)}d ago` : `${inv.daysUntilExpiry}d left`}
+              </span>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "expired",
+      header: "Status",
+      cell: ({ row }) => {
+        const inv = row.original;
+        return (
+          <Badge variant={inv.expired ? "destructive" : inv.lowStock ? "outline" : "secondary"} className={
+            !inv.expired && !inv.lowStock ? "bg-green-100 text-green-800 hover:bg-green-100 border-transparent" : ""
+          }>
+            {inv.expired ? "Expired" : inv.lowStock ? "Low" : "OK"}
+          </Badge>
+        );
+      },
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => {
+        const inv = row.original;
+        return (
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleAdjust(inv.productId, inv.branchId, inv.productName)}
+              disabled={adjustStock.isPending}
+            >
+              {adjustStock.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
+              Adjust
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleTransfer(inv.productId, inv.branchId, inv.productName)}
+              disabled={transferStock.isPending}
+            >
+              {transferStock.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
+              Transfer
+            </Button>
+          </div>
+        );
+      },
+    },
+  ];
+
+  const getRowClass = (row: any) => {
+    if (row.expired) return "bg-red-50/50 hover:bg-red-50";
+    if (row.lowStock) return "bg-amber-50/50 hover:bg-amber-50";
+    return "";
   };
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h2 className="text-2xl font-bold tracking-tight">Inventory</h2>
-        
-        <Select 
-          value={branchId} 
+
+        <Select
+          value={branchId}
           onValueChange={(val) => { setBranchId(val); setPage(0); }}
           disabled={isManager}
         >
@@ -177,7 +285,7 @@ export default function InventoryPage() {
         <TabsList className="grid w-full grid-cols-2 md:w-auto md:flex">
           <TabsTrigger value="all">All Stock</TabsTrigger>
           <TabsTrigger value="low" className="gap-2">
-            Low Stock 
+            Low Stock
             {lowQuery.data?.length ? <Badge variant="destructive" className="h-5 px-1.5">{lowQuery.data.length}</Badge> : null}
           </TabsTrigger>
           <TabsTrigger value="expiring" className="gap-2">
@@ -195,77 +303,19 @@ export default function InventoryPage() {
       ) : (
         <Card>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Product</TableHead>
-                  <TableHead>Branch</TableHead>
-                  <TableHead>Qty</TableHead>
-                  <TableHead className="hidden md:table-cell">Threshold</TableHead>
-                  <TableHead>Expiry</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows?.map((inv) => (
-                  <TableRow 
-                    key={inv.id}
-                    className={
-                        inv.expired ? "bg-red-50/50 hover:bg-red-50" : 
-                        inv.lowStock ? "bg-amber-50/50 hover:bg-amber-50" : ""
-                    }
-                  >
-                    <TableCell className="font-medium">{inv.productName}</TableCell>
-                    <TableCell>{inv.branchName}</TableCell>
-                    <TableCell className="font-bold">{inv.quantity}</TableCell>
-                    <TableCell className="hidden md:table-cell text-muted-foreground">{inv.lowStockThreshold}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="text-sm">{inv.expiryDate ?? "—"}</span>
-                        {inv.daysUntilExpiry !== undefined && (
-                          <span className={`text-xs font-semibold ${
-                            inv.daysUntilExpiry < 0 ? "text-red-600" : 
-                            inv.daysUntilExpiry <= 7 ? "text-orange-600" : "text-muted-foreground"
-                          }`}>
-                            {inv.daysUntilExpiry < 0 ? `${Math.abs(inv.daysUntilExpiry)}d ago` : `${inv.daysUntilExpiry}d left`}
-                          </span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={inv.expired ? "destructive" : inv.lowStock ? "outline" : "secondary"} className={
-                        !inv.expired && !inv.lowStock ? "bg-green-100 text-green-800 hover:bg-green-100 border-transparent" : ""
-                      }>
-                        {inv.expired ? "Expired" : inv.lowStock ? "Low" : "OK"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => handleAdjust(inv.productId, inv.branchId, inv.productName)}
-                          disabled={adjustStock.isPending}
-                        >
-                          {adjustStock.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
-                          Adjust
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => handleTransfer(inv.productId, inv.branchId, inv.productName)}
-                          disabled={transferStock.isPending}
-                        >
-                          {transferStock.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
-                          Transfer
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <DataTable
+              columns={columns}
+              data={rows ?? []}
+              filterColumn="productName"
+              filterPlaceholder="Search products..."
+              isLoading={isLoading}
+              enablePagination={false}
+              emptyState={{
+                title: "No inventory found",
+                description: "No items match your current filters.",
+              }}
+              getRowClass={getRowClass}
+            />
           </CardContent>
         </Card>
       )}

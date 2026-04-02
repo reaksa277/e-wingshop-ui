@@ -10,7 +10,6 @@ import {
   BarChart3,
   Users,
   BookOpen,
-  Settings,
   LogOut,
   Percent,
 } from "lucide-react";
@@ -21,6 +20,7 @@ import { clearAuth } from "@/lib/auth-helpers";
 import { DashboardHeader } from "@/components/dashboard/Header";
 
 import { Badge } from "@/components/ui/badge";
+import type { UserResponse } from "@/types";
 import {
   Sidebar,
   SidebarContent,
@@ -37,6 +37,7 @@ import {
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: ["SUPERADMIN", "MANAGER", "STAFF"] },
+  { label: "Categories", href: "/dashboard/categories", icon: Package, roles: ["SUPERADMIN", "MANAGER"] },
   { label: "Products", href: "/dashboard/products", icon: Package, roles: ["SUPERADMIN", "MANAGER", "STAFF"] },
   { label: "Branches", href: "/dashboard/branches", icon: Store, roles: ["SUPERADMIN", "MANAGER"] },
   { label: "Inventory", href: "/dashboard/inventory", icon: ClipboardList, roles: ["SUPERADMIN", "MANAGER"] },
@@ -96,7 +97,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 type NavItem = (typeof NAV_ITEMS)[number];
 
 interface AppSidebarProps {
-  user: any;
+  user: UserResponse | undefined;
   role: string | null;
   pathname: string;
   visibleNav: NavItem[];

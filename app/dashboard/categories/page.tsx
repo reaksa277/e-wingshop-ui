@@ -1,27 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  getCategories,
-  createCategory,
-  updateCategory,
-  deleteCategory,
-  type CategoryFormData,
-} from '@/app/actions/categories';
+import { type ColumnDef } from '@tanstack/react-table';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { DataTable } from '@/components/ui/data-table';
 import {
   Dialog,
   DialogContent,
@@ -41,74 +27,24 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Plus, Pencil, Trash2, Package } from 'lucide-react';
+import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory } from '@/hooks';
+import type { CategoryResponse, CategoryBody } from '@/types';
 
 export default function CategoriesPage() {
-  const queryClient = useQueryClient();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<any>(null);
-  const [deletingCategory, setDeletingCategory] = useState<any>(null);
-  const [formData, setFormData] = useState<CategoryFormData>({
+  const [editingCategory, setEditingCategory] = useState<CategoryResponse | null>(null);
+  const [deletingCategory, setDeletingCategory] = useState<CategoryResponse | null>(null);
+  const [formData, setFormData] = useState<CategoryBody>({
     name: '',
     description: '',
   });
 
-  const { data: categoriesData, isLoading } = useQuery({
-    queryKey: ['categories'],
-    queryFn: () => getCategories(),
-  });
-
-  const createMutation = useMutation({
-    mutationFn: createCategory,
-    onSuccess: (result) => {
-      if (result.success) {
-        toast.success('Category created successfully!');
-        setIsAddDialogOpen(false);
-        queryClient.invalidateQueries({ queryKey: ['categories'] });
-        resetForm();
-      } else {
-        toast.error(result.error || 'Failed to create category');
-      }
-    },
-    onError: () => {
-      toast.error('An unexpected error occurred');
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<CategoryFormData> }) =>
-      updateCategory(id, data),
-    onSuccess: (result) => {
-      if (result.success) {
-        toast.success('Category updated successfully!');
-        setEditingCategory(null);
-        queryClient.invalidateQueries({ queryKey: ['categories'] });
-        resetForm();
-      } else {
-        toast.error(result.error || 'Failed to update category');
-      }
-    },
-    onError: () => {
-      toast.error('An unexpected error occurred');
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteCategory,
-    onSuccess: (result) => {
-      if (result.success) {
-        toast.success('Category deleted successfully!');
-        setDeletingCategory(null);
-        queryClient.invalidateQueries({ queryKey: ['categories'] });
-      } else {
-        toast.error(result.error || 'Failed to delete category');
-      }
-    },
-    onError: () => {
-      toast.error('An unexpected error occurred');
-    },
-  });
+  const { data: categoriesData, isLoading } = useCategories();
+  const createMutation = useCreateCategory();
+  const updateMutation = useUpdateCategory();
+  const deleteMutation = useDeleteCategory();
 
   const resetForm = () => {
     setFormData({
@@ -117,7 +53,7 @@ export default function CategoriesPage() {
     });
   };
 
-  const handleEdit = (category: any) => {
+  const handleEdit = (category: CategoryResponse) => {
     setEditingCategory(category);
     setFormData({
       name: category.name,
@@ -133,17 +69,92 @@ export default function CategoriesPage() {
     }
 
     if (editingCategory) {
-      updateMutation.mutate({ id: editingCategory.id, data: formData });
+      updateMutation.mutate(
+        { id: editingCategory.id, body: formData },
+        {
+          onSuccess: () => {
+            toast.success('Category updated successfully!');
+            setEditingCategory(null);
+            resetForm();
+            setIsAddDialogOpen(false);
+          },
+          onError: () => {
+            toast.error('Failed to update category');
+          },
+        }
+      );
     } else {
-      createMutation.mutate(formData);
+      createMutation.mutate(formData, {
+        onSuccess: () => {
+          toast.success('Category created successfully!');
+          resetForm();
+          setIsAddDialogOpen(false);
+        },
+        onError: () => {
+          toast.error('Failed to create category');
+        },
+      });
     }
   };
 
   const handleDelete = () => {
     if (deletingCategory) {
-      deleteMutation.mutate(deletingCategory.id);
+      deleteMutation.mutate(deletingCategory.id, {
+        onSuccess: () => {
+          toast.success('Category deleted successfully!');
+          setDeletingCategory(null);
+        },
+        onError: () => {
+          toast.error('Failed to delete category');
+        },
+      });
     }
   };
+
+  // Define columns for DataTable
+  const columns: ColumnDef<CategoryResponse>[] = [
+    {
+      accessorKey: 'name',
+      header: 'Category Name',
+      cell: ({ row }) => (
+        <span className="font-medium">{row.getValue('name')}</span>
+      ),
+    },
+    {
+      accessorKey: 'description',
+      header: 'Description',
+      cell: ({ row }) => (
+        <p className="max-w-md text-muted-foreground truncate">
+          {row.getValue('description') || '—'}
+        </p>
+      ),
+    },
+    {
+      id: 'actions',
+      header: 'Actions',
+      cell: ({ row }) => {
+        const category = row.original;
+        return (
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleEdit(category)}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setDeletingCategory(category)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        );
+      },
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -162,8 +173,8 @@ export default function CategoriesPage() {
             }
           }}
         >
-          <DialogTrigger asChild>
-            <Button onClick={() => setIsAddDialogOpen(true)}>
+          <DialogTrigger>
+            <Button>
               <Plus className="mr-2 h-4 w-4" />
               Add Category
             </Button>
@@ -171,7 +182,9 @@ export default function CategoriesPage() {
           <DialogContent className="sm:max-w-106.25">
             <form onSubmit={handleSubmit}>
               <DialogHeader>
-                <DialogTitle>{editingCategory ? 'Edit Category' : 'Add New Category'}</DialogTitle>
+                <DialogTitle>
+                  {editingCategory ? 'Edit Category' : 'Add New Category'}
+                </DialogTitle>
                 <DialogDescription>
                   {editingCategory
                     ? 'Update category information.'
@@ -185,8 +198,12 @@ export default function CategoriesPage() {
                     id="name"
                     placeholder="e.g., Dairy Products"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    disabled={createMutation.isPending || updateMutation.isPending}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    disabled={
+                      createMutation.isPending || updateMutation.isPending
+                    }
                   />
                 </div>
                 <div className="grid gap-2">
@@ -195,8 +212,12 @@ export default function CategoriesPage() {
                     id="description"
                     placeholder="Brief description of this category..."
                     value={formData.description || ''}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    disabled={createMutation.isPending || updateMutation.isPending}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                    disabled={
+                      createMutation.isPending || updateMutation.isPending
+                    }
                     rows={3}
                   />
                 </div>
@@ -215,7 +236,9 @@ export default function CategoriesPage() {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={createMutation.isPending || updateMutation.isPending}
+                  disabled={
+                    createMutation.isPending || updateMutation.isPending
+                  }
                 >
                   {createMutation.isPending || updateMutation.isPending
                     ? 'Saving...'
@@ -232,79 +255,40 @@ export default function CategoriesPage() {
       {/* Categories Table */}
       <Card>
         <CardContent className="pt-6">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Category Name</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Products</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8">
-                    Loading...
-                  </TableCell>
-                </TableRow>
-              ) : categoriesData?.data?.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8">
-                    No categories found. Create one to get started.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                categoriesData?.data?.map((category: any, index: number) => (
-                  <TableRow key={category?.id || category?.name || `cat-${index}`}>
-                    <TableCell className="font-medium">{category.name}</TableCell>
-                    <TableCell className="max-w-md">
-                      <p className="text-muted-foreground truncate">
-                        {category.description || '—'}
-                      </p>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Package className="h-4 w-4 text-muted-foreground" />
-                        <span>{category.productCount || 0} products</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon" onClick={() => handleEdit(category)}>
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setDeletingCategory(category)}
-                          disabled={category.productCount && category.productCount > 0}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+          <DataTable
+            columns={columns}
+            data={categoriesData ?? []}
+            filterColumn="name"
+            filterPlaceholder="Search categories..."
+            isLoading={isLoading}
+            enablePagination={false}
+            emptyState={{
+              title: 'No categories found',
+              description: 'Create your first category to get started.',
+            }}
+          />
         </CardContent>
       </Card>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deletingCategory} onOpenChange={() => setDeletingCategory(null)}>
+      <AlertDialog
+        open={!!deletingCategory}
+        onOpenChange={() => setDeletingCategory(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the category &quot;
-              {deletingCategory?.name}&quot;.
+              This action cannot be undone. This will permanently delete the
+              category &quot;{deletingCategory?.name}&quot;.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} disabled={deleteMutation.isPending}>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleteMutation.isPending}
+            >
               {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -3,7 +3,6 @@
 import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 import { Suspense } from 'react';
 
 function ErrorContent() {
@@ -26,8 +25,8 @@ function ErrorContent() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Button asChild className="w-full">
-          <Link href="/auth/login">Back to Login</Link>
+        <Button className="w-full" onClick={() => window.location.href = '/auth/login'}>
+          Back to Login
         </Button>
       </CardContent>
     </Card>
