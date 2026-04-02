@@ -170,7 +170,7 @@ export default function CategoriesExample() {
           <p className="text-muted-foreground">Manage product categories</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
+          <DialogTrigger>
             <Button onClick={() => setEditingCategory(null)}>
               <Plus className="mr-2 h-4 w-4" />
               Add Category

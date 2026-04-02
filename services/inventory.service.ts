@@ -26,6 +26,15 @@ export const inventoryService = {
   upsert: (data: InventoryRequest) =>
     api.post<InventoryResponse>("/inventory", data),
 
+  addStock: (data: {
+    branchId: number;
+    productId: number;
+    quantity: number;
+    lowStockThreshold?: number;
+    expiryDate?: string;
+  }) =>
+    api.post<InventoryResponse>("/inventory/add-stock", data),
+
   adjust: ({ branchId, productId, delta, reason }: AdjustStockParams) =>
     api.patch<InventoryResponse>("/inventory/adjust", undefined, {
       branchId,

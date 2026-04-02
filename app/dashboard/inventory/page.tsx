@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   useInventoryByBranch, 
   useListAllInventory,
@@ -9,7 +9,8 @@ import {
   useExpiredInventory, 
   useAdjustStock, 
   useTransferStock, 
-  useBranches 
+  useBranches,
+  useMe
 } from "@/hooks";
 
 // Shadcn UI Components
@@ -50,6 +51,17 @@ export default function InventoryPage() {
   const [tab, setTab] = useState<Tab>("all");
   const [branchId, setBranchId] = useState<string>("all");
   const [page, setPage] = useState(0);
+
+  // Get current user
+  const { data: currentUser } = useMe();
+  const isManager = currentUser?.role === "MANAGER";
+
+  // When user data loads and they are a manager, set their branch
+  useEffect(() => {
+    if (isManager && currentUser?.branchId) {
+      setBranchId(currentUser.branchId.toString());
+    }
+  }, [isManager, currentUser?.branchId]);
 
   // Adjust Stock Dialog State
   const [adjustDialogOpen, setAdjustDialogOpen] = useState(false);
@@ -147,8 +159,9 @@ export default function InventoryPage() {
         <Select 
           value={branchId} 
           onValueChange={(val) => { setBranchId(val); setPage(0); }}
+          disabled={isManager}
         >
-          <SelectTrigger className="w-50">
+          <SelectTrigger className="w-50" disabled={isManager}>
             <SelectValue placeholder="All Branches" />
           </SelectTrigger>
           <SelectContent>

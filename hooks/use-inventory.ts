@@ -80,6 +80,29 @@ export function useUpsertInventory() {
   });
 }
 
+// ── Add stock ─────────────────────────────────────────────────────────────────
+
+export function useAddStock() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: {
+      branchId: number;
+      productId: number;
+      quantity: number;
+      lowStockThreshold?: number;
+      expiryDate?: string;
+    }) => inventoryService.addStock(data),
+    onSuccess: (_data, vars) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.inventory.byBranch(vars.branchId),
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.all() });
+      queryClient.invalidateQueries({ queryKey: ["inventory", "low-stock"] });
+      queryClient.invalidateQueries({ queryKey: ["inventory", "expiring-soon"] });
+    },
+  });
+}
+
 // ── Adjust stock ──────────────────────────────────────────────────────────────
 
 export function useAdjustStock() {
