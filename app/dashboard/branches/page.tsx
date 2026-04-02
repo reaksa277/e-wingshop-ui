@@ -33,8 +33,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { authService } from '@/services/auth.service';
-import { tokenStore } from '@/lib/api-client';
+import { useAuth } from '@/lib/auth-context';
 import type { BranchResponse, BranchRequest } from '@/types';
 import { useBranches, useCreateBranch, useUpdateBranch, useDeleteBranch } from '@/hooks/use-branches';
 
@@ -49,18 +48,7 @@ const branchFormSchema = z.object({
 type BranchFormData = z.infer<typeof branchFormSchema>;
 
 export default function BranchesPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    setIsAuthenticated(!!tokenStore.getAccess());
-  }, []);
-
-  const { data: userData } = useQuery({
-    queryKey: ['user', 'me'],
-    queryFn: () => authService.me(),
-    enabled: isAuthenticated,
-    staleTime: 5 * 60 * 1000,
-  });
+  const { canManage, isLoading: isAuthLoading } = useAuth();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBranch, setEditingBranch] = useState<BranchResponse | null>(null);
@@ -86,7 +74,7 @@ export default function BranchesPage() {
     },
   });
 
-  const isSuperadmin = userData?.role === 'OWNER' || userData?.role === 'ADMIN';
+  const isSuperadmin = canManage;
 
   // Filter branches based on search
   const filteredBranches = branchesData?.filter((branch: BranchResponse) => {
