@@ -12,11 +12,13 @@ import {
   BookOpen,
   Settings,
   LogOut,
+  Percent,
 } from "lucide-react";
 
 import { useAuth } from "@/lib/auth-context";
 import { useLogout } from "@/hooks";
 import { clearAuth } from "@/lib/auth-helpers";
+import { DashboardHeader } from "@/components/dashboard/Header";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -38,6 +40,7 @@ const NAV_ITEMS = [
   { label: "Products", href: "/dashboard/products", icon: Package, roles: ["SUPERADMIN", "MANAGER", "STAFF"] },
   { label: "Branches", href: "/dashboard/branches", icon: Store, roles: ["SUPERADMIN", "MANAGER"] },
   { label: "Inventory", href: "/dashboard/inventory", icon: ClipboardList, roles: ["SUPERADMIN", "MANAGER"] },
+  { label: "Discounts", href: "/dashboard/discounts", icon: Percent, roles: ["SUPERADMIN", "MANAGER"] },
   { label: "Reports", href: "/dashboard/reports", icon: BarChart3, roles: ["SUPERADMIN", "MANAGER"] },
   { label: "Users", href: "/dashboard/users", icon: Users, roles: ["SUPERADMIN", "MANAGER"] },
   { label: "Audit log", href: "/dashboard/audit", icon: BookOpen, roles: ["SUPERADMIN", "MANAGER"] },
@@ -79,6 +82,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     <SidebarProvider>
       <AppSidebar user={user} role={role ?? null} pathname={pathname} visibleNav={visibleNav} onLogout={handleLogout} logoutPending={logout.isPending} />
       <SidebarInset>
+        <DashboardHeader />
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
           {children}
         </main>

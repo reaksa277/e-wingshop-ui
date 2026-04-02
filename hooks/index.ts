@@ -16,3 +16,4 @@ export * from "./use-inventory";
 export * from "./use-discounts";
 export * from "./use-reports";
 export * from "./use-audit";
+export * from "./use-alerts";

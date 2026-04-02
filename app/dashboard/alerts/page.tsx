@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getExpiryAlerts, dismissExpiryAlert, type ExpiryAlert } from '@/app/actions/alerts';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { alertService } from '@/services/alert.service';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -22,21 +22,19 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { CheckCircle2 } from 'lucide-react';
-import { RoleGuard } from '@/components/dashboard/RoleGuard';
+import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 export default function AlertsPage() {
   const [status, setStatus] = useState('all');
   const queryClient = useQueryClient();
 
-  const { data: alertsData, isLoading } = useQuery({
+  const { data: alertsResponse, isLoading } = useQuery({
     queryKey: ['alerts', status],
-    queryFn: () => getExpiryAlerts(undefined, status),
+    queryFn: () => alertService.getAll(0, 100, status === 'all' ? undefined : status),
   });
 
   const dismissMutation = useMutation({
-    mutationFn: ({ alertId, note }: { alertId: string; note?: string }) =>
-      dismissExpiryAlert(alertId, note),
+    mutationFn: (alertId: string) => alertService.dismiss(alertId),
     onSuccess: () => {
       toast.success('Alert dismissed successfully');
       queryClient.invalidateQueries({ queryKey: ['alerts'] });
@@ -62,13 +60,13 @@ export default function AlertsPage() {
       );
     } else if (days <= 30) {
       return (
-        <Badge variant="warning" className="w-20 justify-center">
+        <Badge variant="destructive" className="w-20 justify-center">
           {days} days
         </Badge>
       );
     }
     return (
-      <Badge variant="success" className="w-20 justify-center">
+      <Badge variant="secondary" className="w-20 justify-center">
         {days} days
       </Badge>
     );
@@ -89,9 +87,12 @@ export default function AlertsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Expiry Alerts</h1>
-        <p className="text-muted-foreground">Monitor products approaching expiry</p>
+      <div className="flex items-center gap-3">
+        <AlertCircle className="h-8 w-8 text-yellow-600" />
+        <div>
+          <h1 className="text-3xl font-bold">Expiry Alerts</h1>
+          <p className="text-muted-foreground">Monitor products approaching expiry</p>
+        </div>
       </div>
 
       {/* Filters */}
@@ -99,7 +100,7 @@ export default function AlertsPage() {
         <CardContent className="pt-6">
           <div className="flex gap-4 flex-wrap">
             <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger className="w-[150px]">
+              <SelectTrigger className="w-37.5">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -123,7 +124,6 @@ export default function AlertsPage() {
                 <TableHead>Branch</TableHead>
                 <TableHead>Expiry Date</TableHead>
                 <TableHead>Days Remaining</TableHead>
-                <TableHead>Quantity</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -131,37 +131,35 @@ export default function AlertsPage() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
+                  <TableCell colSpan={6} className="text-center py-8">
                     Loading...
                   </TableCell>
                 </TableRow>
-              ) : alertsData?.data?.alerts?.length === 0 ? (
+              ) : alertsResponse?.data?.alerts?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
+                  <TableCell colSpan={6} className="text-center py-8">
                     No alerts found
                   </TableCell>
                 </TableRow>
               ) : (
-                alertsData?.data?.alerts?.map((alert: ExpiryAlert) => (
+                alertsResponse?.data?.alerts?.map((alert) => (
                   <TableRow key={alert.id}>
-                    <TableCell className="font-medium">{alert.product.name}</TableCell>
-                    <TableCell>{alert.branch.name}</TableCell>
+                    <TableCell className="font-medium">{alert.product?.name || 'Unknown'}</TableCell>
+                    <TableCell>{alert.branch?.name || 'N/A'}</TableCell>
                     <TableCell>{new Date(alert.expiryDate).toLocaleDateString()}</TableCell>
-                    <TableCell>{getDaysRemainingBadge(alert.daysRemaining)}</TableCell>
-                    <TableCell>{alert.quantity}</TableCell>
+                    <TableCell>{getDaysRemainingBadge(alert.daysRemaining || 0)}</TableCell>
                     <TableCell>{getStatusBadge(alert.status)}</TableCell>
                     <TableCell className="text-right">
                       {alert.status === 'ACTIVE' && (
-                        <RoleGuard permission="dismiss_expiry_alerts">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => dismissMutation.mutate({ alertId: alert.id })}
-                          >
-                            <CheckCircle2 className="mr-2 h-4 w-4" />
-                            Dismiss
-                          </Button>
-                        </RoleGuard>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => dismissMutation.mutate(alert.id)}
+                          disabled={dismissMutation.isPending}
+                        >
+                          <CheckCircle2 className="mr-2 h-4 w-4" />
+                          Dismiss
+                        </Button>
                       )}
                     </TableCell>
                   </TableRow>
