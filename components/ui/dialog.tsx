@@ -11,9 +11,33 @@ function Dialog({ ...props }: DialogPrimitive.Root.Props) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
 }
 
-function DialogTrigger({ ...props }: DialogPrimitive.Trigger.Props) {
-  return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />
-}
+const DialogTrigger = React.forwardRef<
+  HTMLButtonElement,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Trigger> & { asChild?: boolean }
+>(({ asChild, render, children, ...props }, ref) => {
+  if (asChild && React.isValidElement(children)) {
+    return (
+      <DialogPrimitive.Trigger 
+        {...props} 
+        ref={ref}
+        render={children}
+        nativeButton={true}
+      />
+    );
+  }
+
+  return (
+    <DialogPrimitive.Trigger 
+      data-slot="dialog-trigger" 
+      {...props} 
+      ref={ref}
+      render={render}
+    >
+      {children}
+    </DialogPrimitive.Trigger>
+  );
+});
+DialogTrigger.displayName = "DialogTrigger"
 
 function DialogPortal({ ...props }: DialogPrimitive.Portal.Props) {
   return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />

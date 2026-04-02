@@ -9,7 +9,9 @@ import {
   useCreateStaff,
   useChangeRole,
   useResetPassword,
+  useAssignManagerBranch,
 } from '@/hooks/use-users';
+import { useBranches } from '@/hooks';
 import { userService } from '@/services/user.service';
 import { RoleName, CreateStaffRequest } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -69,13 +71,18 @@ export default function UsersPage() {
   const [currentPage, setCurrentPage] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
+  const [assignManagerOpen, setAssignManagerOpen] = useState(false);
+  const [selectedManagerId, setSelectedManagerId] = useState<number | null>(null);
+  const [selectedBranchId, setSelectedBranchId] = useState<string>('');
 
   const PAGE_SIZE = 20;
 
   const { data: usersData, isLoading, refetch: refetchUsers } = useUsers(currentPage, PAGE_SIZE);
+  const { data: branchesData } = useBranches();
   const createStaffMutation = useCreateStaff();
   const changeRoleMutation = useChangeRole();
   const resetPasswordMutation = useResetPassword();
+  const assignManagerBranchMutation = useAssignManagerBranch();
 
   const form = useForm<z.infer<typeof userFormSchema>>({
     resolver: zodResolver(userFormSchema),
@@ -158,6 +165,29 @@ export default function UsersPage() {
     }
   };
 
+  const handleAssignManager = (user: any) => {
+    setSelectedManagerId(user.id);
+    setSelectedBranchId(user.branchId?.toString() || '');
+    setAssignManagerOpen(true);
+  };
+
+  const handleAssignManagerSubmit = async () => {
+    if (!selectedManagerId || !selectedBranchId) return;
+    try {
+      await assignManagerBranchMutation.mutateAsync({
+        id: selectedManagerId,
+        branchId: Number(selectedBranchId),
+      });
+      toast.success('Manager assigned to branch successfully');
+      setAssignManagerOpen(false);
+      setSelectedManagerId(null);
+      setSelectedBranchId('');
+      refetchUsers();
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to assign manager to branch');
+    }
+  };
+
   const handleEdit = (user: any) => {
     setEditingUser(user);
     setIsDialogOpen(true);
@@ -196,7 +226,7 @@ export default function UsersPage() {
             Export CSV
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger>
+            <DialogTrigger asChild>
               <Button onClick={() => setEditingUser(null)}>
                 <Plus className="mr-2 h-4 w-4" />
                 Add User
@@ -331,6 +361,53 @@ export default function UsersPage() {
                 </Form>
               </DialogContent>
             </Dialog>
+
+            {/* Assign Manager to Branch Dialog */}
+            <Dialog open={assignManagerOpen} onOpenChange={setAssignManagerOpen}>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Assign Manager to Branch</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <FormLabel>Select Branch</FormLabel>
+                    <Select value={selectedBranchId} onValueChange={setSelectedBranchId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose a branch..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {branchesData?.map((branch: any) => (
+                          <SelectItem key={branch.id} value={branch.id.toString()}>
+                            {branch.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setAssignManagerOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleAssignManagerSubmit}
+                    disabled={!selectedBranchId || assignManagerBranchMutation.isPending}
+                  >
+                    {assignManagerBranchMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Assigning...
+                      </>
+                    ) : (
+                      'Assign'
+                    )}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
         </div>
       </div>
 
@@ -416,6 +493,16 @@ export default function UsersPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
+                        {user.role === 'MANAGER' && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleAssignManager(user)}
+                            title="Assign branch"
+                          >
+                            Assign Branch
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="icon"

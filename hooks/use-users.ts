@@ -82,3 +82,17 @@ export function useResetPassword() {
       userService.resetPassword(id, password),
   });
 }
+
+// ── Assign manager to branch ──────────────────────────────────────────────────
+
+export function useAssignManagerBranch() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, branchId }: { id: number; branchId: number }) =>
+      userService.assignManagerBranch(id, branchId),
+    onSuccess: (updated, { id }) => {
+      queryClient.setQueryData(queryKeys.users.detail(id), updated);
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+}

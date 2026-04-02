@@ -27,4 +27,7 @@ export const userService = {
 
   deleteUser: (id: number) =>
     api.delete<void>(`/users/${id}`),
+
+  assignManagerBranch: (id: number, branchId: number) =>
+    api.patch<UserResponse>(`/users/${id}/manager-branch`, { branchId }),
 };

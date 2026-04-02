@@ -43,6 +43,7 @@ export interface AuthResponse {
   fullName:     string;
   email:        string;
   role:         RoleName;
+  branchId?:    number;  // For managers
 }
 
 export interface LoginRequest {
@@ -65,6 +66,7 @@ export interface UserResponse {
   email:     string;
   phone?:    string;
   role:      RoleName;
+  branchId?: number;  // For managers
   createdAt: string;
 }
 
