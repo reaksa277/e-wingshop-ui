@@ -24,7 +24,6 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 
 // Assets & Types
-import { SkeletonPage } from '@/components/ui/Skeletonui';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { ChevronLeft, Edit3, Trash2, AlertTriangle, ExternalLink, Save, X } from 'lucide-react';
 import type { ProductRequest } from '@/types';
