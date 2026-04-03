@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { authService } from "@/services/auth.service";
-import { queryKeys } from "@/lib/query-keys";
-import { LoginRequest, RegisterRequest } from "@/types";
-import { tokenStore } from "@/lib/api-client";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { authService } from '@/services/auth.service';
+import { queryKeys } from '@/lib/query-keys';
+import { LoginRequest, RegisterRequest } from '@/types';
+import { tokenStore } from '@/lib/api-client';
 
 // ── Current user ──────────────────────────────────────────────────────────────
 
@@ -17,11 +17,11 @@ export function useMe() {
   }, []);
 
   return useQuery({
-    queryKey:  queryKeys.users.me(),
-    queryFn:   authService.me,
-    enabled:   hasToken,
-    staleTime: 5 * 60 * 1000,   // 5 minutes
-    retry:     false,
+    queryKey: queryKeys.users.me(),
+    queryFn: authService.me,
+    enabled: hasToken,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: false,
   });
 }
 
@@ -34,10 +34,10 @@ export function useLogin() {
     mutationFn: (data: LoginRequest) => authService.login(data),
     onSuccess: (data) => {
       queryClient.setQueryData(queryKeys.users.me(), {
-        id:       data.userId,
+        id: data.userId,
         fullName: data.fullName,
-        email:    data.email,
-        role:     data.role,
+        email: data.email,
+        role: data.role,
       });
     },
   });
@@ -52,10 +52,10 @@ export function useRegister() {
     mutationFn: (data: RegisterRequest) => authService.register(data),
     onSuccess: (data) => {
       queryClient.setQueryData(queryKeys.users.me(), {
-        id:       data.userId,
+        id: data.userId,
         fullName: data.fullName,
-        email:    data.email,
-        role:     data.role,
+        email: data.email,
+        role: data.role,
       });
     },
   });
@@ -68,6 +68,6 @@ export function useLogout() {
 
   return useMutation({
     mutationFn: async () => authService.logout(),
-    onSuccess:  () => queryClient.clear(),
+    onSuccess: () => queryClient.clear(),
   });
 }

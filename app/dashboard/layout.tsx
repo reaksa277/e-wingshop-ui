@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useEffect, type ReactNode } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useEffect, type ReactNode } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   Package,
@@ -13,9 +13,10 @@ import {
   Bell,
 } from "lucide-react";
 
-import { useAuth } from "@/lib/auth-context";
-import { useLogout } from "@/hooks";
-import { clearAuth } from "@/lib/auth-helpers";
+import { useAuth } from '@/lib/auth-context';
+import { useLogout } from '@/hooks';
+import { clearAuth } from '@/lib/auth-helpers';
+import { DashboardHeader } from '@/components/dashboard/Header';
 
 import { Badge } from "@/components/ui/badge";
 import { NotificationDropdown } from "@/components/dashboard/NotificationDropdown";
@@ -56,14 +57,14 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!isLoading && !isLoggedIn) {
-      router.replace("/login");
+      router.replace('/login');
     }
   }, [isLoading, isLoggedIn, router]);
 
   async function handleLogout() {
     await logout.mutateAsync();
     clearAuth();
-    router.push("/login");
+    router.push('/login');
   }
 
   if (isLoading) {
@@ -82,8 +83,16 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   return (
     <SidebarProvider>
-      <AppSidebar user={user} role={role ?? null} pathname={pathname} visibleNav={visibleNav} onLogout={handleLogout} logoutPending={logout.isPending} />
+      <AppSidebar
+        user={user}
+        role={role ?? null}
+        pathname={pathname}
+        visibleNav={visibleNav}
+        onLogout={handleLogout}
+        logoutPending={logout.isPending}
+      />
       <SidebarInset>
+<<<<<<< HEAD
         {/* Top Navbar */}
         <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
           <SidebarTrigger className="md:hidden" />
@@ -100,6 +109,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         <main className="dashboard-main">
           {children}
         </main>
+=======
+        <DashboardHeader />
+        <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
+>>>>>>> b750e70e4013afa744d4299da8c5baab8c10231f
       </SidebarInset>
     </SidebarProvider>
   );
@@ -118,13 +131,25 @@ interface AppSidebarProps {
   logoutPending: boolean;
 }
 
-function AppSidebar({ user, role, pathname, visibleNav, onLogout, logoutPending }: AppSidebarProps) {
+function AppSidebar({
+  user,
+  role,
+  pathname,
+  visibleNav,
+  onLogout,
+  logoutPending,
+}: AppSidebarProps) {
   return (
     <Sidebar>
+<<<<<<< HEAD
       <SidebarHeader className="sidebar-brand">
         <div className="flex items-center gap-2">
           🛒 Grocery Stock Management
         </div>
+=======
+      <SidebarHeader className="flex items-center gap-2 py-4">
+        <div className="flex items-center gap-2 font-bold text-lg tracking-tight">🛒 FreshMart</div>
+>>>>>>> b750e70e4013afa744d4299da8c5baab8c10231f
       </SidebarHeader>
 
       <SidebarContent>
@@ -133,12 +158,12 @@ function AppSidebar({ user, role, pathname, visibleNav, onLogout, logoutPending 
             const Icon = item.icon;
             const isActive =
               pathname === item.href ||
-              (item.href !== "/dashboard" && pathname.startsWith(item.href));
+              (item.href !== '/dashboard' && pathname.startsWith(item.href));
 
             return (
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
-                  onClick={() => window.location.href = item.href}
+                  onClick={() => (window.location.href = item.href)}
                   isActive={isActive}
                   tooltip={item.label}
                 >
@@ -163,13 +188,9 @@ function AppSidebar({ user, role, pathname, visibleNav, onLogout, logoutPending 
           )}
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton
-                onClick={onLogout}
-                disabled={logoutPending}
-                tooltip="Sign out"
-              >
+              <SidebarMenuButton onClick={onLogout} disabled={logoutPending} tooltip="Sign out">
                 <LogOut className="h-4 w-4" />
-                <span>{logoutPending ? "Signing out…" : "Sign out"}</span>
+                <span>{logoutPending ? 'Signing out…' : 'Sign out'}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

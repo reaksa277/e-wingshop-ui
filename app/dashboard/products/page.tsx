@@ -1,25 +1,26 @@
-"use client";
+'use client';
 
 import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Edit, Trash2 } from "lucide-react";
 
-import {
-  useProducts,
-  useCategories,
-  useCreateProduct,
-  useDeleteProduct,
-} from "@/hooks";
-import { useAuth } from "@/lib/auth-context";
-import type { ProductResponse, ProductRequest } from "@/types";
+import { useProducts, useCategories, useCreateProduct, useDeleteProduct } from '@/hooks';
+import { useAuth } from '@/lib/auth-context';
+import type { ProductResponse, ProductRequest } from '@/types';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DataTable } from "@/components/ui/data-table";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { DataTable } from '@/components/ui/data-table';
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -30,9 +31,7 @@ export default function ProductsPage() {
   const [size] = useState(20);
   const [keyword, setKeyword] = useState(searchParams.get("keyword") ?? "");
   const [categoryId, setCategoryId] = useState<number | undefined>(
-    searchParams.get("categoryId")
-      ? Number(searchParams.get("categoryId"))
-      : undefined
+    searchParams.get('categoryId') ? Number(searchParams.get('categoryId')) : undefined
   );
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<Partial<ProductRequest>>({});
@@ -64,53 +63,51 @@ export default function ProductsPage() {
   // Define columns for DataTable
   const columns: ColumnDef<ProductResponse>[] = [
     {
-      accessorKey: "name",
-      header: "Name",
+      accessorKey: 'name',
+      header: 'Name',
       cell: ({ row }) => (
         <button
           onClick={() => router.push(`/dashboard/products/${row.original.id}`)}
           className="font-medium text-primary underline-offset-4 hover:underline"
         >
-          {row.getValue("name")}
+          {row.getValue('name')}
         </button>
       ),
     },
     {
-      accessorKey: "barcode",
-      header: "Barcode",
-      cell: ({ row }) => row.getValue("barcode") ?? "—",
+      accessorKey: 'barcode',
+      header: 'Barcode',
+      cell: ({ row }) => row.getValue('barcode') ?? '—',
     },
     {
-      accessorKey: "category",
-      header: "Category",
-      cell: ({ row }) => (row.original.category?.name ?? "—") as React.ReactNode,
+      accessorKey: 'category',
+      header: 'Category',
+      cell: ({ row }) => (row.original.category?.name ?? '—') as React.ReactNode,
     },
     {
-      accessorKey: "costPrice",
-      header: "Cost",
-      cell: ({ row }) => `$${Number(row.getValue("costPrice")).toFixed(2)}`,
+      accessorKey: 'costPrice',
+      header: 'Cost',
+      cell: ({ row }) => `$${Number(row.getValue('costPrice')).toFixed(2)}`,
     },
     {
-      accessorKey: "sellingPrice",
-      header: "Price",
+      accessorKey: 'sellingPrice',
+      header: 'Price',
       cell: ({ row }) => (
-        <span className="font-medium">
-          ${Number(row.getValue("sellingPrice")).toFixed(2)}
-        </span>
+        <span className="font-medium">${Number(row.getValue('sellingPrice')).toFixed(2)}</span>
       ),
     },
     {
-      accessorKey: "isActive",
-      header: "Status",
+      accessorKey: 'isActive',
+      header: 'Status',
       cell: ({ row }) => (
-        <Badge variant={row.original.isActive ? "default" : "destructive"}>
-          {row.original.isActive ? "Active" : "Inactive"}
+        <Badge variant={row.original.isActive ? 'default' : 'destructive'}>
+          {row.original.isActive ? 'Active' : 'Inactive'}
         </Badge>
       ),
     },
     {
-      id: "actions",
-      header: "Actions",
+      id: 'actions',
+      header: 'Actions',
       cell: ({ row }) => {
         const product = row.original;
         return (
@@ -163,26 +160,23 @@ export default function ProductsPage() {
             <CardTitle>Create Product</CardTitle>
           </CardHeader>
           <CardContent>
-            <form
-              onSubmit={handleCreate}
-              className="grid gap-4 md:grid-cols-3"
-            >
+            <form onSubmit={handleCreate} className="grid gap-4 md:grid-cols-3">
               <Input
                 required
                 placeholder="Name *"
-                value={formData.name ?? ""}
-                onChange={(e) => set("name", e.target.value)}
+                value={formData.name ?? ''}
+                onChange={(e) => set('name', e.target.value)}
               />
 
               <Input
                 placeholder="Barcode"
-                value={formData.barcode ?? ""}
-                onChange={(e) => set("barcode", e.target.value)}
+                value={formData.barcode ?? ''}
+                onChange={(e) => set('barcode', e.target.value)}
               />
 
               <Select
-                value={formData.categoryId?.toString() ?? ""}
-                onValueChange={(v) => set("categoryId", Number(v))}
+                value={formData.categoryId?.toString() ?? ''}
+                onValueChange={(v) => set('categoryId', Number(v))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Category *" />
@@ -201,8 +195,8 @@ export default function ProductsPage() {
                 type="number"
                 step="0.01"
                 placeholder="Cost price *"
-                value={formData.costPrice ?? ""}
-                onChange={(e) => set("costPrice", Number(e.target.value))}
+                value={formData.costPrice ?? ''}
+                onChange={(e) => set('costPrice', Number(e.target.value))}
               />
 
               <Input
@@ -210,26 +204,22 @@ export default function ProductsPage() {
                 type="number"
                 step="0.01"
                 placeholder="Selling price *"
-                value={formData.sellingPrice ?? ""}
-                onChange={(e) => set("sellingPrice", Number(e.target.value))}
+                value={formData.sellingPrice ?? ''}
+                onChange={(e) => set('sellingPrice', Number(e.target.value))}
               />
 
               <Input
                 placeholder="Description"
-                value={formData.description ?? ""}
-                onChange={(e) => set("description", e.target.value)}
+                value={formData.description ?? ''}
+                onChange={(e) => set('description', e.target.value)}
               />
 
               <div className="col-span-full flex gap-2">
                 <Button type="submit" disabled={createProduct.isPending}>
-                  {createProduct.isPending ? "Saving…" : "Create"}
+                  {createProduct.isPending ? 'Saving…' : 'Create'}
                 </Button>
 
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setShowForm(false)}
-                >
+                <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
                   Cancel
                 </Button>
 
@@ -256,7 +246,7 @@ export default function ProductsPage() {
         />
 
         <Select
-          value={categoryId?.toString() ?? ""}
+          value={categoryId?.toString() ?? ''}
           onValueChange={(v) => {
             setCategoryId(v ? Number(v) : undefined);
             setPage(0);
@@ -289,10 +279,11 @@ export default function ProductsPage() {
             pageSize={10}
             totalCount={data?.totalElements}
             emptyState={{
-              title: "No products found",
-              description: keyword || categoryId
-                ? "Try adjusting your search or filters."
-                : "Create your first product to get started.",
+              title: 'No products found',
+              description:
+                keyword || categoryId
+                  ? 'Try adjusting your search or filters.'
+                  : 'Create your first product to get started.',
             }}
           />
         </CardContent>

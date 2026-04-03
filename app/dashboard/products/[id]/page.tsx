@@ -1,46 +1,32 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import Image from "next/image";
-import {
-  useProduct,
-  useUpdateProduct,
-  useDeleteProduct,
-  useCategories
-} from "@/hooks";
-import { useAuth } from "@/lib/auth-context";
+import { useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { useProduct, useUpdateProduct, useDeleteProduct, useCategories } from '@/hooks';
+import { useAuth } from '@/lib/auth-context';
 
 // Shadcn UI Components
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+} from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 
 // Assets & Types
-import { SkeletonPage } from "@/components/ui/Skeletonui";
-import { ErrorMessage } from "@/components/ui/ErrorMessage";
-import {
-  ChevronLeft,
-  Edit3,
-  Trash2,
-  AlertTriangle,
-  ExternalLink,
-  Save,
-  X
-} from "lucide-react";
-import type { ProductRequest } from "@/types";
+import { ErrorMessage } from '@/components/ui/ErrorMessage';
+import { ChevronLeft, Edit3, Trash2, AlertTriangle, ExternalLink, Save, X } from 'lucide-react';
+import type { ProductRequest } from '@/types';
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -56,9 +42,19 @@ export default function ProductDetailPage() {
   const updateProduct = useUpdateProduct(productId);
   const deleteProduct = useDeleteProduct();
 
-  if (isLoading) return <SkeletonPage />;
+  if (isLoading)
+    return (
+      <div className="space-y-6">
+        <div className="h-10 bg-muted rounded animate-pulse" />
+        <div className="grid grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-20 bg-muted rounded animate-pulse" />
+          ))}
+        </div>
+      </div>
+    );
   if (isError) return <ErrorMessage error={error} retry={refetch} />;
-  if (!product) return <ErrorMessage error={new Error("Product not found")} />;
+  if (!product) return <ErrorMessage error={new Error('Product not found')} />;
 
   const set = (key: keyof ProductRequest, value: unknown) => {
     setForm((f) => ({ ...f, [key]: value }));
@@ -84,12 +80,13 @@ export default function ProductDetailPage() {
   async function handleDelete() {
     if (!confirm(`Deactivate "${product!.name}"?`)) return;
     await deleteProduct.mutateAsync(productId);
-    router.push("/dashboard/products");
+    router.push('/dashboard/products');
   }
 
-  const margin = product!.sellingPrice > 0
-    ? (((product!.sellingPrice - product!.costPrice) / product!.sellingPrice) * 100).toFixed(1)
-    : "0";
+  const margin =
+    product!.sellingPrice > 0
+      ? (((product!.sellingPrice - product!.costPrice) / product!.sellingPrice) * 100).toFixed(1)
+      : '0';
 
   return (
     <div className="space-y-6">
@@ -100,29 +97,40 @@ export default function ProductDetailPage() {
             variant="ghost"
             size="sm"
             className="pl-0 text-muted-foreground hover:text-foreground"
-            onClick={() => router.push("/dashboard/products")}
+            onClick={() => router.push('/dashboard/products')}
           >
             <ChevronLeft className="mr-1 h-4 w-4" />
             Back to products
           </Button>
           <div className="flex items-center gap-3">
             <h2 className="text-3xl font-bold tracking-tight">{product.name}</h2>
-            <Badge variant={product.isActive ? "outline" : "destructive"}>
-              {product.isActive ? "Active" : "Inactive"}
+            <Badge variant={product.isActive ? 'outline' : 'destructive'}>
+              {product.isActive ? 'Active' : 'Inactive'}
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground">
-            {product.category?.name ?? "Uncategorized"} • Barcode: {product.barcode || "N/A"}
+            {product.category?.name ?? 'Uncategorized'} • Barcode: {product.barcode || 'N/A'}
           </p>
         </div>
 
         {canManage && (
           <div className="flex items-center gap-2">
             <Button
-              variant={editMode ? "outline" : "default"}
-              onClick={() => { setEditMode(!editMode); setForm({}); }}
+              variant={editMode ? 'outline' : 'default'}
+              onClick={() => {
+                setEditMode(!editMode);
+                setForm({});
+              }}
             >
-              {editMode ? <><X className="mr-2 h-4 w-4" /> Cancel</> : <><Edit3 className="mr-2 h-4 w-4" /> Edit Product</>}
+              {editMode ? (
+                <>
+                  <X className="mr-2 h-4 w-4" /> Cancel
+                </>
+              ) : (
+                <>
+                  <Edit3 className="mr-2 h-4 w-4" /> Edit Product
+                </>
+              )}
             </Button>
             {isOwner && (
               <Button
@@ -131,7 +139,7 @@ export default function ProductDetailPage() {
                 disabled={deleteProduct.isPending || !product.isActive}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                {product.isActive ? "Deactivate" : "Inactive"}
+                {product.isActive ? 'Deactivate' : 'Inactive'}
               </Button>
             )}
           </div>
@@ -144,12 +152,12 @@ export default function ProductDetailPage() {
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Product Inactive</AlertTitle>
           <AlertDescription>
-            This product is currently hidden from the customer-facing storefront and cannot be added to new orders.
+            This product is currently hidden from the customer-facing storefront and cannot be added
+            to new orders.
           </AlertDescription>
         </Alert>
       )}
 
-      {/* KPI Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard label="Cost Price" value={`$${Number(product.costPrice).toFixed(2)}`} />
         <StatCard label="Selling Price" value={`$${Number(product.sellingPrice).toFixed(2)}`} color="text-primary" />
@@ -171,24 +179,35 @@ export default function ProductDetailPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="name">Name *</Label>
-                      <Input id="name" required defaultValue={product.name} onChange={(e) => set("name", e.target.value)} />
+                      <Input
+                        id="name"
+                        required
+                        defaultValue={product.name}
+                        onChange={(e) => set('name', e.target.value)}
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="barcode">Barcode</Label>
-                      <Input id="barcode" defaultValue={product.barcode ?? ""} onChange={(e) => set("barcode", e.target.value)} />
+                      <Input
+                        id="barcode"
+                        defaultValue={product.barcode ?? ''}
+                        onChange={(e) => set('barcode', e.target.value)}
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label>Category *</Label>
                       <Select
                         defaultValue={product.category?.id?.toString()}
-                        onValueChange={(val) => set("categoryId", Number(val))}
+                        onValueChange={(val) => set('categoryId', Number(val))}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
                         <SelectContent>
                           {categories?.map((c) => (
-                            <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>
+                            <SelectItem key={c.id} value={c.id.toString()}>
+                              {c.name}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -196,8 +215,8 @@ export default function ProductDetailPage() {
                     <div className="space-y-2">
                       <Label>Status</Label>
                       <Select
-                        defaultValue={product.isActive ? "true" : "false"}
-                        onValueChange={(val) => set("isActive", val === "true")}
+                        defaultValue={product.isActive ? 'true' : 'false'}
+                        onValueChange={(val) => set('isActive', val === 'true')}
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -210,29 +229,58 @@ export default function ProductDetailPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="cost">Cost Price ($) *</Label>
-                      <Input id="cost" type="number" step="0.01" defaultValue={product.costPrice} onChange={(e) => set("costPrice", Number(e.target.value))} />
+                      <Input
+                        id="cost"
+                        type="number"
+                        step="0.01"
+                        defaultValue={product.costPrice}
+                        onChange={(e) => set('costPrice', Number(e.target.value))}
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="selling">Selling Price ($) *</Label>
-                      <Input id="selling" type="number" step="0.01" defaultValue={product.sellingPrice} onChange={(e) => set("sellingPrice", Number(e.target.value))} />
+                      <Input
+                        id="selling"
+                        type="number"
+                        step="0.01"
+                        defaultValue={product.sellingPrice}
+                        onChange={(e) => set('sellingPrice', Number(e.target.value))}
+                      />
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="desc">Description</Label>
-                    <Textarea id="desc" rows={4} defaultValue={product.description ?? ""} onChange={(e) => set("description", e.target.value)} />
+                    <Textarea
+                      id="desc"
+                      rows={4}
+                      defaultValue={product.description ?? ''}
+                      onChange={(e) => set('description', e.target.value)}
+                    />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="image">Image URL</Label>
-                    <Input id="image" defaultValue={product.imageUrl ?? ""} onChange={(e) => set("imageUrl", e.target.value)} />
+                    <Input
+                      id="image"
+                      defaultValue={product.imageUrl ?? ''}
+                      onChange={(e) => set('imageUrl', e.target.value)}
+                    />
                   </div>
 
                   <div className="pt-4 flex gap-3">
                     <Button type="submit" disabled={updateProduct.isPending}>
-                      {updateProduct.isPending ? "Saving..." : <><Save className="mr-2 h-4 w-4" /> Save Changes</>}
+                      {updateProduct.isPending ? (
+                        'Saving...'
+                      ) : (
+                        <>
+                          <Save className="mr-2 h-4 w-4" /> Save Changes
+                        </>
+                      )}
                     </Button>
-                    <Button type="button" variant="ghost" onClick={() => setEditMode(false)}>Cancel</Button>
+                    <Button type="button" variant="ghost" onClick={() => setEditMode(false)}>
+                      Cancel
+                    </Button>
                   </div>
                   {updateProduct.isError && <ErrorMessage error={updateProduct.error} />}
                 </form>
@@ -246,9 +294,12 @@ export default function ProductDetailPage() {
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <DetailItem label="Full Name" value={product.name} className="md:col-span-2" />
-                  <DetailItem label="Category" value={product.category?.name ?? "—"} />
-                  <DetailItem label="Barcode" value={product.barcode ?? "—"} />
-                  <DetailItem label="Last Updated" value={new Date(product.updatedAt || product.createdAt).toLocaleString()} />
+                  <DetailItem label="Category" value={product.category?.name ?? '—'} />
+                  <DetailItem label="Barcode" value={product.barcode ?? '—'} />
+                  <DetailItem
+                    label="Last Updated"
+                    value={new Date(product.updatedAt || product.createdAt).toLocaleString()}
+                  />
                 </div>
 
                 <Separator />
@@ -256,7 +307,7 @@ export default function ProductDetailPage() {
                 <div className="space-y-2">
                   <h4 className="text-sm font-medium text-muted-foreground">Description</h4>
                   <p className="text-sm leading-relaxed whitespace-pre-wrap italic text-foreground/80">
-                    {product.description || "No description provided for this product."}
+                    {product.description || 'No description provided for this product.'}
                   </p>
                 </div>
               </CardContent>
@@ -302,18 +353,36 @@ export default function ProductDetailPage() {
   );
 }
 
-function StatCard({ label, value, color = "text-foreground" }: { label: string; value: string; color?: string }) {
+function StatCard({
+  label,
+  value,
+  color = 'text-foreground',
+}: {
+  label: string;
+  value: string;
+  color?: string;
+}) {
   return (
     <Card>
       <CardContent className="p-4">
-        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</p>
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+          {label}
+        </p>
         <p className={`text-2xl font-bold mt-1 ${color}`}>{value}</p>
       </CardContent>
     </Card>
   );
 }
 
-function DetailItem({ label, value, className = "" }: { label: string; value: string; className?: string }) {
+function DetailItem({
+  label,
+  value,
+  className = '',
+}: {
+  label: string;
+  value: string;
+  className?: string;
+}) {
   return (
     <div className={`space-y-1 ${className}`}>
       <p className="text-xs font-medium text-muted-foreground uppercase">{label}</p>

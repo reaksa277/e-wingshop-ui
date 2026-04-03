@@ -4,17 +4,19 @@ This document outlines the role-based access control (RBAC) system for E-WingSho
 
 ### Role Hierarchy
 
-| Role | API Name | Level | Description |
-|------|----------|-------|-------------|
-| Superadmin | `OWNER` | 5 (Highest) | Full system access, manages everything |
-| Manager | `ADMIN` | 3 | Branch management, inventory, products |
-| Staff | `STAFF` | 2 | Product and inventory management |
-| Viewer | `CUSTOMER` | 1 (Lowest) | Read-only inventory access |
+| Role       | API Name   | Level       | Description                            |
+| ---------- | ---------- | ----------- | -------------------------------------- |
+| Superadmin | `OWNER`    | 5 (Highest) | Full system access, manages everything |
+| Manager    | `ADMIN`    | 3           | Branch management, inventory, products |
+| Staff      | `STAFF`    | 2           | Product and inventory management       |
+| Viewer     | `CUSTOMER` | 1 (Lowest)  | Read-only inventory access             |
 
 ### Permissions by Role
 
 #### Superadmin (OWNER)
+
 Can perform all actions:
+
 - ✅ manage_users - Create/edit/delete user accounts and staff
 - ✅ manage_roles - Assign and modify user roles
 - ✅ manage_branches - Create/edit/delete branches
@@ -27,7 +29,9 @@ Can perform all actions:
 - ✅ dismiss_expiry_alerts - Manage expiry notifications
 
 #### Manager (ADMIN)
+
 Can manage branch operations:
+
 - ✅ manage_branches - Create/edit/delete branches
 - ✅ manage_products - Add/edit/delete products
 - ✅ manage_categories - Create/manage product categories
@@ -40,7 +44,9 @@ Can manage branch operations:
 - ❌ manage_roles - Cannot change roles
 
 #### Staff (STAFF)
+
 Can manage products and inventory:
+
 - ✅ manage_products - Add/edit/delete products
 - ✅ manage_inventory - Update stock levels
 - ✅ view_inventory - Check stock availability
@@ -52,7 +58,9 @@ Can manage products and inventory:
 - ❌ dismiss_expiry_alerts - Cannot manage alerts
 
 #### Viewer (CUSTOMER)
+
 Read-only access:
+
 - ✅ view_inventory - Can see available products and stock
 - ❌ All management permissions - No write access
 
@@ -60,17 +68,17 @@ Read-only access:
 
 The sidebar automatically filters menu items based on user role and permissions:
 
-| Menu Item | Required Permission | Accessible Roles |
-|-----------|-------------------|------------------|
-| Dashboard | None | All |
-| Categories | manage_categories | Superadmin, Manager |
-| Products | manage_products | Superadmin, Manager, Staff |
-| Branches | manage_branches | Superadmin, Manager |
-| Inventory | view_inventory | All |
-| Orders | process_orders | Superadmin, Manager, Staff |
-| Reports | view_sales_reports | Superadmin, Manager |
-| Alerts | dismiss_expiry_alerts | Superadmin, Manager |
-| Users | manage_users | Superadmin |
+| Menu Item  | Required Permission   | Accessible Roles           |
+| ---------- | --------------------- | -------------------------- |
+| Dashboard  | None                  | All                        |
+| Categories | manage_categories     | Superadmin, Manager        |
+| Products   | manage_products       | Superadmin, Manager, Staff |
+| Branches   | manage_branches       | Superadmin, Manager        |
+| Inventory  | view_inventory        | All                        |
+| Orders     | process_orders        | Superadmin, Manager, Staff |
+| Reports    | view_sales_reports    | Superadmin, Manager        |
+| Alerts     | dismiss_expiry_alerts | Superadmin, Manager        |
+| Users      | manage_users          | Superadmin                 |
 
 ### Using Permission Guards in Components
 
@@ -86,19 +94,19 @@ export function ProductActions() {
     <>
       {/* Everyone can see this button */}
       <button>View Details</button>
-      
+
       {/* Only superadmin, manager, and staff can see this */}
       <RoleGuard permission="manage_products">
         <button>Edit Product</button>
       </RoleGuard>
-      
+
       {/* Only superadmin and manager can see this */}
       <RoleGuard permission="manage_categories">
         <button>Manage Categories</button>
       </RoleGuard>
-      
+
       {/* Fallback UI if no permission */}
-      <RoleGuard 
+      <RoleGuard
         permission="manage_users"
         fallback={<span className="text-gray-500">Requires Admin</span>}
       >
@@ -139,8 +147,8 @@ import { getPermissionsForRole, type Role } from '@/lib/permissions';
 const role: Role = 'manager';
 const permissions = getPermissionsForRole(role);
 console.log(permissions);
-// Output: ['manage_branches', 'manage_products', 'manage_categories', 
-//          'manage_inventory', 'view_inventory', 'process_orders', 
+// Output: ['manage_branches', 'manage_products', 'manage_categories',
+//          'manage_inventory', 'view_inventory', 'process_orders',
 //          'view_sales_reports', 'dismiss_expiry_alerts']
 ```
 
@@ -155,18 +163,18 @@ When creating users via the admin panel:
 
 ### API Endpoints with Permission Requirements
 
-| Endpoint | Method | Permission | Roles |
-|----------|--------|-----------|-------|
-| `/users` | GET | manage_users | Superadmin |
-| `/users/staff` | POST | manage_users | Superadmin |
-| `/users/{id}/role` | PATCH | manage_roles | Superadmin |
-| `/branches` | GET/POST | manage_branches | Superadmin, Manager |
-| `/categories` | GET/POST | manage_categories | Superadmin, Manager |
-| `/products` | GET/POST | manage_products | Superadmin, Manager, Staff |
-| `/inventory` | GET/POST | manage_inventory or view_inventory | Superadmin, Manager, Staff, Viewer |
-| `/orders` | GET/POST | process_orders | Superadmin, Manager, Staff |
-| `/reports/*` | GET | view_sales_reports | Superadmin, Manager |
-| `/audit/*` | GET | manage_roles or manage_users | Superadmin |
+| Endpoint           | Method   | Permission                         | Roles                              |
+| ------------------ | -------- | ---------------------------------- | ---------------------------------- |
+| `/users`           | GET      | manage_users                       | Superadmin                         |
+| `/users/staff`     | POST     | manage_users                       | Superadmin                         |
+| `/users/{id}/role` | PATCH    | manage_roles                       | Superadmin                         |
+| `/branches`        | GET/POST | manage_branches                    | Superadmin, Manager                |
+| `/categories`      | GET/POST | manage_categories                  | Superadmin, Manager                |
+| `/products`        | GET/POST | manage_products                    | Superadmin, Manager, Staff         |
+| `/inventory`       | GET/POST | manage_inventory or view_inventory | Superadmin, Manager, Staff, Viewer |
+| `/orders`          | GET/POST | process_orders                     | Superadmin, Manager, Staff         |
+| `/reports/*`       | GET      | view_sales_reports                 | Superadmin, Manager                |
+| `/audit/*`         | GET      | manage_roles or manage_users       | Superadmin                         |
 
 ### Implementation Details
 
@@ -179,6 +187,7 @@ When creating users via the admin panel:
 ### Security Notes
 
 ⚠️ **Important**: Frontend permission checks are for UX only. The backend API must enforce all permission checks:
+
 - Frontend hides UI elements for users without permissions
 - Backend validates permissions for all API requests
 - Never trust client-side permission checks alone
@@ -197,11 +206,13 @@ To test each role locally:
 To add new permissions:
 
 1. Add to `Permission` type in `lib/permissions.ts`:
+
    ```tsx
    export type Permission = '...' | 'new_permission';
    ```
 
 2. Add to relevant roles in `rolePermissions`:
+
    ```tsx
    export const rolePermissions: Record<Role, Permission[]> = {
      superadmin: [..., 'new_permission'],
@@ -212,7 +223,5 @@ To add new permissions:
 
 3. Use in components:
    ```tsx
-   <RoleGuard permission="new_permission">
-     {/* content */}
-   </RoleGuard>
+   <RoleGuard permission="new_permission">{/* content */}</RoleGuard>
    ```

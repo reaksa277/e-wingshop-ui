@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { type ColumnDef } from "@tanstack/react-table";
+import { useEffect, useState } from 'react';
+import { type ColumnDef } from '@tanstack/react-table';
 import {
   useListAllInventory,
   useLowStock,
@@ -21,14 +21,14 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
-} from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+  SelectValue,
+} from '@/components/ui/select';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
@@ -41,11 +41,11 @@ import { Loader2, ArrowLeft, ArrowRight, Plus } from "lucide-react";
 import { DataTable } from "@/components/ui/data-table";
 import type { InventoryResponse } from "@/types";
 
-type Tab = "all" | "low" | "expiring" | "expired";
+type Tab = 'all' | 'low' | 'expiring' | 'expired';
 
 export default function InventoryPage() {
-  const [tab, setTab] = useState<Tab>("all");
-  const [branchId, setBranchId] = useState<string>("all");
+  const [tab, setTab] = useState<Tab>('all');
+  const [branchId, setBranchId] = useState<string>('all');
   const [page, setPage] = useState(0);
   const [showAddForm, setShowAddForm] = useState(false);
   const [inventoryForm, setInventoryForm] = useState<Partial<InventoryRequest>>({
@@ -63,9 +63,9 @@ export default function InventoryPage() {
   const [adjustData, setAdjustData] = useState({
     productId: 0,
     branchId: 0,
-    productName: "",
-    quantity: "",
-    reason: "Manual"
+    productName: '',
+    quantity: '',
+    reason: 'Manual',
   });
 
   // Transfer Stock Dialog State
@@ -73,9 +73,9 @@ export default function InventoryPage() {
   const [transferData, setTransferData] = useState({
     productId: 0,
     fromBranchId: 0,
-    productName: "",
-    toBranchId: "",
-    quantity: ""
+    productName: '',
+    toBranchId: '',
+    quantity: '',
   });
 
   const { data: branches } = useBranches();
@@ -85,29 +85,37 @@ export default function InventoryPage() {
   const upsertInventory = useUpsertInventory();
 
   // Queries
-  const selectedBranchId = branchId === "all" ? undefined : Number(branchId);
+  const selectedBranchId = branchId === 'all' ? undefined : Number(branchId);
   const allQuery = useListAllInventory(page, 20, selectedBranchId);
   const lowQuery = useLowStock(selectedBranchId);
   const expiringQuery = useExpiringSoon(selectedBranchId, 30);
   const expiredQuery = useExpiredInventory();
 
-  const rows = tab === "all" ? allQuery.data?.content
-    : tab === "low" ? lowQuery.data
-    : tab === "expiring" ? expiringQuery.data
-    : expiredQuery.data;
+  const rows =
+    tab === 'all'
+      ? allQuery.data?.content
+      : tab === 'low'
+        ? lowQuery.data
+        : tab === 'expiring'
+          ? expiringQuery.data
+          : expiredQuery.data;
 
-  const isLoading = tab === "all" ? allQuery.isLoading
-    : tab === "low" ? lowQuery.isLoading
-    : tab === "expiring" ? expiringQuery.isLoading
-    : expiredQuery.isLoading;
+  const isLoading =
+    tab === 'all'
+      ? allQuery.isLoading
+      : tab === 'low'
+        ? lowQuery.isLoading
+        : tab === 'expiring'
+          ? expiringQuery.isLoading
+          : expiredQuery.isLoading;
 
   const handleAdjust = (productId: number, bId: number, name: string) => {
     setAdjustData({
       productId,
       branchId: bId,
       productName: name,
-      quantity: "",
-      reason: "Manual"
+      quantity: '',
+      reason: 'Manual',
     });
     setAdjustDialogOpen(true);
   };
@@ -119,10 +127,10 @@ export default function InventoryPage() {
       branchId: adjustData.branchId,
       productId: adjustData.productId,
       delta,
-      reason: adjustData.reason
+      reason: adjustData.reason,
     });
     setAdjustDialogOpen(false);
-    setAdjustData({ productId: 0, branchId: 0, productName: "", quantity: "", reason: "Manual" });
+    setAdjustData({ productId: 0, branchId: 0, productName: '', quantity: '', reason: 'Manual' });
   };
 
   const handleTransfer = (productId: number, fromBranchId: number, name: string) => {
@@ -130,8 +138,8 @@ export default function InventoryPage() {
       productId,
       fromBranchId,
       productName: name,
-      toBranchId: "",
-      quantity: ""
+      toBranchId: '',
+      quantity: '',
     });
     setTransferDialogOpen(true);
   };
@@ -142,7 +150,7 @@ export default function InventoryPage() {
       fromBranchId: transferData.fromBranchId,
       toBranchId: Number(transferData.toBranchId),
       productId: transferData.productId,
-      quantity: Number(transferData.quantity)
+      quantity: Number(transferData.quantity),
     });
     setTransferDialogOpen(false);
     setTransferData({ productId: 0, fromBranchId: 0, productName: "", toBranchId: "", quantity: "" });
@@ -187,41 +195,37 @@ export default function InventoryPage() {
   // Define columns for DataTable
   const columns: ColumnDef<InventoryResponse>[] = [
     {
-      accessorKey: "productName",
-      header: "Product",
-      cell: ({ row }) => (
-        <span className="font-medium">{row.getValue("productName")}</span>
-      ),
+      accessorKey: 'productName',
+      header: 'Product',
+      cell: ({ row }) => <span className="font-medium">{row.getValue('productName')}</span>,
     },
     {
-      accessorKey: "branchName",
-      header: "Branch",
-      cell: ({ row }) => row.getValue("branchName"),
+      accessorKey: 'branchName',
+      header: 'Branch',
+      cell: ({ row }) => row.getValue('branchName'),
     },
     {
-      accessorKey: "quantity",
-      header: "Qty",
-      cell: ({ row }) => (
-        <span className="font-bold">{row.getValue("quantity")}</span>
-      ),
+      accessorKey: 'quantity',
+      header: 'Qty',
+      cell: ({ row }) => <span className="font-bold">{row.getValue('quantity')}</span>,
     },
     {
-      accessorKey: "lowStockThreshold",
-      header: "Threshold",
+      accessorKey: 'lowStockThreshold',
+      header: 'Threshold',
       cell: ({ row }) => (
         <span className="text-muted-foreground hidden md:table-cell">
-          {row.getValue("lowStockThreshold")}
+          {row.getValue('lowStockThreshold')}
         </span>
       ),
     },
     {
-      accessorKey: "expiryDate",
-      header: "Expiry",
+      accessorKey: 'expiryDate',
+      header: 'Expiry',
       cell: ({ row }) => {
         const inv = row.original;
         return (
           <div className="flex flex-col">
-            <span className="text-sm">{inv.expiryDate ?? "—"}</span>
+            <span className="text-sm">{inv.expiryDate ?? '—'}</span>
             {inv.daysUntilExpiry !== undefined && (
               <span className={`text-xs font-semibold ${
                 inv.daysUntilExpiry < 0 ? "text-destructive" :
@@ -235,8 +239,8 @@ export default function InventoryPage() {
       },
     },
     {
-      accessorKey: "expired",
-      header: "Status",
+      accessorKey: 'expired',
+      header: 'Status',
       cell: ({ row }) => {
         const inv = row.original;
         return (
@@ -249,8 +253,8 @@ export default function InventoryPage() {
       },
     },
     {
-      id: "actions",
-      header: "Actions",
+      id: 'actions',
+      header: 'Actions',
       cell: ({ row }) => {
         const inv = row.original;
         return (
@@ -311,12 +315,22 @@ export default function InventoryPage() {
         </div>
       </div>
 
-      <Tabs value={tab} onValueChange={(v) => { setTab(v as Tab); setPage(0); }}>
+      <Tabs
+        value={tab}
+        onValueChange={(v) => {
+          setTab(v as Tab);
+          setPage(0);
+        }}
+      >
         <TabsList className="grid w-full grid-cols-2 md:w-auto md:flex">
           <TabsTrigger value="all">All Stock</TabsTrigger>
           <TabsTrigger value="low" className="gap-2">
             Low Stock
-            {lowQuery.data?.length ? <Badge variant="destructive" className="h-5 px-1.5">{lowQuery.data.length}</Badge> : null}
+            {lowQuery.data?.length ? (
+              <Badge variant="destructive" className="h-5 px-1.5">
+                {lowQuery.data.length}
+              </Badge>
+            ) : null}
           </TabsTrigger>
           <TabsTrigger value="expiring" className="gap-2">
             Expiring
@@ -487,8 +501,8 @@ export default function InventoryPage() {
               isLoading={isLoading}
               enablePagination={false}
               emptyState={{
-                title: "No inventory found",
-                description: "No items match your current filters.",
+                title: 'No inventory found',
+                description: 'No items match your current filters.',
               }}
               getRowClass={getRowClass}
             />
@@ -496,7 +510,7 @@ export default function InventoryPage() {
         </Card>
       )}
 
-      {tab === "all" && allQuery.data && (
+      {tab === 'all' && allQuery.data && (
         <div className="flex items-center justify-between px-2">
           <p className="text-sm text-muted-foreground">
             Page {allQuery.data.page + 1} of {allQuery.data.totalPages}
@@ -541,7 +555,9 @@ export default function InventoryPage() {
                 value={adjustData.quantity}
                 onChange={(e) => setAdjustData({ ...adjustData, quantity: e.target.value })}
               />
-              <p className="text-xs text-muted-foreground">Use negative numbers to reduce stock (e.g., -5)</p>
+              <p className="text-xs text-muted-foreground">
+                Use negative numbers to reduce stock (e.g., -5)
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="adjust-reason">Reason</Label>
@@ -558,7 +574,10 @@ export default function InventoryPage() {
             <Button variant="outline" onClick={() => setAdjustDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleAdjustSubmit} disabled={adjustStock.isPending || !adjustData.quantity}>
+            <Button
+              onClick={handleAdjustSubmit}
+              disabled={adjustStock.isPending || !adjustData.quantity}
+            >
               {adjustStock.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Adjust Stock
             </Button>
@@ -572,22 +591,30 @@ export default function InventoryPage() {
           <DialogHeader>
             <DialogTitle>Transfer Stock</DialogTitle>
             <DialogDescription>
-              Transfer <span className="font-semibold">{transferData.productName}</span> from {transferData.fromBranchId ? branches?.find(b => b.id === transferData.fromBranchId)?.name : "selected branch"}
+              Transfer <span className="font-semibold">{transferData.productName}</span> from{' '}
+              {transferData.fromBranchId
+                ? branches?.find((b) => b.id === transferData.fromBranchId)?.name
+                : 'selected branch'}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="transfer-to-branch">To Branch</Label>
-              <Select value={transferData.toBranchId} onValueChange={(val) => setTransferData({ ...transferData, toBranchId: val })}>
+              <Select
+                value={transferData.toBranchId}
+                onValueChange={(val) => setTransferData({ ...transferData, toBranchId: val })}
+              >
                 <SelectTrigger id="transfer-to-branch">
                   <SelectValue placeholder="Select destination branch" />
                 </SelectTrigger>
                 <SelectContent>
-                  {branches?.filter(b => b.id !== transferData.fromBranchId).map((b) => (
-                    <SelectItem key={b.id} value={b.id.toString()}>
-                      {b.name}
-                    </SelectItem>
-                  ))}
+                  {branches
+                    ?.filter((b) => b.id !== transferData.fromBranchId)
+                    .map((b) => (
+                      <SelectItem key={b.id} value={b.id.toString()}>
+                        {b.name}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
@@ -606,7 +633,12 @@ export default function InventoryPage() {
             <Button variant="outline" onClick={() => setTransferDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleTransferSubmit} disabled={transferStock.isPending || !transferData.toBranchId || !transferData.quantity}>
+            <Button
+              onClick={handleTransferSubmit}
+              disabled={
+                transferStock.isPending || !transferData.toBranchId || !transferData.quantity
+              }
+            >
               {transferStock.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Transfer Stock
             </Button>

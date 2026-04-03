@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // lib/auth-context.tsx
@@ -6,15 +6,11 @@
 // Wrap with <Providers> (which already includes QueryClientProvider).
 // ─────────────────────────────────────────────────────────────────────────────
 
-import {
-  createContext,
-  useContext,
-  type ReactNode,
-} from "react";
-import { useCurrentUser } from "@/hooks/use-users";
-import { tokenStore } from "@/lib/api-client";
-import { getRoleName } from "@/lib/role-utils";
-import type { RoleName, UserResponse } from "@/types";
+import { createContext, useContext, type ReactNode } from 'react';
+import { useCurrentUser } from '@/hooks/use-users';
+import { tokenStore } from '@/lib/api-client';
+import { getRoleName } from '@/lib/role-utils';
+import type { RoleName, UserResponse } from '@/types';
 
 interface AuthContextValue {
   user:        UserResponse | undefined;
@@ -32,7 +28,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { data: user, isLoading } = useCurrentUser();
 
-  const role       = getRoleName(user?.role) as RoleName | undefined;
+  const role = getRoleName(user?.role) as RoleName | undefined;
   const isLoggedIn = !!tokenStore.getAccess() && !!user;
 
   const value: AuthContextValue = {
@@ -40,21 +36,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading,
     isLoggedIn,
     role,
+<<<<<<< HEAD
     isOwner:    role === "SUPERADMIN",
     isAdmin:    role === "MANAGER",
     isStaff:    role === "STAFF",
     canManage:  role === "SUPERADMIN" || role === "MANAGER",
+=======
+    isOwner: role === 'SUPERADMIN',
+    isAdmin: role === 'MANAGER',
+    isCustomer: role === 'STAFF',
+    canManage: role === 'SUPERADMIN' || role === 'MANAGER',
+>>>>>>> b750e70e4013afa744d4299da8c5baab8c10231f
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");
+  if (!ctx) throw new Error('useAuth must be used inside <AuthProvider>');
   return ctx;
 }

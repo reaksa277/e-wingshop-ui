@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { FileQuestion, Home } from "lucide-react";
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { FileQuestion, Home } from 'lucide-react';
 
 export default function NotFound() {
   return (
@@ -25,7 +25,7 @@ export default function NotFound() {
       </p>
 
       <div className="mt-10 flex flex-col sm:flex-row gap-3">
-        <Button size="lg" className="px-8" onClick={() => window.location.href = '/dashboard'}>
+        <Button size="lg" className="px-8" onClick={() => (window.location.href = '/dashboard')}>
           <Home className="mr-2 h-4 w-4" />
           Back to dashboard
         </Button>
@@ -36,10 +36,11 @@ export default function NotFound() {
       </div>
 
       <p className="mt-12 text-sm text-muted-foreground">
-        If you think this is a mistake, please{" "}
+        If you think this is a mistake, please{' '}
         <Link href="/support" className="underline underline-offset-4 hover:text-primary">
           contact support
-        </Link>.
+        </Link>
+        .
       </p>
     </div>
   );

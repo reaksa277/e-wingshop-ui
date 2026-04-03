@@ -52,6 +52,7 @@ export default function BranchesPage() {
   const [editingBranch, setEditingBranch] = useState<BranchResponse | null>(null);
 
   const { data: branchesData, isLoading } = useBranches();
+  const { data: branchesData, isLoading } = useBranches();
 
   const createBranchMutation = useCreateBranch();
   const updateBranchMutation = useUpdateBranch(editingBranch?.id || 0);
@@ -73,6 +74,7 @@ export default function BranchesPage() {
     {
       accessorKey: 'name',
       header: 'Name',
+      cell: ({ row }) => <span className="font-medium">{row.getValue('name')}</span>,
       cell: ({ row }) => <span className="font-medium">{row.getValue('name')}</span>,
     },
     {
@@ -111,6 +113,7 @@ export default function BranchesPage() {
             <Button variant="ghost" size="icon" onClick={() => handleEdit(branch)}>
               <Edit className="h-4 w-4" />
             </Button>
+            <Button variant="ghost" size="icon" onClick={() => handleDelete(branch.id)}>
             <Button variant="ghost" size="icon" onClick={() => handleDelete(branch.id)}>
               <Trash2 className="h-4 w-4 text-destructive" />
             </Button>

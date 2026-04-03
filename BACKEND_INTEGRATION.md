@@ -20,11 +20,11 @@ Your backend returns authentication responses like:
 
 Your backend role names map to internal permission system:
 
-| Backend Role | Internal Role | Permissions |
-|---|---|---|
-| **SUPERADMIN** | `superadmin` | Full system access - everything |
-| **ADMIN** | `manager` | Branches, Products, Categories, Inventory, Orders, Reports, Alerts |
-| **STAFF** | `staff` | Products, Inventory, Orders |
+| Backend Role   | Internal Role | Permissions                                                        |
+| -------------- | ------------- | ------------------------------------------------------------------ |
+| **SUPERADMIN** | `superadmin`  | Full system access - everything                                    |
+| **ADMIN**      | `manager`     | Branches, Products, Categories, Inventory, Orders, Reports, Alerts |
+| **STAFF**      | `staff`       | Products, Inventory, Orders                                        |
 
 ## How It Works
 
@@ -36,25 +36,27 @@ Your backend role names map to internal permission system:
 ## Current Implementation
 
 ### Types (types/index.ts)
+
 ```tsx
-export type RoleName = "SUPERADMIN" | "ADMIN" | "STAFF";
+export type RoleName = 'SUPERADMIN' | 'ADMIN' | 'STAFF';
 
 export interface AuthResponse {
-  accessToken:  string;
+  accessToken: string;
   refreshToken: string;
-  tokenType:    string;
-  userId:       number;
-  fullName:     string;
-  email:        string;
-  role:         RoleName;  // ← One of: SUPERADMIN, ADMIN, STAFF
+  tokenType: string;
+  userId: number;
+  fullName: string;
+  email: string;
+  role: RoleName; // ← One of: SUPERADMIN, ADMIN, STAFF
 }
 ```
 
 ### Auth Service (services/auth.service.ts)
+
 ```tsx
 export const authService = {
   login: async (data: LoginRequest): Promise<AuthResponse> => {
-    const res = await api.postPublic<AuthResponse>("/auth/login", data);
+    const res = await api.postPublic<AuthResponse>('/auth/login', data);
     tokenStore.setTokens(res.accessToken, res.refreshToken);
     return res;
   },
@@ -63,12 +65,13 @@ export const authService = {
 ```
 
 ### Role Mapping (in DashboardLayout)
+
 ```tsx
 function mapRoleNameToRole(roleName: RoleName): Role {
   const roleMap: Record<RoleName, Role> = {
-    SUPERADMIN: 'superadmin',  // Full permissions
-    ADMIN:      'manager',     // Branch manager permissions
-    STAFF:      'staff',       // Staff permissions
+    SUPERADMIN: 'superadmin', // Full permissions
+    ADMIN: 'manager', // Branch manager permissions
+    STAFF: 'staff', // Staff permissions
   };
   return roleMap[roleName];
 }
@@ -79,6 +82,7 @@ function mapRoleNameToRole(roleName: RoleName): Role {
 When a user with `role: "SUPERADMIN"` logs in:
 
 ✅ **Visible menu items:**
+
 - Dashboard
 - Categories
 - Products
@@ -92,6 +96,7 @@ When a user with `role: "SUPERADMIN"` logs in:
 When a user with `role: "ADMIN"` logs in:
 
 ✅ **Visible menu items:**
+
 - Dashboard
 - Categories
 - Products
@@ -102,11 +107,13 @@ When a user with `role: "ADMIN"` logs in:
 - Alerts
 
 ❌ **Hidden:**
+
 - Users (requires SUPERADMIN)
 
 When a user with `role: "STAFF"` logs in:
 
 ✅ **Visible menu items:**
+
 - Dashboard
 - Products
 - Inventory

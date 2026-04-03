@@ -10,7 +10,9 @@ import {
   useCreateStaff,
   useChangeRole,
   useResetPassword,
+  useAssignManagerBranch,
 } from '@/hooks/use-users';
+import { useBranches } from '@/hooks';
 import { userService } from '@/services/user.service';
 import { RoleName, CreateStaffRequest } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -62,13 +64,18 @@ export default function UsersPage() {
   const [currentPage, setCurrentPage] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
+  const [assignManagerOpen, setAssignManagerOpen] = useState(false);
+  const [selectedManagerId, setSelectedManagerId] = useState<number | null>(null);
+  const [selectedBranchId, setSelectedBranchId] = useState<string>('');
 
   const PAGE_SIZE = 20;
 
   const { data: usersData, isLoading, refetch: refetchUsers } = useUsers(currentPage, PAGE_SIZE);
+  const { data: branchesData } = useBranches();
   const createStaffMutation = useCreateStaff();
   const changeRoleMutation = useChangeRole();
   const resetPasswordMutation = useResetPassword();
+  const assignManagerBranchMutation = useAssignManagerBranch();
 
   const form = useForm<z.infer<typeof userFormSchema>>({
     resolver: zodResolver(userFormSchema),
@@ -150,6 +157,29 @@ export default function UsersPage() {
     }
   };
 
+  const handleAssignManager = (user: any) => {
+    setSelectedManagerId(user.id);
+    setSelectedBranchId(user.branchId?.toString() || '');
+    setAssignManagerOpen(true);
+  };
+
+  const handleAssignManagerSubmit = async () => {
+    if (!selectedManagerId || !selectedBranchId) return;
+    try {
+      await assignManagerBranchMutation.mutateAsync({
+        id: selectedManagerId,
+        branchId: Number(selectedBranchId),
+      });
+      toast.success('Manager assigned to branch successfully');
+      setAssignManagerOpen(false);
+      setSelectedManagerId(null);
+      setSelectedBranchId('');
+      refetchUsers();
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to assign manager to branch');
+    }
+  };
+
   const handleEdit = (user: any) => {
     setEditingUser(user);
     setIsDialogOpen(true);
@@ -201,9 +231,7 @@ export default function UsersPage() {
     {
       accessorKey: 'email',
       header: 'Email',
-      cell: ({ row }) => (
-        <span className="text-muted-foreground">{row.getValue('email')}</span>
-      ),
+      cell: ({ row }) => <span className="text-muted-foreground">{row.getValue('email')}</span>,
     },
     {
       accessorKey: 'phone',
@@ -263,141 +291,181 @@ export default function UsersPage() {
             Export CSV
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger>
+            <DialogTrigger asChild>
               <Button onClick={() => setEditingUser(null)}>
                 <Plus className="mr-2 h-4 w-4" />
                 Add User
               </Button>
             </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>{editingUser ? 'Edit User' : 'Add New User'}</DialogTitle>
-                </DialogHeader>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="fullName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Full Name</FormLabel>
-                            <FormControl>
-                              <Input {...field} placeholder="John Doe" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                              <Input
-                                {...field}
-                                type="email"
-                                placeholder="john@example.com"
-                                disabled={!!editingUser}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="password"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>
-                              {editingUser ? 'New Password (optional)' : 'Password'}
-                            </FormLabel>
-                            <FormControl>
-                              <Input
-                                {...field}
-                                type="password"
-                                placeholder={editingUser ? 'Leave blank to keep unchanged' : '••••••'}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="phone"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Phone (optional)</FormLabel>
-                            <FormControl>
-                              <Input {...field} placeholder="+1 (555) 123-4567" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>{editingUser ? 'Edit User' : 'Add New User'}</DialogTitle>
+              </DialogHeader>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
-                      name="role"
+                      name="fullName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Role</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select role" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="SUPERADMIN">Super Admin</SelectItem>
-                              <SelectItem value="MANAGER">Manager</SelectItem>
-                              <SelectItem value="STAFF">Staff</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <FormLabel>Full Name</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="John Doe" />
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setIsDialogOpen(false)}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        type="submit"
-                        disabled={
-                          createStaffMutation.isPending ||
-                          changeRoleMutation.isPending ||
-                          resetPasswordMutation.isPending
-                        }
-                      >
-                        {createStaffMutation.isPending ||
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="email"
+                              placeholder="john@example.com"
+                              disabled={!!editingUser}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {editingUser ? 'New Password (optional)' : 'Password'}
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="password"
+                              placeholder={editingUser ? 'Leave blank to keep unchanged' : '••••••'}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone (optional)</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="+1 (555) 123-4567" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <FormField
+                    control={form.control}
+                    name="role"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Role</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select role" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="SUPERADMIN">Super Admin</SelectItem>
+                            <SelectItem value="MANAGER">Manager</SelectItem>
+                            <SelectItem value="STAFF">Staff</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex justify-end gap-2">
+                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={
+                        createStaffMutation.isPending ||
                         changeRoleMutation.isPending ||
-                        resetPasswordMutation.isPending ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Saving...
-                          </>
-                        ) : editingUser ? (
-                          'Update'
-                        ) : (
-                          'Create'
-                        )}
-                      </Button>
-                    </div>
-                  </form>
-                </Form>
-              </DialogContent>
-            </Dialog>
+                        resetPasswordMutation.isPending
+                      }
+                    >
+                      {createStaffMutation.isPending ||
+                      changeRoleMutation.isPending ||
+                      resetPasswordMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Saving...
+                        </>
+                      ) : editingUser ? (
+                        'Update'
+                      ) : (
+                        'Create'
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+
+          {/* Assign Manager to Branch Dialog */}
+          <Dialog open={assignManagerOpen} onOpenChange={setAssignManagerOpen}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Assign Manager to Branch</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <FormLabel>Select Branch</FormLabel>
+                  <Select value={selectedBranchId} onValueChange={setSelectedBranchId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a branch..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {branchesData?.map((branch: any) => (
+                        <SelectItem key={branch.id} value={branch.id.toString()}>
+                          {branch.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setAssignManagerOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleAssignManagerSubmit}
+                  disabled={!selectedBranchId || assignManagerBranchMutation.isPending}
+                >
+                  {assignManagerBranchMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Assigning...
+                    </>
+                  ) : (
+                    'Assign'
+                  )}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -438,9 +506,7 @@ export default function UsersPage() {
             </span>
             <Button
               variant="outline"
-              onClick={() =>
-                setCurrentPage((p) => Math.min(usersData.totalPages - 1, p + 1))
-              }
+              onClick={() => setCurrentPage((p) => Math.min(usersData.totalPages - 1, p + 1))}
               disabled={currentPage >= usersData.totalPages - 1}
             >
               Next

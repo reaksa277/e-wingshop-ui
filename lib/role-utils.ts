@@ -47,12 +47,14 @@ export function formatRoleNameBadge(role: any): string {
  * Get badge variant based on role
  * Handles both API role names (SUPERADMIN, ADMIN, STAFF) and internal names
  */
-export function getRoleBadgeVariant(role: any): 'destructive' | 'default' | 'secondary' | 'outline' {
+export function getRoleBadgeVariant(
+  role: any
+): 'destructive' | 'default' | 'secondary' | 'outline' {
   const roleName = getRoleName(role);
   if (!roleName) return 'secondary';
 
   const lowerRole = roleName.toLowerCase();
-  
+
   // Map both API names and internal names
   switch (lowerRole) {
     case 'superadmin':

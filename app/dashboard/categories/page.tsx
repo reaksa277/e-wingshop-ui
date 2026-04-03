@@ -116,9 +116,7 @@ export default function CategoriesPage() {
     {
       accessorKey: 'name',
       header: 'Category Name',
-      cell: ({ row }) => (
-        <span className="font-medium">{row.getValue('name')}</span>
-      ),
+      cell: ({ row }) => <span className="font-medium">{row.getValue('name')}</span>,
     },
     {
       accessorKey: 'description',
@@ -135,6 +133,7 @@ export default function CategoriesPage() {
       cell: ({ row }) => {
         const category = row.original;
         return (
+<<<<<<< HEAD
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
@@ -149,6 +148,14 @@ export default function CategoriesPage() {
               onClick={() => setDeletingCategory(category)}
             >
               <Trash2 className="h-4 w-4 text-destructive" />
+=======
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" size="icon" onClick={() => handleEdit(category)}>
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => setDeletingCategory(category)}>
+              <Trash2 className="h-4 w-4" />
+>>>>>>> b750e70e4013afa744d4299da8c5baab8c10231f
             </Button>
           </div>
         );
@@ -182,9 +189,7 @@ export default function CategoriesPage() {
           <DialogContent className="sm:max-w-106.25">
             <form onSubmit={handleSubmit}>
               <DialogHeader>
-                <DialogTitle>
-                  {editingCategory ? 'Edit Category' : 'Add New Category'}
-                </DialogTitle>
+                <DialogTitle>{editingCategory ? 'Edit Category' : 'Add New Category'}</DialogTitle>
                 <DialogDescription>
                   {editingCategory
                     ? 'Update category information.'
@@ -198,12 +203,8 @@ export default function CategoriesPage() {
                     id="name"
                     placeholder="e.g., Dairy Products"
                     value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    disabled={
-                      createMutation.isPending || updateMutation.isPending
-                    }
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    disabled={createMutation.isPending || updateMutation.isPending}
                   />
                 </div>
                 <div className="grid gap-2">
@@ -212,12 +213,8 @@ export default function CategoriesPage() {
                     id="description"
                     placeholder="Brief description of this category..."
                     value={formData.description || ''}
-                    onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
-                    }
-                    disabled={
-                      createMutation.isPending || updateMutation.isPending
-                    }
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    disabled={createMutation.isPending || updateMutation.isPending}
                     rows={3}
                   />
                 </div>
@@ -236,9 +233,7 @@ export default function CategoriesPage() {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={
-                    createMutation.isPending || updateMutation.isPending
-                  }
+                  disabled={createMutation.isPending || updateMutation.isPending}
                 >
                   {createMutation.isPending || updateMutation.isPending
                     ? 'Saving...'
@@ -272,24 +267,18 @@ export default function CategoriesPage() {
       </Card>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog
-        open={!!deletingCategory}
-        onOpenChange={() => setDeletingCategory(null)}
-      >
+      <AlertDialog open={!!deletingCategory} onOpenChange={() => setDeletingCategory(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              category &quot;{deletingCategory?.name}&quot;.
+              This action cannot be undone. This will permanently delete the category &quot;
+              {deletingCategory?.name}&quot;.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              disabled={deleteMutation.isPending}
-            >
+            <AlertDialogAction onClick={handleDelete} disabled={deleteMutation.isPending}>
               {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>

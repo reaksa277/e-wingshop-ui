@@ -25,7 +25,7 @@ function ErrorContent() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Button className="w-full" onClick={() => window.location.href = '/auth/login'}>
+        <Button className="w-full" onClick={() => (window.location.href = '/auth/login')}>
           Back to Login
         </Button>
       </CardContent>

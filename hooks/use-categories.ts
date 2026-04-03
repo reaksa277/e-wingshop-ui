@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { queryKeys } from "@/lib/query-keys";
-import { categoryService } from "@/services/category.service";
-import type { CategoryBody } from "@/types";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/lib/query-keys';
+import { categoryService } from '@/services/category.service';
+import type { CategoryBody } from '@/types';
 
 /** GET /api/v1/categories */
 export function useCategories() {
   return useQuery({
-    queryKey:  queryKeys.categories.all(),
-    queryFn:   categoryService.getAll,
+    queryKey: queryKeys.categories.all(),
+    queryFn: categoryService.getAll,
     staleTime: 60_000,
   });
 }
@@ -18,8 +18,8 @@ export function useCategories() {
 export function useCategory(id: number) {
   return useQuery({
     queryKey: queryKeys.categories.detail(id),
-    queryFn:  () => categoryService.getById(id),
-    enabled:  !!id,
+    queryFn: () => categoryService.getById(id),
+    enabled: !!id,
   });
 }
 
@@ -28,7 +28,7 @@ export function useCreateCategory() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: CategoryBody) => categoryService.create(body),
-    onSuccess:  () => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.categories.all() });
     },
   });
@@ -52,7 +52,7 @@ export function useDeleteCategory() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => categoryService.delete(id),
-    onSuccess:  (_data, id) => {
+    onSuccess: (_data, id) => {
       queryClient.removeQueries({ queryKey: queryKeys.categories.detail(id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.categories.all() });
     },

@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { useLowStock, useExpiringSoon, useReportSummary, useActiveDiscounts } from "@/hooks";
-import { useAuth } from "@/lib/auth-context";
+import { useLowStock, useExpiringSoon, useReportSummary, useActiveDiscounts } from '@/hooks';
+import { useAuth } from '@/lib/auth-context';
 
 // Last 30 days
-const today = () => new Date().toISOString().split("T")[0];
+const today = () => new Date().toISOString().split('T')[0];
 const daysAgo = (n: number) => {
   const d = new Date();
   d.setDate(d.getDate() - n);
-  return d.toISOString().split("T")[0];
+  return d.toISOString().split('T')[0];
 };
 
 export default function DashboardHome() {
@@ -154,13 +154,13 @@ export default function DashboardHome() {
       {/* Quick links */}
       <div className="quick-links-grid">
         {[
-          { label: "Browse products", href: "/dashboard/products" },
-          { label: "Place an order", href: "/dashboard/orders/new" },
+          { label: 'Browse products', href: '/dashboard/products' },
+          { label: 'Place an order', href: '/dashboard/orders/new' },
           ...(canManage
             ? [
-                { label: "Manage inventory", href: "/dashboard/inventory" },
-                { label: "Sales reports", href: "/dashboard/reports" },
-                { label: "Manage discounts", href: "/dashboard/discounts" },
+                { label: 'Manage inventory', href: '/dashboard/inventory' },
+                { label: 'Sales reports', href: '/dashboard/reports' },
+                { label: 'Manage discounts', href: '/dashboard/discounts' },
               ]
             : []),
         ].map((link) => (
@@ -173,13 +173,7 @@ export default function DashboardHome() {
   );
 }
 
-function KpiCard({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function KpiCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="kpi-card">
       <div className="kpi-label">{label}</div>
