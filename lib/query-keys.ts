@@ -78,6 +78,8 @@ export const queryKeys = {
 
   // ── Sales Reports ─────────────────────────────────────────────────────────
   reports: {
+    dashboard: (range: string, interval: string) =>
+      ['reports', 'dashboard', { range, interval }] as const,
     summary: (from: string, to: string, branchId?: number) =>
       ['reports', 'summary', { from, to, branchId }] as const,
     dailyRevenue: (from: string, to: string, branchId?: number) =>

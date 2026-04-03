@@ -93,7 +93,7 @@ export default function BranchesPage() {
         onError: () => toast.error('Failed to delete branch'),
       });
     },
-    [deleteBranchMutation],
+    [deleteBranchMutation]
   );
 
   const handleEdit = useCallback(
@@ -108,7 +108,7 @@ export default function BranchesPage() {
       });
       setIsDialogOpen(true);
     },
-    [form],
+    [form]
   );
 
   // Define columns for DataTable

@@ -11,6 +11,8 @@ import {
   LogOut,
   Percent,
   Bell,
+  BarChart3,
+  Folder,
 } from 'lucide-react';
 
 import { useAuth } from '@/lib/auth-context';
@@ -45,7 +47,7 @@ const NAV_ITEMS = [
   {
     label: 'Categories',
     href: '/dashboard/categories',
-    icon: Package,
+    icon: Folder,
     roles: ['SUPERADMIN', 'MANAGER'],
   },
   {
@@ -68,7 +70,12 @@ const NAV_ITEMS = [
     icon: Percent,
     roles: ['SUPERADMIN', 'MANAGER', 'STAFF'],
   },
-  //   { label: "Reports", href: "/dashboard/reports", icon: BarChart3, roles: ["SUPERADMIN", "MANAGER"] },
+  {
+    label: 'Reports',
+    href: '/dashboard/reports',
+    icon: BarChart3,
+    roles: ['SUPERADMIN', 'MANAGER'],
+  },
   { label: 'Users', href: '/dashboard/users', icon: Users, roles: ['SUPERADMIN'] },
   //   { label: "Audit log", href: "/dashboard/audit", icon: BookOpen, roles: ["SUPERADMIN", "MANAGER"] },
 ] as const;

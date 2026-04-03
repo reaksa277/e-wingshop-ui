@@ -7,24 +7,53 @@ import { reportService } from '@/services/report.service';
 import { queryKeys } from '@/lib/query-keys';
 import { ReportParams } from '@/types';
 
-// ── Summary KPIs ──────────────────────────────────────────────────────────────
+interface ReportsResponse {
+  summary: {
+    totalRevenue: number;
+    totalOrders: number;
+    averageOrderValue: number;
+    topProduct: { name: string; revenue: number };
+  };
+  revenueOverTime: { date: string; revenue: number }[];
+  topProducts: { name: string; revenue: number }[];
+  salesByBranch: { name: string; revenue: number }[];
+}
 
-export function useReportSummary({ from, to, branchId }: ReportParams) {
+function fetchReports(range: string, interval: string): Promise<ReportsResponse> {
+  return fetch(`/api/reports?range=${range}&interval=${interval}`).then((res) => {
+    if (!res.ok) throw new Error('Failed to fetch reports');
+    return res.json();
+  });
+}
+
+// ── Full reports dashboard (used by /dashboard/reports) ───────────────────────
+
+export function useReports(range = '7d', interval = 'daily') {
   return useQuery({
-    queryKey: queryKeys.reports.summary(from, to, branchId),
-    queryFn: () => reportService.summary({ from, to, branchId }),
-    enabled: !!from && !!to,
+    queryKey: queryKeys.reports.dashboard(range, interval),
+    queryFn: () => fetchReports(range, interval),
+    staleTime: 2 * 60 * 1000,
+  });
+}
+
+// ── Summary KPIs (used by dashboard home) ─────────────────────────────────────
+
+export function useReportSummary(_params?: ReportParams) {
+  return useQuery({
+    queryKey: queryKeys.reports.dashboard('30d', 'daily'),
+    queryFn: () => fetchReports('30d', 'daily'),
+    select: (data) => data.summary,
     staleTime: 2 * 60 * 1000,
   });
 }
 
 // ── Daily revenue line chart ──────────────────────────────────────────────────
 
-export function useDailyRevenue({ from, to, branchId }: ReportParams) {
+export function useDailyRevenue(_params?: ReportParams) {
   return useQuery({
-    queryKey: queryKeys.reports.dailyRevenue(from, to, branchId),
-    queryFn: () => reportService.dailyRevenue({ from, to, branchId }),
-    enabled: !!from && !!to,
+    queryKey: queryKeys.reports.dashboard('7d', 'daily'),
+    queryFn: () => fetchReports('7d', 'daily'),
+    select: (data) => data.revenueOverTime,
     staleTime: 2 * 60 * 1000,
   });
 }
