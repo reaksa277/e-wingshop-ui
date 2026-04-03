@@ -7,10 +7,10 @@ import {
   Package,
   Store,
   ClipboardList,
-  BarChart3,
   Users,
-  BookOpen,
   LogOut,
+  Percent,
+  Bell,
 } from "lucide-react";
 
 import { useAuth } from "@/lib/auth-context";
@@ -18,6 +18,7 @@ import { useLogout } from "@/hooks";
 import { clearAuth } from "@/lib/auth-helpers";
 
 import { Badge } from "@/components/ui/badge";
+import { NotificationDropdown } from "@/components/dashboard/NotificationDropdown";
 import type { UserResponse } from "@/types";
 import {
   Sidebar,
@@ -29,6 +30,7 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarInset,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
 
 // ── Nav items ─────────────────────────────────────────────────────────────────
@@ -39,9 +41,11 @@ const NAV_ITEMS = [
   { label: "Products", href: "/dashboard/products", icon: Package, roles: ["SUPERADMIN", "MANAGER", "STAFF"] },
   { label: "Branches", href: "/dashboard/branches", icon: Store, roles: ["SUPERADMIN", "MANAGER"] },
   { label: "Inventory", href: "/dashboard/inventory", icon: ClipboardList, roles: ["SUPERADMIN", "MANAGER"] },
-  { label: "Reports", href: "/dashboard/reports", icon: BarChart3, roles: ["SUPERADMIN", "MANAGER"] },
-  { label: "Users", href: "/dashboard/users", icon: Users, roles: ["SUPERADMIN", "MANAGER"] },
-  { label: "Audit log", href: "/dashboard/audit", icon: BookOpen, roles: ["SUPERADMIN", "MANAGER"] },
+  { label: "Alerts", href: "/dashboard/alerts", icon: Bell, roles: ["SUPERADMIN", "MANAGER"] },
+  { label: "Discounts", href: "/dashboard/discounts", icon: Percent, roles: ["SUPERADMIN", "MANAGER", "STAFF"] },
+//   { label: "Reports", href: "/dashboard/reports", icon: BarChart3, roles: ["SUPERADMIN", "MANAGER"] },
+  { label: "Users", href: "/dashboard/users", icon: Users, roles: ["SUPERADMIN"] },
+//   { label: "Audit log", href: "/dashboard/audit", icon: BookOpen, roles: ["SUPERADMIN", "MANAGER"] },
 ] as const;
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
@@ -64,7 +68,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center text-sm text-muted-foreground">
+      <div className="dashboard-loading">
         Loading…
       </div>
     );
@@ -80,7 +84,20 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     <SidebarProvider>
       <AppSidebar user={user} role={role ?? null} pathname={pathname} visibleNav={visibleNav} onLogout={handleLogout} logoutPending={logout.isPending} />
       <SidebarInset>
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+        {/* Top Navbar */}
+        <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+          <SidebarTrigger className="md:hidden" />
+          <div className="flex-1">
+            <h1 className="text-lg font-semibold">Welcome back, {user?.fullName}</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <NotificationDropdown />
+            <Badge variant="secondary" className="hidden md:flex">
+              {role}
+            </Badge>
+          </div>
+        </header>
+        <main className="dashboard-main">
           {children}
         </main>
       </SidebarInset>
@@ -104,9 +121,9 @@ interface AppSidebarProps {
 function AppSidebar({ user, role, pathname, visibleNav, onLogout, logoutPending }: AppSidebarProps) {
   return (
     <Sidebar>
-      <SidebarHeader className="flex items-center gap-2 py-4">
-        <div className="flex items-center gap-2 font-bold text-lg tracking-tight">
-          🛒 FreshMart
+      <SidebarHeader className="sidebar-brand">
+        <div className="flex items-center gap-2">
+          🛒 Grocery Stock Management
         </div>
       </SidebarHeader>
 
@@ -135,11 +152,11 @@ function AppSidebar({ user, role, pathname, visibleNav, onLogout, logoutPending 
       </SidebarContent>
 
       <SidebarFooter>
-        <div className="flex flex-col gap-3 border-t pt-4">
+        <div className="sidebar-user-info">
           {user && (
             <div className="flex flex-col gap-2">
-              <p className="text-sm font-medium">{user.fullName}</p>
-              <Badge variant="secondary" className="w-fit text-xs">
+              <p className="sidebar-user-name">{user.fullName}</p>
+              <Badge variant="secondary" className="sidebar-user-role">
                 {role}
               </Badge>
             </div>

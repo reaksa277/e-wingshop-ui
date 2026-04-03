@@ -35,12 +35,12 @@ export const inventoryService = {
     }),
 
   transfer: ({ fromBranchId, toBranchId, productId, quantity }: TransferStockParams) =>
-    api.post<void>("/inventory/transfer", undefined, {
+    api.post<void>("/inventory/transfer", {
       fromBranchId,
       toBranchId,
       productId,
       quantity,
-    } as any),
+    }),
 
   getLowStock: (branchId?: number) =>
     api.get<InventoryResponse[]>("/inventory/low-stock", { branchId }),

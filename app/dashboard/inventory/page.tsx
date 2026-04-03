@@ -3,15 +3,17 @@
 import { useState } from "react";
 import { type ColumnDef } from "@tanstack/react-table";
 import {
-  useInventoryByBranch,
   useListAllInventory,
   useLowStock,
   useExpiringSoon,
   useExpiredInventory,
   useAdjustStock,
   useTransferStock,
-  useBranches
+  useUpsertInventory,
+  useBranches,
+  useProducts,
 } from "@/hooks";
+import type { InventoryRequest } from "@/types";
 
 // Shadcn UI Components
 import {
@@ -35,8 +37,9 @@ import {
   DialogTitle,
   DialogFooter
 } from "@/components/ui/dialog";
-import { Loader2, ArrowLeft, ArrowRight } from "lucide-react";
+import { Loader2, ArrowLeft, ArrowRight, Plus } from "lucide-react";
 import { DataTable } from "@/components/ui/data-table";
+import type { InventoryResponse } from "@/types";
 
 type Tab = "all" | "low" | "expiring" | "expired";
 
@@ -44,6 +47,16 @@ export default function InventoryPage() {
   const [tab, setTab] = useState<Tab>("all");
   const [branchId, setBranchId] = useState<string>("all");
   const [page, setPage] = useState(0);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [inventoryForm, setInventoryForm] = useState<Partial<InventoryRequest>>({
+    quantity: 0,
+    lowStockThreshold: 10,
+  });
+  const [formErrors, setFormErrors] = useState<{
+    branchId?: string;
+    productId?: string;
+    quantity?: string;
+  }>({});
 
   // Adjust Stock Dialog State
   const [adjustDialogOpen, setAdjustDialogOpen] = useState(false);
@@ -66,8 +79,10 @@ export default function InventoryPage() {
   });
 
   const { data: branches } = useBranches();
+  const { data: products } = useProducts({ size: 1000 });
   const adjustStock = useAdjustStock();
   const transferStock = useTransferStock();
+  const upsertInventory = useUpsertInventory();
 
   // Queries
   const selectedBranchId = branchId === "all" ? undefined : Number(branchId);
@@ -133,8 +148,44 @@ export default function InventoryPage() {
     setTransferData({ productId: 0, fromBranchId: 0, productName: "", toBranchId: "", quantity: "" });
   };
 
+  const handleAddInventory = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validate required fields
+    const errors: { branchId?: string; productId?: string; quantity?: string } = {};
+
+    if (!inventoryForm.branchId) {
+      errors.branchId = 'Please select a branch';
+    }
+
+    if (!inventoryForm.productId) {
+      errors.productId = 'Please select a product';
+    }
+
+    if (!inventoryForm.quantity || inventoryForm.quantity <= 0) {
+      errors.quantity = 'Please enter a valid quantity (greater than 0)';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
+    // Clear errors and submit
+    setFormErrors({});
+
+    try {
+      await upsertInventory.mutateAsync(inventoryForm as InventoryRequest);
+      setShowAddForm(false);
+      setInventoryForm({ quantity: 0, lowStockThreshold: 10 });
+      setFormErrors({});
+    } catch (error) {
+      console.error('Failed to add inventory:', error);
+    }
+  };
+
   // Define columns for DataTable
-  const columns: ColumnDef<any>[] = [
+  const columns: ColumnDef<InventoryResponse>[] = [
     {
       accessorKey: "productName",
       header: "Product",
@@ -173,8 +224,8 @@ export default function InventoryPage() {
             <span className="text-sm">{inv.expiryDate ?? "—"}</span>
             {inv.daysUntilExpiry !== undefined && (
               <span className={`text-xs font-semibold ${
-                inv.daysUntilExpiry < 0 ? "text-red-600" :
-                inv.daysUntilExpiry <= 7 ? "text-orange-600" : "text-muted-foreground"
+                inv.daysUntilExpiry < 0 ? "text-destructive" :
+                inv.daysUntilExpiry <= 7 ? "text-accent" : "text-muted-foreground"
               }`}>
                 {inv.daysUntilExpiry < 0 ? `${Math.abs(inv.daysUntilExpiry)}d ago` : `${inv.daysUntilExpiry}d left`}
               </span>
@@ -190,7 +241,7 @@ export default function InventoryPage() {
         const inv = row.original;
         return (
           <Badge variant={inv.expired ? "destructive" : inv.lowStock ? "outline" : "secondary"} className={
-            !inv.expired && !inv.lowStock ? "bg-green-100 text-green-800 hover:bg-green-100 border-transparent" : ""
+            !inv.expired && !inv.lowStock ? "" : ""
           }>
             {inv.expired ? "Expired" : inv.lowStock ? "Low" : "OK"}
           </Badge>
@@ -228,7 +279,7 @@ export default function InventoryPage() {
     },
   ];
 
-  const getRowClass = (row: any) => {
+  const getRowClass = (row: InventoryResponse) => {
     if (row.expired) return "bg-red-50/50 hover:bg-red-50";
     if (row.lowStock) return "bg-amber-50/50 hover:bg-amber-50";
     return "";
@@ -239,20 +290,25 @@ export default function InventoryPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h2 className="text-2xl font-bold tracking-tight">Inventory</h2>
 
-        <Select
-          value={branchId}
-          onValueChange={(val) => { setBranchId(val); setPage(0); }}
-        >
-          <SelectTrigger className="w-50">
-            <SelectValue placeholder="All Branches" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Branches</SelectItem>
-            {branches?.map((b) => (
-              <SelectItem key={b.id} value={b.id.toString()}>{b.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowAddForm(!showAddForm)}>
+            <Plus className="mr-2 h-4 w-4" /> Add Inventory
+          </Button>
+          <Select
+            value={branchId}
+            onValueChange={(val) => { setBranchId(val); setPage(0); }}
+          >
+            <SelectTrigger className="w-50">
+              <SelectValue placeholder="All Branches" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Branches</SelectItem>
+              {branches?.map((b) => (
+                <SelectItem key={b.id} value={b.id.toString()}>{b.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <Tabs value={tab} onValueChange={(v) => { setTab(v as Tab); setPage(0); }}>
@@ -264,11 +320,157 @@ export default function InventoryPage() {
           </TabsTrigger>
           <TabsTrigger value="expiring" className="gap-2">
             Expiring
-            {expiringQuery.data?.length ? <Badge variant="outline" className="h-5 px-1.5 bg-orange-100 text-orange-700 border-orange-200">{expiringQuery.data.length}</Badge> : null}
+            {expiringQuery.data?.length ? <Badge variant="outline" className="h-5 px-1.5">{expiringQuery.data.length}</Badge> : null}
           </TabsTrigger>
           <TabsTrigger value="expired">Expired</TabsTrigger>
         </TabsList>
       </Tabs>
+
+      {/* Add Inventory Form */}
+      {showAddForm && (
+        <Card>
+          <CardContent className="p-6">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold">Add Stock Inventory</h3>
+              <p className="text-sm text-muted-foreground">Add new inventory for a product at a specific branch</p>
+            </div>
+            <form onSubmit={handleAddInventory} className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {/* Branch Selection */}
+              <div className="space-y-2">
+                <Label htmlFor="branch-select">Branch <span className="text-destructive">*</span></Label>
+                <Select
+                  value={inventoryForm.branchId?.toString()}
+                  onValueChange={(v) => {
+                    setInventoryForm((f) => ({ ...f, branchId: Number(v) }));
+                    if (formErrors.branchId) {
+                      setFormErrors((e) => ({ ...e, branchId: undefined }));
+                    }
+                  }}
+                >
+                  <SelectTrigger id="branch-select" className={formErrors.branchId ? 'border-destructive' : ''}>
+                    <SelectValue placeholder="Select Branch *" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {branches?.map((b) => (
+                      <SelectItem key={b.id} value={b.id.toString()}>
+                        {b.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {formErrors.branchId && (
+                  <p className="text-sm text-destructive">{formErrors.branchId}</p>
+                )}
+              </div>
+
+              {/* Product Selection */}
+              <div className="space-y-2">
+                <Label htmlFor="product-select">Product <span className="text-destructive">*</span></Label>
+                <Select
+                  value={inventoryForm.productId?.toString()}
+                  onValueChange={(v) => {
+                    setInventoryForm((f) => ({
+                      ...f,
+                      productId: Number(v),
+                    }));
+                    if (formErrors.productId) {
+                      setFormErrors((e) => ({ ...e, productId: undefined }));
+                    }
+                  }}
+                >
+                  <SelectTrigger id="product-select" className={formErrors.productId ? 'border-destructive' : ''}>
+                    <SelectValue placeholder="Select Product *" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {products?.content.map((p) => (
+                      <SelectItem key={p.id} value={p.id.toString()}>
+                        {p.name} {p.barcode ? `(${p.barcode})` : ''}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {formErrors.productId && (
+                  <p className="text-sm text-destructive">{formErrors.productId}</p>
+                )}
+              </div>
+
+              {/* Quantity Input */}
+              <div className="space-y-2">
+                <Label htmlFor="quantity-input">Quantity <span className="text-destructive">*</span></Label>
+                <Input
+                  id="quantity-input"
+                  required
+                  type="number"
+                  placeholder="Enter quantity"
+                  value={inventoryForm.quantity ?? ''}
+                  onChange={(e) => {
+                    setInventoryForm((f) => ({ ...f, quantity: Number(e.target.value) }));
+                    if (formErrors.quantity) {
+                      setFormErrors((e) => ({ ...e, quantity: undefined }));
+                    }
+                  }}
+                  className={formErrors.quantity ? 'border-destructive' : ''}
+                />
+                {formErrors.quantity && (
+                  <p className="text-sm text-destructive">{formErrors.quantity}</p>
+                )}
+              </div>
+
+              {/* Low Stock Threshold Input */}
+              <div className="space-y-2">
+                <Label htmlFor="threshold-input">Low Stock Threshold</Label>
+                <Input
+                  id="threshold-input"
+                  type="number"
+                  placeholder="Enter threshold (optional)"
+                  value={inventoryForm.lowStockThreshold ?? ''}
+                  onChange={(e) => setInventoryForm((f) => ({ ...f, lowStockThreshold: Number(e.target.value) }))}
+                />
+              </div>
+
+              {/* Expiry Date Input */}
+              <div className="space-y-2">
+                <Label htmlFor="expiry-input">Expiry Date</Label>
+                <Input
+                  id="expiry-input"
+                  type="date"
+                  placeholder="Select expiry date"
+                  value={inventoryForm.expiryDate ?? ''}
+                  onChange={(e) => setInventoryForm((f) => ({ ...f, expiryDate: e.target.value }))}
+                />
+              </div>
+
+              {/* Form Actions */}
+              <div className="flex items-end gap-4 md:col-span-2 lg:col-span-3">
+                <Button type="submit" variant="default" disabled={upsertInventory.isPending}>
+                  {upsertInventory.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {upsertInventory.isPending ? 'Adding...' : 'Add Inventory'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setFormErrors({});
+                  }}
+                >
+                  Cancel
+                </Button>
+                {upsertInventory.isError && (
+                  <span className="text-sm text-destructive font-medium">
+                    Failed to add inventory. Please try again.
+                  </span>
+                )}
+                {upsertInventory.isSuccess && showAddForm && (
+                  <span className="text-sm text-primary font-medium">
+                    ✓ Inventory added successfully!
+                  </span>
+                )}
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
 
       {isLoading ? (
         <div className="flex justify-center p-12">

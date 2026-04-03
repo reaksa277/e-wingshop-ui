@@ -1,0 +1,13 @@
+name: Inventory Alerts
+on:
+  schedule:
+    - cron: '0 7 * * *'  # Daily at 7 AM
+    - cron: '*/30 * * * *'  # Every 30 minutes
+jobs:
+  check-alerts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger alert check
+        run: |
+          curl -H "Authorization: Bearer ${{ secrets.CRON_SECRET_KEY }}" \
+               https://grocery-stock-ui.vercel.app/api/alerts/check-inventory
