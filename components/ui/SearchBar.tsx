@@ -48,7 +48,7 @@ export function SearchBar({
       {/* Search icon */}
       <Search
         className={cn(
-          'absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 transition-colors',
+          'absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors',
           isFocused && 'text-brand'
         )}
       />

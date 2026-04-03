@@ -23,7 +23,7 @@ interface AuthContextValue {
   role:        RoleName | undefined;
   isOwner:     boolean;
   isAdmin:     boolean;
-  isCustomer:  boolean;
+  isStaff:     boolean;
   canManage:   boolean;   // OWNER or ADMIN
 }
 
@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     role,
     isOwner:    role === "SUPERADMIN",
     isAdmin:    role === "MANAGER",
-    isCustomer: role === "STAFF",
+    isStaff:    role === "STAFF",
     canManage:  role === "SUPERADMIN" || role === "MANAGER",
   };
 

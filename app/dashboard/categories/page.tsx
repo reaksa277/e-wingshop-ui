@@ -27,7 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Edit } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory } from '@/hooks';
 import type { CategoryResponse, CategoryBody } from '@/types';
@@ -135,20 +135,20 @@ export default function CategoriesPage() {
       cell: ({ row }) => {
         const category = row.original;
         return (
-          <div className="flex justify-end gap-2">
+          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => handleEdit(category)}
             >
-              <Pencil className="h-4 w-4" />
+              <Edit className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setDeletingCategory(category)}
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-4 w-4 text-destructive" />
             </Button>
           </div>
         );
@@ -261,7 +261,8 @@ export default function CategoriesPage() {
             filterColumn="name"
             filterPlaceholder="Search categories..."
             isLoading={isLoading}
-            enablePagination={false}
+            enablePagination={true}
+            pageSize={10}
             emptyState={{
               title: 'No categories found',
               description: 'Create your first category to get started.',

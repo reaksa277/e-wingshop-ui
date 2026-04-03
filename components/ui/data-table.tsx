@@ -69,6 +69,11 @@ interface DataTableProps<TData, TValue> {
   enablePagination?: boolean;
   pageSize?: number;
   /**
+   * Total count for server-side pagination (optional)
+   * If provided, shows total count instead of current page count
+   */
+  totalCount?: number;
+  /**
    * Custom actions column
    */
   actionsColumn?: {
@@ -107,6 +112,7 @@ export function DataTable<TData, TValue>({
   enableSorting = true,
   enablePagination = true,
   pageSize = 10,
+  totalCount,
   actionsColumn,
   emptyState = {
     title: "No results",
@@ -326,10 +332,17 @@ export function DataTable<TData, TValue>({
       {/* Pagination */}
       {enablePagination && (
         <div className="flex items-center justify-between gap-4">
-          <div className="text-sm text-muted-foreground">
-            {table.getFilteredSelectedRowModel().rows.length} of{" "}
-            {table.getFilteredRowModel().rows.length} row(s) selected.
-          </div>
+          {enableRowSelection && (
+            <div className="text-sm text-muted-foreground">
+              {table.getFilteredSelectedRowModel().rows.length} of{" "}
+              {totalCount ?? table.getFilteredRowModel().rows.length} row(s) selected.
+            </div>
+          )}
+          {!enableRowSelection && (
+            <div className="text-sm text-muted-foreground">
+              {totalCount ?? table.getFilteredRowModel().rows.length} row(s)
+            </div>
+          )}
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1">
               <Button

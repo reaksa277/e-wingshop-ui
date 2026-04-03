@@ -36,7 +36,7 @@ export function CountdownTimer({ hours, className, onExpire }: CountdownTimerPro
   if (isExpired) {
     return (
       <div className={cn('flex items-center gap-2', className)}>
-        <span className="text-sm font-medium text-red-500">Offer expired!</span>
+        <span className="text-sm font-medium text-destructive">Offer expired!</span>
       </div>
     );
   }

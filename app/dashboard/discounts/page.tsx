@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { type ColumnDef } from "@tanstack/react-table";
+import { useState } from 'react';
+import { type ColumnDef } from '@tanstack/react-table';
 import {
   useActiveDiscounts,
   useDiscountTiers,
@@ -10,30 +10,34 @@ import {
   useRevokeDiscount,
   useExpiringSoon,
   useBranches,
-} from "@/hooks";
-import type { CreateDiscountRequest, DiscountTier } from "@/types";
+} from '@/hooks';
+import type { CreateDiscountRequest, DiscountTier } from '@/types';
 
 // Shadcn UI Components
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Plus, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
-import { DataTable } from "@/components/ui/data-table";
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader2, Plus, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { DataTable } from '@/components/ui/data-table';
+import { useAuth } from '@/lib/auth-context';
+import { can } from '@/lib/permissions';
 
 export default function DiscountsPage() {
+  const { canManage, role } = useAuth();
+  const canManageProducts = role ? can(role.toLowerCase() as any, 'manage_products') : false;
   const [branchId, setBranchId] = useState<number | undefined>();
   const [page, setPage] = useState(0);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState<Partial<CreateDiscountRequest>>({ tier: "ONE_WEEK" });
+  const [form, setForm] = useState<Partial<CreateDiscountRequest>>({ tier: 'ONE_WEEK' });
 
   const { data: branches } = useBranches();
   const { data: discounts, isLoading } = useActiveDiscounts(branchId, page, 20);
@@ -60,86 +64,85 @@ export default function DiscountsPage() {
     if (!form.inventoryId || !form.tier) return;
     await createDiscount.mutateAsync(form as CreateDiscountRequest);
     setShowForm(false);
-    setForm({ tier: "ONE_WEEK" });
+    setForm({ tier: 'ONE_WEEK' });
   }
 
   const noDiscountCount =
-    expiring?.filter((inv) => !discounts?.content.some((d) => d.inventoryId === inv.id)).length ?? 0;
+    expiring?.filter((inv) => !discounts?.content.some((d) => d.inventoryId === inv.id)).length ??
+    0;
 
   // Define columns for DataTable
   const columns: ColumnDef<any>[] = [
     {
-      accessorKey: "productName",
-      header: "Product",
+      accessorKey: 'productName',
+      header: 'Product',
+      cell: ({ row }) => <span className="font-medium">{row.getValue('productName')}</span>,
+    },
+    {
+      accessorKey: 'branchName',
+      header: 'Branch',
       cell: ({ row }) => (
-        <span className="font-medium">{row.getValue("productName")}</span>
+        <span className="text-xs text-muted-foreground">{row.getValue('branchName')}</span>
       ),
     },
     {
-      accessorKey: "branchName",
-      header: "Branch",
-      cell: ({ row }) => (
-        <span className="text-xs text-muted-foreground">{row.getValue("branchName")}</span>
-      ),
+      accessorKey: 'currentStock',
+      header: 'Stock',
+      cell: ({ row }) => row.getValue('currentStock'),
     },
     {
-      accessorKey: "currentStock",
-      header: "Stock",
-      cell: ({ row }) => row.getValue("currentStock"),
-    },
-    {
-      accessorKey: "tierLabel",
-      header: "Tier",
+      accessorKey: 'tierLabel',
+      header: 'Tier',
       cell: ({ row }) => (
-        <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-          {row.getValue("tierLabel")}
+        <Badge variant="secondary">
+          {row.getValue('tierLabel')}
         </Badge>
       ),
     },
     {
-      accessorKey: "originalPrice",
-      header: "Was",
+      accessorKey: 'originalPrice',
+      header: 'Was',
       cell: ({ row }) => (
         <span className="text-muted-foreground line-through">
-          ${Number(row.getValue("originalPrice")).toFixed(2)}
+          ${Number(row.getValue('originalPrice')).toFixed(2)}
         </span>
       ),
     },
     {
-      accessorKey: "discountPct",
-      header: "Disc.",
+      accessorKey: 'discountPct',
+      header: 'Disc.',
       cell: ({ row }) => (
-        <span className="font-bold text-destructive">-{row.getValue("discountPct")}%</span>
+        <span className="font-bold text-destructive">-{row.getValue('discountPct')}%</span>
       ),
     },
     {
-      accessorKey: "discountedPrice",
-      header: "Now",
+      accessorKey: 'discountedPrice',
+      header: 'Now',
       cell: ({ row }) => (
-        <span className="font-bold text-green-600">
-          ${Number(row.getValue("discountedPrice")).toFixed(2)}
+        <span className="font-bold text-primary">
+          ${Number(row.getValue('discountedPrice')).toFixed(2)}
         </span>
       ),
     },
     {
-      accessorKey: "savingsAmount",
-      header: "Saves",
+      accessorKey: 'savingsAmount',
+      header: 'Saves',
       cell: ({ row }) => (
-        <span className="text-xs">${Number(row.getValue("savingsAmount")).toFixed(2)}</span>
+        <span className="text-xs">${Number(row.getValue('savingsAmount')).toFixed(2)}</span>
       ),
     },
     {
-      accessorKey: "expiryDate",
-      header: "Expiry",
+      accessorKey: 'expiryDate',
+      header: 'Expiry',
       cell: ({ row }) => {
         const d = row.original;
         return (
           <div className="flex flex-col text-xs">
-            <span>{d.expiryDate ?? "—"}</span>
+            <span>{d.expiryDate ?? '—'}</span>
             {d.daysUntilExpiry !== undefined && (
               <span
                 className={`font-bold ${
-                  d.daysUntilExpiry <= 3 ? "text-destructive" : "text-amber-600"
+                  d.daysUntilExpiry <= 3 ? 'text-destructive' : 'text-accent'
                 }`}
               >
                 {d.daysUntilExpiry}d left
@@ -150,8 +153,8 @@ export default function DiscountsPage() {
       },
     },
     {
-      id: "actions",
-      header: "Actions",
+      id: 'actions',
+      header: 'Actions',
       cell: ({ row }) => {
         const d = row.original;
         return (
@@ -170,26 +173,28 @@ export default function DiscountsPage() {
 
   const getRowClass = (row: any) => {
     if (row.daysUntilExpiry !== undefined && row.daysUntilExpiry <= 3) {
-      return "bg-red-50/50";
+      return 'bg-red-50/50';
     }
-    return "";
+    return '';
   };
 
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold tracking-tight">Expiry Discounts</h2>
-        <Button onClick={() => setShowForm(!showForm)}>
-          <Plus className="mr-2 h-4 w-4" /> New Discount
-        </Button>
+        {canManage && (
+          <Button onClick={() => setShowForm(!showForm)}>
+            <Plus className="mr-2 h-4 w-4" /> New Discount
+          </Button>
+        )}
       </div>
 
       {/* Filter Section */}
       <div className="w-60">
         <Select
-          value={branchId?.toString() ?? "all"}
+          value={branchId?.toString() ?? 'all'}
           onValueChange={(v) => {
-            setBranchId(v === "all" ? undefined : Number(v));
+            setBranchId(v === 'all' ? undefined : Number(v));
             setPage(0);
           }}
         >
@@ -219,8 +224,8 @@ export default function DiscountsPage() {
               </AlertDescription>
             </div>
             <div className="flex gap-2">
-              {tiers
-                ?.filter((t) => t.tier !== "CUSTOM")
+              {canManageProducts && tiers
+                ?.filter((t) => t.tier !== 'CUSTOM')
                 .map((t) => (
                   <Button
                     key={t.tier}
@@ -249,7 +254,7 @@ export default function DiscountsPage() {
                 required
                 type="number"
                 placeholder="Inventory ID *"
-                value={form.inventoryId ?? ""}
+                value={form.inventoryId ?? ''}
                 onChange={(e) => setForm((f) => ({ ...f, inventoryId: Number(e.target.value) }))}
               />
               <Select
@@ -271,7 +276,7 @@ export default function DiscountsPage() {
                 type="number"
                 step="0.01"
                 placeholder="Override %"
-                value={form.discountPct ?? ""}
+                value={form.discountPct ?? ''}
                 onChange={(e) =>
                   setForm((f) => ({
                     ...f,
@@ -279,18 +284,18 @@ export default function DiscountsPage() {
                   }))
                 }
               />
-              {form.tier === "CUSTOM" && (
+              {form.tier === 'CUSTOM' && (
                 <Input
                   type="date"
                   required
-                  value={form.validUntil ?? ""}
+                  value={form.validUntil ?? ''}
                   onChange={(e) => setForm((f) => ({ ...f, validUntil: e.target.value }))}
                 />
               )}
               <Input
                 className="md:col-span-4"
                 placeholder="Note"
-                value={form.note ?? ""}
+                value={form.note ?? ''}
                 onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
               />
               <div className="md:col-span-4 flex items-center gap-4">
@@ -326,8 +331,8 @@ export default function DiscountsPage() {
             isLoading={isLoading}
             enablePagination={false}
             emptyState={{
-              title: "No discounts found",
-              description: "No active discounts match your current filters.",
+              title: 'No discounts found',
+              description: 'No active discounts match your current filters.',
             }}
             getRowClass={getRowClass}
           />

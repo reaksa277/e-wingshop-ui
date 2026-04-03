@@ -18,15 +18,15 @@ export function StockBar({ currentStock, maxStock, showLabel = true, className }
     <div className={cn('w-full', className)}>
       {showLabel && (
         <div className="mb-1 flex items-center justify-between text-xs">
-          <span className="font-medium text-gray-600">
+          <span className="font-medium text-muted-foreground">
             {displayedStock} / {maxStock} in stock
           </span>
           <span
             className={cn(
               'font-semibold',
-              stockLevel === 'low' && 'text-red-600',
-              stockLevel === 'medium' && 'text-amber-600',
-              stockLevel === 'high' && 'text-green-600'
+              stockLevel === 'low' && 'text-destructive',
+              stockLevel === 'medium' && 'text-accent',
+              stockLevel === 'high' && 'text-primary'
             )}
           >
             {stockLevel === 'low' && '🔥 Selling fast!'}

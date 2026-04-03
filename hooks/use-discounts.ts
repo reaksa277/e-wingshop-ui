@@ -17,6 +17,7 @@ export function useActiveDiscounts(branchId?: number, page = 0, size = 20) {
     queryKey: queryKeys.discounts.active(branchId, page, size),
     queryFn:  () => discountService.getActive(branchId, page, size),
     staleTime: 60 * 1000,
+    enabled: true, // Always enabled since discounts should be viewable by staff
   });
 }
 

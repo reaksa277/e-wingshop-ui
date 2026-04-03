@@ -3,10 +3,6 @@
 import { useLowStock, useExpiringSoon, useReportSummary, useActiveDiscounts } from "@/hooks";
 import { useAuth } from "@/lib/auth-context";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-
 // Last 30 days
 const today = () => new Date().toISOString().split("T")[0];
 const daysAgo = (n: number) => {
@@ -16,7 +12,7 @@ const daysAgo = (n: number) => {
 };
 
 export default function DashboardHome() {
-  const { user, canManage } = useAuth();
+  const { user, canManage, role } = useAuth();
 
   const { data: summary } = useReportSummary({ from: daysAgo(30), to: today() });
   const { data: lowStock } = useLowStock();
@@ -24,19 +20,19 @@ export default function DashboardHome() {
   const { data: discounts } = useActiveDiscounts(undefined, 0, 5);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">
+    <div className="dashboard-container">
+      <div className="dashboard-header">
+        <h1 className="dashboard-title">
           Welcome back, {user?.fullName} 👋
         </h1>
-        <p className="mt-1 text-muted-foreground">
+        <p className="dashboard-subtitle">
           {`Here's what's happening across all branches today.`}
         </p>
       </div>
 
       {/* KPI row — admin/owner only */}
       {canManage && summary && (
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="kpi-grid">
           <KpiCard
             label="Revenue (30d)"
             value={`$${Number(summary.totalRevenue).toFixed(2)}`}
@@ -54,7 +50,7 @@ export default function DashboardHome() {
 
       {/* Alert row */}
       {canManage && (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="alert-grid">
           <AlertCard
             title="⚠ Low stock items"
             count={lowStock?.length ?? 0}
@@ -64,17 +60,17 @@ export default function DashboardHome() {
               {lowStock?.slice(0, 4).map((inv) => (
                 <div
                   key={inv.id}
-                  className="border-b pb-2 text-sm last:border-b-0 last:pb-0"
+                  className="alert-item"
                 >
-                  <span className="font-semibold">{inv.productName}</span>
-                  <span className="text-muted-foreground">
+                  <span className="alert-item-name">{inv.productName}</span>
+                  <span className="alert-item-detail">
                     {" "}
                     — {inv.branchName}:{" "}
                   </span>
-                  <span className="font-semibold text-amber-600">
+                  <span className="alert-item-quantity">
                     {inv.quantity}
                   </span>
-                  <span className="text-muted-foreground">
+                  <span className="alert-item-detail">
                     {" "}
                     left (threshold: {inv.lowStockThreshold})
                   </span>
@@ -92,17 +88,17 @@ export default function DashboardHome() {
               {expiring?.slice(0, 4).map((inv) => (
                 <div
                   key={inv.id}
-                  className="border-b pb-2 text-sm last:border-b-0 last:pb-0"
+                  className="alert-item"
                 >
-                  <span className="font-semibold">{inv.productName}</span>
-                  <span className="text-muted-foreground">
+                  <span className="alert-item-name">{inv.productName}</span>
+                  <span className="alert-item-detail">
                     {" "}
                     — {inv.branchName}:{" "}
                   </span>
-                  <span className="font-semibold text-red-600">
+                  <span className="alert-item-warning">
                     {inv.daysUntilExpiry}d left
                   </span>
-                  <span className="text-muted-foreground">
+                  <span className="alert-item-detail">
                     {" "}
                     ({inv.quantity} units)
                   </span>
@@ -114,49 +110,49 @@ export default function DashboardHome() {
       )}
 
       {/* Active discounts snapshot */}
-      {canManage && discounts && discounts.totalElements > 0 && (
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+      {role && discounts && discounts.totalElements > 0 && (
+        <div className="discount-card">
+          <div className="discount-header">
             <div>
-              <CardTitle>🏷 Active discounts</CardTitle>
-              <CardDescription>
+              <div className="discount-header-title">🏷 Active discounts</div>
+              <div className="discount-header-description">
                 Current branch discounts and promotional pricing
-              </CardDescription>
+              </div>
             </div>
 
-            <Button variant="link" className="px-0" onClick={() => window.location.href = '/dashboard/discounts'}>
+            <button className="discount-view-all" onClick={() => window.location.href = '/dashboard/discounts'}>
               View all ({discounts?.totalElements}) →
-            </Button>
-          </CardHeader>
+            </button>
+          </div>
 
-          <CardContent className="space-y-3">
+          <div className="discount-content">
             {discounts.content.map((d) => (
               <div
                 key={d.id}
-                className="flex flex-col justify-between gap-2 border-b pb-3 text-sm last:border-b-0 last:pb-0 sm:flex-row sm:items-center"
+                className="discount-item"
               >
                 <span>
-                  <span className="font-semibold">{d.productName}</span>
-                  <span className="text-muted-foreground"> — {d.branchName}</span>
+                  <span className="discount-item-name">{d.productName}</span>
+                  <span className="discount-item-branch"> — {d.branchName}</span>
                 </span>
 
-                <span className="flex items-center gap-2">
-                  <span className="text-muted-foreground line-through">
+                <span className="discount-pricing">
+                  <span className="discount-original">
                     ${d.originalPrice.toFixed(2)}
                   </span>
-                  <span className="font-semibold text-green-600">
+                  <span className="discount-price">
                     ${d.discountedPrice.toFixed(2)}
                   </span>
-                  <Badge variant="destructive">-{d.discountPct}%</Badge>
+                  <span className="discount-badge">-{d.discountPct}%</span>
                 </span>
               </div>
             ))}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {/* Quick links */}
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="quick-links-grid">
         {[
           { label: "Browse products", href: "/dashboard/products" },
           { label: "Place an order", href: "/dashboard/orders/new" },
@@ -168,9 +164,9 @@ export default function DashboardHome() {
               ]
             : []),
         ].map((link) => (
-          <Button key={link.href} variant="outline" className="h-12 w-full justify-center" onClick={() => window.location.href = link.href}>
+          <button key={link.href} className="quick-link-button" onClick={() => window.location.href = link.href}>
             {link.label}
-          </Button>
+          </button>
         ))}
       </div>
     </div>
@@ -185,12 +181,10 @@ function KpiCard({
   value: string;
 }) {
   return (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="text-sm text-muted-foreground">{label}</div>
-        <div className="mt-2 text-3xl font-bold tracking-tight">{value}</div>
-      </CardContent>
-    </Card>
+    <div className="kpi-card">
+      <div className="kpi-label">{label}</div>
+      <div className="kpi-value">{value}</div>
+    </div>
   );
 }
 
@@ -206,25 +200,25 @@ function AlertCard({
   children: React.ReactNode;
 }) {
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <CardTitle className="text-base">{title}</CardTitle>
-        <Badge variant={count === 0 ? "secondary" : "destructive"}>{count}</Badge>
-      </CardHeader>
+    <div className="alert-card">
+      <div className="alert-header">
+        <div className="alert-title">{title}</div>
+        <div className={`alert-count ${count === 0 ? 'secondary' : 'destructive'}`}>{count}</div>
+      </div>
 
-      <CardContent>
+      <div className="alert-content">
         {count === 0 ? (
-          <p className="text-sm text-muted-foreground">No issues right now 🎉</p>
+          <p className="alert-empty">No issues right now 🎉</p>
         ) : (
           children
         )}
 
         {count > 4 && (
-          <Button variant="link" className="mt-3 h-auto p-0" onClick={() => window.location.href = href}>
+          <button className="alert-view-all" onClick={() => window.location.href = href}>
             View all {count} →
-          </Button>
+          </button>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

@@ -66,13 +66,13 @@ export function PromoCodeInput({ onApply, className }: PromoCodeInputProps) {
 
       {/* Status message */}
       {status === 'valid' && (
-        <p className="mt-2 text-sm font-medium text-green-600 animate-fade-up">
+        <p className="mt-2 text-sm font-medium text-primary animate-fade-up">
           ✓ Promo code applied successfully!
         </p>
       )}
 
       {status === 'invalid' && (
-        <p className="mt-2 text-sm font-medium text-red-600 animate-fade-up">
+        <p className="mt-2 text-sm font-medium text-destructive animate-fade-up">
           ✕ Invalid promo code. Please try again.
         </p>
       )}

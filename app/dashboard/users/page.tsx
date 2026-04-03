@@ -227,7 +227,7 @@ export default function UsersPage() {
       cell: ({ row }) => {
         const user = row.original;
         return (
-          <div className="flex justify-end gap-2">
+          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"

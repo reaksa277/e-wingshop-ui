@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { type ColumnDef } from "@tanstack/react-table";
-import { Pencil, Trash2 } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 
 import {
   useProducts,
@@ -27,6 +27,7 @@ export default function ProductsPage() {
   const { canManage, isOwner } = useAuth();
 
   const [page, setPage] = useState(0);
+  const [size] = useState(20);
   const [keyword, setKeyword] = useState(searchParams.get("keyword") ?? "");
   const [categoryId, setCategoryId] = useState<number | undefined>(
     searchParams.get("categoryId")
@@ -40,7 +41,7 @@ export default function ProductsPage() {
     keyword: keyword || undefined,
     categoryId,
     page,
-    size: 20,
+    size,
   });
 
   const { data: categories } = useCategories();
@@ -119,13 +120,13 @@ export default function ProductsPage() {
               size="icon-xs"
               onClick={() => router.push(`/dashboard/products/${product.id}`)}
             >
-              <Pencil className="h-4 w-4" />
+              <Edit className="h-5 w-5" />
             </Button>
             {isOwner && (
               <Button
                 variant="ghost"
                 size="icon-xs"
-                className="text-red-500 hover:text-red-600"
+                className="text-destructive hover:text-destructive/80"
                 onClick={() => {
                   if (confirm(`Deactivate "${product.name}"?`)) {
                     deleteProduct.mutate(product.id);
@@ -133,7 +134,7 @@ export default function ProductsPage() {
                 }}
                 disabled={deleteProduct.isPending}
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-4 w-4 text-destructive" />
               </Button>
             )}
           </div>
@@ -149,7 +150,7 @@ export default function ProductsPage() {
         <h2 className="text-2xl font-bold tracking-tight">Products</h2>
 
         {canManage && (
-          <Button onClick={() => setShowForm(!showForm)}>
+          <Button className="bg-primary" onClick={() => setShowForm(!showForm)}>
             + New product
           </Button>
         )}
@@ -233,7 +234,7 @@ export default function ProductsPage() {
                 </Button>
 
                 {createProduct.isError && (
-                  <span className="text-sm text-red-500">
+                  <span className="text-sm text-destructive">
                     {(createProduct.error as Error).message}
                   </span>
                 )}
@@ -284,7 +285,9 @@ export default function ProductsPage() {
             filterColumn="name"
             filterPlaceholder="Search products..."
             isLoading={isLoading}
-            enablePagination={false}
+            enablePagination={true}
+            pageSize={10}
+            totalCount={data?.totalElements}
             emptyState={{
               title: "No products found",
               description: keyword || categoryId

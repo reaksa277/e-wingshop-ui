@@ -92,7 +92,7 @@ export default function ProductDetailPage() {
     : "0";
 
   return (
-    <div className="container max-w-5xl py-6 space-y-6">
+    <div className="space-y-6">
       {/* Header Navigation */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
@@ -140,8 +140,8 @@ export default function ProductDetailPage() {
 
       {/* Inactive Banner */}
       {!product.isActive && (
-        <Alert variant="destructive" className="bg-amber-50 border-amber-200 text-amber-900">
-          <AlertTriangle className="h-4 w-4 stroke-amber-900" />
+        <Alert variant="default">
+          <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Product Inactive</AlertTitle>
           <AlertDescription>
             This product is currently hidden from the customer-facing storefront and cannot be added to new orders.
@@ -152,8 +152,8 @@ export default function ProductDetailPage() {
       {/* KPI Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard label="Cost Price" value={`$${Number(product.costPrice).toFixed(2)}`} />
-        <StatCard label="Selling Price" value={`$${Number(product.sellingPrice).toFixed(2)}`} color="text-green-600" />
-        <StatCard label="Margin" value={`${margin}%`} color="text-violet-600" />
+        <StatCard label="Selling Price" value={`$${Number(product.sellingPrice).toFixed(2)}`} color="text-primary" />
+        <StatCard label="Margin" value={`${margin}%`} color="text-accent" />
         <StatCard label="Created On" value={new Date(product.createdAt).toLocaleDateString()} />
       </div>
 

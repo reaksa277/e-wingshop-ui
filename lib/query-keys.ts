@@ -8,7 +8,7 @@
 export const queryKeys = {
   // ── Auth ──────────────────────────────────────────────────────────────────
   auth: {
-    me: () => ["auth", "me"] as const,  
+    me: () => ["auth", "me"] as const,
   },
 
   // ── Users ─────────────────────────────────────────────────────────────────
@@ -20,7 +20,7 @@ export const queryKeys = {
 
   // ── Branches ──────────────────────────────────────────────────────────────
   branches: {
-    all:    ()                                  => ["branches"] as const,
+    all:    () => ["branches"] as const,
     detail: (id: number)                        => ["branches", id] as const,
     nearby: (lat: number, lng: number, km: number) =>
       ["branches", "nearby", { lat, lng, km }] as const,

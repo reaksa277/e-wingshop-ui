@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { type ColumnDef } from '@tanstack/react-table';
 import { Card, CardContent } from '@/components/ui/card';
 import { MapPin, Phone, Plus, Edit, Trash2 } from 'lucide-react';
@@ -27,10 +26,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { DataTable } from '@/components/ui/data-table';
-import { authService } from '@/services/auth.service';
-import { tokenStore } from '@/lib/api-client';
 import type { BranchResponse, BranchRequest } from '@/types';
-import { useBranches, useCreateBranch, useUpdateBranch, useDeleteBranch } from '@/hooks/use-branches';
+import {
+  useBranches,
+  useCreateBranch,
+  useUpdateBranch,
+  useDeleteBranch,
+} from '@/hooks/use-branches';
+import { useAuth } from '@/lib/auth-context';
 
 const branchFormSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -43,22 +46,12 @@ const branchFormSchema = z.object({
 type BranchFormData = z.infer<typeof branchFormSchema>;
 
 export default function BranchesPage() {
-  const isAuthenticated = !!tokenStore.getAccess();
-
-  const { data: userData } = useQuery({
-    queryKey: ['user', 'me'],
-    queryFn: () => authService.me(),
-    enabled: isAuthenticated,
-    staleTime: 5 * 60 * 1000,
-  });
+  const { canManage, isOwner } = useAuth();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBranch, setEditingBranch] = useState<BranchResponse | null>(null);
 
-  const {
-    data: branchesData,
-    isLoading,
-  } = useBranches();
+  const { data: branchesData, isLoading } = useBranches();
 
   const createBranchMutation = useCreateBranch();
   const updateBranchMutation = useUpdateBranch(editingBranch?.id || 0);
@@ -75,16 +68,12 @@ export default function BranchesPage() {
     },
   });
 
-  const isSuperadmin = userData?.role === 'SUPERADMIN' || userData?.role === 'MANAGER';
-
   // Define columns for DataTable
   const columns: ColumnDef<BranchResponse>[] = [
     {
       accessorKey: 'name',
       header: 'Name',
-      cell: ({ row }) => (
-        <span className="font-medium">{row.getValue('name')}</span>
-      ),
+      cell: ({ row }) => <span className="font-medium">{row.getValue('name')}</span>,
     },
     {
       accessorKey: 'address',
@@ -116,17 +105,13 @@ export default function BranchesPage() {
       header: 'Actions',
       cell: ({ row }) => {
         const branch = row.original;
-        if (!isSuperadmin) return null;
+        if (!isOwner) return null;
         return (
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-center gap-2">
             <Button variant="ghost" size="icon" onClick={() => handleEdit(branch)}>
               <Edit className="h-4 w-4" />
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handleDelete(branch.id)}
-            >
+            <Button variant="ghost" size="icon" onClick={() => handleDelete(branch.id)}>
               <Trash2 className="h-4 w-4 text-destructive" />
             </Button>
           </div>
@@ -200,13 +185,15 @@ export default function BranchesPage() {
           <h1 className="text-3xl font-bold">Branches</h1>
           <p className="text-muted-foreground">Manage your store locations</p>
         </div>
-        {isSuperadmin && (
+        {canManage && (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger>
-              <Button onClick={() => setEditingBranch(null)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Branch
-              </Button>
+              {isOwner && (
+                <Button onClick={() => setEditingBranch(null)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Branch
+                </Button>
+              )}
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
@@ -276,7 +263,8 @@ export default function BranchesPage() {
             filterColumn="name"
             filterPlaceholder="Search branches..."
             isLoading={isLoading}
-            enablePagination={false}
+            enablePagination={true}
+            pageSize={10}
             emptyState={{
               title: 'No branches found',
               description: 'Create your first branch to get started.',
