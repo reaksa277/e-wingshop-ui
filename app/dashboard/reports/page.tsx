@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -11,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import {
   LineChart,
   Line,
@@ -23,13 +21,8 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
 } from 'recharts';
 import { DollarSign, ShoppingCart, TrendingUp, Package } from 'lucide-react';
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
 
 export default function ReportsPage() {
   const [range, setRange] = useState('7d');
@@ -94,7 +87,7 @@ export default function ReportsPage() {
         </div>
         <div className="flex gap-2">
           <Select value={range} onValueChange={setRange}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-45">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -106,7 +99,7 @@ export default function ReportsPage() {
             </SelectContent>
           </Select>
           <Select value={interval} onValueChange={setInterval}>
-            <SelectTrigger className="w-[150px]">
+            <SelectTrigger className="w-37.5">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -153,22 +146,28 @@ export default function ReportsPage() {
               <CardTitle>Revenue Over Time</CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={reportsData?.revenueOverTime || []}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="revenue"
-                    stroke="#8884d8"
-                    name="Revenue"
-                    strokeWidth={2}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              {reportsData?.revenueOverTime && reportsData.revenueOverTime.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={reportsData.revenueOverTime}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="revenue"
+                      stroke="#8884d8"
+                      name="Revenue"
+                      strokeWidth={2}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-75 text-muted-foreground">
+                  No data found
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -179,15 +178,21 @@ export default function ReportsPage() {
                 <CardTitle>Top 10 Products by Revenue</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={reportsData?.topProducts || []} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" />
-                    <YAxis dataKey="name" type="category" width={120} />
-                    <Tooltip />
-                    <Bar dataKey="revenue" fill="#8884d8" name="Revenue" />
-                  </BarChart>
-                </ResponsiveContainer>
+                {reportsData?.topProducts && reportsData.topProducts.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={reportsData.topProducts} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis type="number" />
+                      <YAxis dataKey="name" type="category" width={120} />
+                      <Tooltip />
+                      <Bar dataKey="revenue" fill="#8884d8" name="Revenue" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-75 text-muted-foreground">
+                    No data found
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -197,16 +202,22 @@ export default function ReportsPage() {
                 <CardTitle>Sales by Branch</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={reportsData?.salesByBranch || []}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="revenue" fill="#82ca9d" name="Revenue" />
-                  </BarChart>
-                </ResponsiveContainer>
+                {reportsData?.salesByBranch && reportsData.salesByBranch.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={reportsData.salesByBranch}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="revenue" fill="#82ca9d" name="Revenue" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-75 text-muted-foreground">
+                    No data found
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

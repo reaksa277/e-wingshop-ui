@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { type ColumnDef } from '@tanstack/react-table';
 import {
   useListAllInventory,

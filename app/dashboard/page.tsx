@@ -122,11 +122,9 @@ export default function DashboardHome() {
       <div className="quick-links-grid">
         {[
           { label: 'Browse products', href: '/dashboard/products' },
-          { label: 'Place an order', href: '/dashboard/orders/new' },
           ...(canManage
             ? [
                 { label: 'Manage inventory', href: '/dashboard/inventory' },
-                { label: 'Sales reports', href: '/dashboard/reports' },
                 { label: 'Manage discounts', href: '/dashboard/discounts' },
               ]
             : []),

@@ -6,6 +6,8 @@ export interface ExpiryAlert {
   id: string;
   productId: string;
   branchId: string;
+  productName?: string;
+  branchName?: string;
   expiryDate: Date;
   status: 'ACTIVE' | 'DISMISSED' | 'EXPIRED';
   category: ExpiryCategory;
@@ -45,6 +47,8 @@ interface InventoryItem {
   id: string;
   productId: string;
   branchId: string;
+  productName?: string;
+  branchName?: string;
   product?: any;
   branch?: any;
   quantity?: number;
@@ -269,6 +273,8 @@ export const alertService = {
         id: `${alertType}-${item.id}-${index}`,
         productId: item.productId || item.id,
         branchId: item.branchId || '',
+        productName: item.productName,
+        branchName: item.branchName,
         expiryDate: item.expiryDate ? new Date(item.expiryDate) : new Date(),
         status: alertType === 'EXPIRED' ? 'EXPIRED' : 'ACTIVE',
         category,

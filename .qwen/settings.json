@@ -12,7 +12,8 @@
       "Bash(findstr *)",
       "Bash(timeout *)",
       "Bash(tasklist *)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(dir *)"
     ]
   },
   "$version": 3

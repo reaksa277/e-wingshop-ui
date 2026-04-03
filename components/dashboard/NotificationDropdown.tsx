@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Bell, Check, Clock, AlertTriangle, RefreshCw } from 'lucide-react';
-import { useLowStock, useExpiringSoon, useExpiredInventory } from '@/hooks';
+import { useAlertsByCategory } from '@/hooks/use-alerts';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -10,7 +10,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { getAlertNotifications } from '@/app/actions/inventory-alerts';
 
 interface NotificationItem {
   id: string;
@@ -25,58 +24,99 @@ interface NotificationItem {
 export function NotificationDropdown() {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [lastChecked, setLastChecked] = useState<Date | null>(null);
+  const [readIds, setReadIds] = useState<Set<string>>(new Set());
   const router = useRouter();
 
-  const { data: lowStock, refetch: refetchLowStock } = useLowStock();
-  const { data: expiring, refetch: refetchExpiring } = useExpiringSoon(undefined, 7);
-  const { data: expired, refetch: refetchExpired } = useExpiredInventory();
+  const { data: alertsData, isLoading: isLoadingAlerts, refetch } = useAlertsByCategory();
 
-  const totalAlerts = (lowStock?.length ?? 0) + (expiring?.length ?? 0) + (expired?.length ?? 0);
+  const totalAlerts = Math.max(0, (alertsData?.totals.total ?? 0) - readIds.size);
 
-  // Load notifications when popover opens
-  const loadNotifications = async () => {
-    setIsLoading(true);
-    try {
-      const result = await getAlertNotifications();
+  // Build notifications from alerts data
+  useEffect(() => {
+    if (!alertsData) return;
 
-      const items: NotificationItem[] = result.notifications.map((n) => ({
-        ...n,
-        timestamp: new Date(),
-        read: false,
-      }));
+    const items: NotificationItem[] = [];
 
-      setNotifications(items);
-      setLastChecked(result.summary.lastChecked);
-    } catch (error) {
-      console.error('Failed to load notifications:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    // Combine all alerts from categories
+    const allAlerts = [
+      ...alertsData.oneMonth,
+      ...alertsData.twoWeeks,
+      ...alertsData.oneWeek,
+      ...alertsData.expired,
+    ];
+
+    allAlerts.forEach((alert) => {
+      let type: NotificationItem['type'] = 'expiring';
+      let severity: NotificationItem['severity'] = 'warning';
+      let title = '';
+
+      if (alert.category === 'EXPIRED') {
+        type = 'expired';
+        severity = 'error';
+        title = '🚨 Product Expired';
+      } else if (alert.category === 'ONE_WEEK') {
+        type = 'expiring';
+        severity = 'warning';
+        title = '⏰ Product Expiring Soon';
+      } else if (alert.category === 'TWO_WEEKS') {
+        type = 'expiring';
+        severity = 'warning';
+        title = '⏰ Product Expiring';
+      } else {
+        type = 'expiring';
+        severity = 'warning';
+        title = '📅 Product Expiring This Month';
+      }
+
+      const productName = alert.productName ?? alert.product?.name ?? 'Unknown Product';
+      const branchName = alert.branchName ?? alert.branch?.name ?? 'Unknown Branch';
+      const daysRemaining = alert.daysRemaining ?? 0;
+
+      let message = '';
+      if (alert.category === 'EXPIRED') {
+        message = `${productName} at ${branchName} expired ${Math.abs(daysRemaining)} days ago`;
+      } else {
+        message = `${productName} at ${branchName} expires in ${daysRemaining} days`;
+      }
+
+      items.push({
+        id: alert.id,
+        title,
+        message,
+        timestamp: new Date(alert.createdAt ?? Date.now()),
+        type,
+        severity,
+        read: alert.isRead ?? false,
+      });
+    });
+
+    setNotifications(items.slice(0, 20)); // Limit to 20 notifications
+  }, [alertsData]);
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
     if (isOpen) {
-      loadNotifications();
-      // Refetch data to get latest
-      refetchLowStock();
-      refetchExpiring();
-      refetchExpired();
+      setReadIds(new Set());
+      refetch();
     }
   };
 
   const markAsRead = (id: string) => {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    setReadIds((prev) => new Set(prev).add(id));
   };
 
   const markAllAsRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    setReadIds((prev) => {
+      const next = new Set(prev);
+      notifications.forEach((n) => next.add(n.id));
+      return next;
+    });
   };
 
-  const refreshAlerts = async () => {
-    await loadNotifications();
+  const refreshAlerts = () => {
+    refetch();
   };
 
   const formatTimeAgo = (date: Date): string => {
@@ -137,21 +177,16 @@ export function NotificationDropdown() {
             <p className="text-xs text-muted-foreground">
               {totalAlerts} alert{totalAlerts !== 1 ? 's' : ''} requiring attention
             </p>
-            {lastChecked && (
-              <p className="text-[10px] text-muted-foreground mt-0.5">
-                Last checked: {lastChecked.toLocaleTimeString()}
-              </p>
-            )}
           </div>
           <div className="flex gap-1">
             <Button
               variant="ghost"
               size="sm"
               onClick={refreshAlerts}
-              disabled={isLoading}
+              disabled={isLoadingAlerts}
               className="h-8 w-8 p-0"
             >
-              <RefreshCw className={cn('h-4 w-4', isLoading && 'animate-spin')} />
+              <RefreshCw className={cn('h-4 w-4', isLoadingAlerts && 'animate-spin')} />
             </Button>
             {notifications.filter((n) => !n.read).length > 0 && (
               <Button
@@ -170,7 +205,7 @@ export function NotificationDropdown() {
 
         {/* Alert List */}
         <ScrollArea className="h-96">
-          {isLoading ? (
+          {isLoadingAlerts ? (
             <div className="flex flex-col items-center justify-center py-12">
               <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground mb-2" />
               <p className="text-sm text-muted-foreground">Loading alerts...</p>

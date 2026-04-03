@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { Card, CardContent } from '@/components/ui/card';
 import { MapPin, Phone, Plus, Edit, Trash2 } from 'lucide-react';
@@ -26,6 +26,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { DataTable } from '@/components/ui/data-table';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { BranchResponse, BranchRequest } from '@/types';
 import {
   useBranches,
@@ -44,6 +45,22 @@ const branchFormSchema = z.object({
 });
 
 type BranchFormData = z.infer<typeof branchFormSchema>;
+
+// Skeleton rows for loading state
+function TableSkeleton() {
+  return (
+    <div className="space-y-3">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div key={i} className="flex gap-4 py-3">
+          <Skeleton className="h-5 flex-1" />
+          <Skeleton className="h-5 flex-[2]" />
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-5 w-24" />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function BranchesPage() {
   const { canManage, isOwner } = useAuth();
@@ -67,6 +84,32 @@ export default function BranchesPage() {
       longitude: undefined,
     },
   });
+
+  const handleDelete = useCallback(
+    async (id: number) => {
+      if (!confirm('Are you sure you want to delete this branch?')) return;
+      deleteBranchMutation.mutate(id, {
+        onSuccess: () => toast.success('Branch deleted successfully'),
+        onError: () => toast.error('Failed to delete branch'),
+      });
+    },
+    [deleteBranchMutation],
+  );
+
+  const handleEdit = useCallback(
+    (branch: BranchResponse) => {
+      setEditingBranch(branch);
+      form.reset({
+        name: branch.name,
+        address: branch.address,
+        phone: branch.phone || '',
+        latitude: branch.latitude,
+        longitude: branch.longitude,
+      });
+      setIsDialogOpen(true);
+    },
+    [form],
+  );
 
   // Define columns for DataTable
   const columns: ColumnDef<BranchResponse>[] = [
@@ -108,10 +151,20 @@ export default function BranchesPage() {
         if (!isOwner) return null;
         return (
           <div className="flex justify-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => handleEdit(branch)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleEdit(branch)}
+              disabled={isLoading}
+            >
               <Edit className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => handleDelete(branch.id)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleDelete(branch.id)}
+              disabled={isLoading}
+            >
               <Trash2 className="h-4 w-4 text-destructive" />
             </Button>
           </div>
@@ -150,34 +203,6 @@ export default function BranchesPage() {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this branch?')) return;
-    deleteBranchMutation.mutate(id, {
-      onSuccess: () => toast.success('Branch deleted successfully'),
-      onError: () => toast.error('Failed to delete branch'),
-    });
-  };
-
-  const handleEdit = (branch: BranchResponse) => {
-    setEditingBranch(branch);
-    form.reset({
-      name: branch.name,
-      address: branch.address,
-      phone: branch.phone || '',
-      latitude: branch.latitude,
-      longitude: branch.longitude,
-    });
-    setIsDialogOpen(true);
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -187,9 +212,14 @@ export default function BranchesPage() {
         </div>
         {canManage && (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger>
+            <DialogTrigger asChild>
               {isOwner && (
-                <Button onClick={() => setEditingBranch(null)}>
+                <Button
+                  onClick={() => {
+                    setEditingBranch(null);
+                    form.reset();
+                  }}
+                >
                   <Plus className="mr-2 h-4 w-4" />
                   Add Branch
                 </Button>
@@ -257,19 +287,22 @@ export default function BranchesPage() {
       {/* Branches Table */}
       <Card>
         <CardContent className="pt-6">
-          <DataTable
-            columns={columns}
-            data={branchesData ?? []}
-            filterColumn="name"
-            filterPlaceholder="Search branches..."
-            isLoading={isLoading}
-            enablePagination={true}
-            pageSize={10}
-            emptyState={{
-              title: 'No branches found',
-              description: 'Create your first branch to get started.',
-            }}
-          />
+          {isLoading ? (
+            <TableSkeleton />
+          ) : (
+            <DataTable
+              columns={columns}
+              data={branchesData ?? []}
+              filterColumn="name"
+              filterPlaceholder="Search branches..."
+              enablePagination={true}
+              pageSize={10}
+              emptyState={{
+                title: 'No branches found',
+                description: 'Create your first branch to get started.',
+              }}
+            />
+          )}
         </CardContent>
       </Card>
     </div>

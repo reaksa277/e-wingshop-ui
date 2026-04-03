@@ -56,4 +56,8 @@ export const inventoryService = {
     }),
 
   getExpired: () => api.get<InventoryResponse[]>('/inventory/expired'),
+
+  triggerExpiryCheck: () => api.post<string>('/api/v1/alerts/expiry'),
+
+  triggerLowStockCheck: () => api.post<string>('/api/v1/alerts/low-stock'),
 };

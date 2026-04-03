@@ -16,7 +16,6 @@ import {
 import { useAuth } from '@/lib/auth-context';
 import { useLogout } from '@/hooks';
 import { clearAuth } from '@/lib/auth-helpers';
-import { DashboardHeader } from '@/components/dashboard/Header';
 
 import { Badge } from '@/components/ui/badge';
 import { NotificationDropdown } from '@/components/dashboard/NotificationDropdown';

@@ -1,18 +1,18 @@
 // services/report.service.ts
 
 import { api } from '@/lib/api-client';
-import { BranchRevenue, DailyRevenuePoint, ReportParams, ReportSummary, TopProduct } from '@/types';
+import { BranchRevenue, ReportParams, TopProduct } from '@/types';
 
 export const reportService = {
-  summary: ({ from, to, branchId }: ReportParams) =>
-    api.get<ReportSummary>('/reports/summary', { from, to, branchId }),
+//   summary: ({ from, to, branchId }: ReportParams) =>
+//     api.get<ReportSummary>('/reports/summary', { from, to, branchId }),
 
-  dailyRevenue: ({ from, to, branchId }: ReportParams) =>
-    api.get<DailyRevenuePoint[]>('/reports/daily-revenue', {
-      from,
-      to,
-      branchId,
-    }),
+//   dailyRevenue: ({ from, to, branchId }: ReportParams) =>
+//     api.get<DailyRevenuePoint[]>('/reports/daily-revenue', {
+//       from,
+//       to,
+//       branchId,
+//     }),
 
   topProducts: ({ from, to, branchId }: ReportParams, limit = 10) =>
     api.get<TopProduct[]>('/reports/top-products', {

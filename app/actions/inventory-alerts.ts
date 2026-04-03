@@ -107,7 +107,23 @@ export async function checkInventoryAlerts(): Promise<AlertSummary> {
  * Get formatted alert summary for notifications
  */
 export async function getAlertNotifications() {
+  let triggerError: string | null = null;
+
+  // Trigger backend alert checks first
+  const results = await Promise.allSettled([
+    inventoryService.triggerExpiryCheck(),
+    inventoryService.triggerLowStockCheck(),
+  ]);
+
+  const failedTriggers = results.filter((r) => r.status === 'rejected');
+  if (failedTriggers.length > 0) {
+    triggerError = (failedTriggers[0] as PromiseRejectedResult).reason?.message ?? 'Unknown error';
+    console.warn('Backend alert trigger failed:', triggerError);
+  }
+
   const summary = await checkInventoryAlerts();
+
+  console.log('[SERVER] Alert summary:', JSON.stringify(summary, null, 2));
 
   // Generate notification messages
   const notifications: Array<{
@@ -154,6 +170,7 @@ export async function getAlertNotifications() {
   return {
     summary,
     notifications,
+    triggerError,
   };
 }
 
