@@ -15,10 +15,7 @@ interface UseStockAnimationReturn {
  * @param maxStock - Maximum stock capacity
  * @returns Object with displayedStock (animated) and stockLevel (low/medium/high)
  */
-export function useStockAnimation(
-  currentStock: number,
-  maxStock: number
-): UseStockAnimationReturn {
+export function useStockAnimation(currentStock: number, maxStock: number): UseStockAnimationReturn {
   const [displayedStock, setDisplayedStock] = useState(0);
 
   // Animate the stock count from 0 to currentStock
@@ -30,10 +27,10 @@ export function useStockAnimation(
     const animate = (timestamp: number) => {
       if (!startTime) startTime = timestamp;
       const progress = Math.min((timestamp - startTime) / duration, 1);
-      
+
       // Ease out cubic
       const easedProgress = 1 - Math.pow(1 - progress, 3);
-      
+
       setDisplayedStock(Math.floor(easedProgress * currentStock));
 
       if (progress < 1) {

@@ -5,11 +5,7 @@ import { Bell, Check, Clock, AlertTriangle, RefreshCw } from 'lucide-react';
 import { useLowStock, useExpiringSoon, useExpiredInventory } from '@/hooks';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/navigation';
@@ -72,9 +68,7 @@ export function NotificationDropdown() {
   };
 
   const markAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
   };
 
   const markAllAsRead = () => {
@@ -107,9 +101,7 @@ export function NotificationDropdown() {
   };
 
   const getSeverityBorder = (severity: NotificationItem['severity']) => {
-    return severity === 'error'
-      ? 'border-l-4 border-l-red-500'
-      : 'border-l-4 border-l-amber-500';
+    return severity === 'error' ? 'border-l-4 border-l-red-500' : 'border-l-4 border-l-amber-500';
   };
 
   const handleViewAll = () => {
@@ -187,9 +179,7 @@ export function NotificationDropdown() {
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <Bell className="mb-2 h-12 w-12 text-muted-foreground/50" />
               <p className="text-sm font-medium">No notifications</p>
-              <p className="text-xs text-muted-foreground">
-                All inventory is in good condition
-              </p>
+              <p className="text-xs text-muted-foreground">All inventory is in good condition</p>
             </div>
           ) : (
             <div className="divide-y">
@@ -208,9 +198,7 @@ export function NotificationDropdown() {
                   </div>
                   <div className="flex-1 space-y-1">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="text-sm font-medium leading-none">
-                        {notification.title}
-                      </p>
+                      <p className="text-sm font-medium leading-none">{notification.title}</p>
                       {!notification.read && (
                         <div className="h-2 w-2 rounded-full bg-blue-600 flex-shrink-0 mt-1" />
                       )}
@@ -233,12 +221,7 @@ export function NotificationDropdown() {
           <>
             <Separator />
             <div className="p-3 space-y-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full"
-                onClick={handleViewAll}
-              >
+              <Button variant="outline" size="sm" className="w-full" onClick={handleViewAll}>
                 View All Alerts ({totalAlerts})
               </Button>
               <p className="text-[10px] text-center text-muted-foreground">

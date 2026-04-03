@@ -160,7 +160,11 @@ export default function ProductDetailPage() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard label="Cost Price" value={`$${Number(product.costPrice).toFixed(2)}`} />
-        <StatCard label="Selling Price" value={`$${Number(product.sellingPrice).toFixed(2)}`} color="text-primary" />
+        <StatCard
+          label="Selling Price"
+          value={`$${Number(product.sellingPrice).toFixed(2)}`}
+          color="text-primary"
+        />
         <StatCard label="Margin" value={`${margin}%`} color="text-accent" />
         <StatCard label="Created On" value={new Date(product.createdAt).toLocaleDateString()} />
       </div>

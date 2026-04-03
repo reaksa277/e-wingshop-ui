@@ -11,7 +11,7 @@ import {
   useExpiringSoon,
   useBranches,
 } from '@/hooks';
-import type { CreateDiscountRequest, DiscountTier } from '@/types';
+import type { CreateDiscountRequest, DiscountTier, ExpiryDiscountResponse } from '@/types';
 
 // Shadcn UI Components
 import { Button } from '@/components/ui/button';
@@ -29,11 +29,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Plus, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { DataTable } from '@/components/ui/data-table';
 import { useAuth } from '@/lib/auth-context';
-import { can } from '@/lib/permissions';
+import { can, type Role } from '@/lib/permissions';
 
 export default function DiscountsPage() {
   const { canManage, role } = useAuth();
-  const canManageProducts = role ? can(role.toLowerCase() as any, 'manage_products') : false;
+  const canManageProducts = role ? can(role.toLowerCase() as Role, 'manage_products') : false;
   const [branchId, setBranchId] = useState<number | undefined>();
   const [page, setPage] = useState(0);
   const [showForm, setShowForm] = useState(false);
@@ -72,7 +72,7 @@ export default function DiscountsPage() {
     0;
 
   // Define columns for DataTable
-  const columns: ColumnDef<any>[] = [
+  const columns: ColumnDef<ExpiryDiscountResponse>[] = [
     {
       accessorKey: 'productName',
       header: 'Product',
@@ -93,11 +93,7 @@ export default function DiscountsPage() {
     {
       accessorKey: 'tierLabel',
       header: 'Tier',
-      cell: ({ row }) => (
-        <Badge variant="secondary">
-          {row.getValue('tierLabel')}
-        </Badge>
-      ),
+      cell: ({ row }) => <Badge variant="secondary">{row.getValue('tierLabel')}</Badge>,
     },
     {
       accessorKey: 'originalPrice',
@@ -171,7 +167,7 @@ export default function DiscountsPage() {
     },
   ];
 
-  const getRowClass = (row: any) => {
+  const getRowClass = (row: ExpiryDiscountResponse) => {
     if (row.daysUntilExpiry !== undefined && row.daysUntilExpiry <= 3) {
       return 'bg-red-50/50';
     }
@@ -224,19 +220,20 @@ export default function DiscountsPage() {
               </AlertDescription>
             </div>
             <div className="flex gap-2">
-              {canManageProducts && tiers
-                ?.filter((t) => t.tier !== 'CUSTOM')
-                .map((t) => (
-                  <Button
-                    key={t.tier}
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => handleAutoApply(t.tier)}
-                    disabled={autoApply.isPending}
-                  >
-                    Auto-apply {t.label}
-                  </Button>
-                ))}
+              {canManageProducts &&
+                tiers
+                  ?.filter((t) => t.tier !== 'CUSTOM')
+                  .map((t) => (
+                    <Button
+                      key={t.tier}
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => handleAutoApply(t.tier)}
+                      disabled={autoApply.isPending}
+                    >
+                      Auto-apply {t.label}
+                    </Button>
+                  ))}
             </div>
           </div>
         </Alert>

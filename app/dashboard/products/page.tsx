@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import { type ColumnDef } from "@tanstack/react-table";
-import { Edit, Trash2 } from "lucide-react";
+import { useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { type ColumnDef } from '@tanstack/react-table';
+import { Edit, Trash2 } from 'lucide-react';
 
 import { useProducts, useCategories, useCreateProduct, useDeleteProduct } from '@/hooks';
 import { useAuth } from '@/lib/auth-context';
@@ -29,7 +29,7 @@ export default function ProductsPage() {
 
   const [page, setPage] = useState(0);
   const [size] = useState(20);
-  const [keyword, setKeyword] = useState(searchParams.get("keyword") ?? "");
+  const [keyword, setKeyword] = useState(searchParams.get('keyword') ?? '');
   const [categoryId, setCategoryId] = useState<number | undefined>(
     searchParams.get('categoryId') ? Number(searchParams.get('categoryId')) : undefined
   );

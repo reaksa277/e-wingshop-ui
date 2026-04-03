@@ -133,29 +133,12 @@ export default function CategoriesPage() {
       cell: ({ row }) => {
         const category = row.original;
         return (
-<<<<<<< HEAD
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handleEdit(category)}
-            >
+            <Button variant="ghost" size="icon" onClick={() => handleEdit(category)}>
               <Edit className="h-4 w-4" />
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setDeletingCategory(category)}
-            >
-              <Trash2 className="h-4 w-4 text-destructive" />
-=======
-          <div className="flex justify-end gap-2">
-            <Button variant="ghost" size="icon" onClick={() => handleEdit(category)}>
-              <Pencil className="h-4 w-4" />
-            </Button>
             <Button variant="ghost" size="icon" onClick={() => setDeletingCategory(category)}>
-              <Trash2 className="h-4 w-4" />
->>>>>>> b750e70e4013afa744d4299da8c5baab8c10231f
+              <Trash2 className="h-4 w-4 text-destructive" />
             </Button>
           </div>
         );

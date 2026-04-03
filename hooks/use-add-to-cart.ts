@@ -19,7 +19,7 @@ export function useAddToCart(): UseAddToCartReturn {
   const addToCart = useCallback(() => {
     // Trigger bounce animation
     setIsBouncing(true);
-    
+
     // Trigger added state
     setIsAdded(true);
 

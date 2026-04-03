@@ -256,12 +256,7 @@ export default function UsersPage() {
         const user = row.original;
         return (
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handleEdit(user)}
-              title="Edit user"
-            >
+            <Button variant="ghost" size="icon" onClick={() => handleEdit(user)} title="Edit user">
               <Edit className="h-4 w-4" />
             </Button>
             <Button

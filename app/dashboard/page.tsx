@@ -22,25 +22,15 @@ export default function DashboardHome() {
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
-        <h1 className="dashboard-title">
-          Welcome back, {user?.fullName} 👋
-        </h1>
-        <p className="dashboard-subtitle">
-          {`Here's what's happening across all branches today.`}
-        </p>
+        <h1 className="dashboard-title">Welcome back, {user?.fullName} 👋</h1>
+        <p className="dashboard-subtitle">{`Here's what's happening across all branches today.`}</p>
       </div>
 
       {/* KPI row — admin/owner only */}
       {canManage && summary && (
         <div className="kpi-grid">
-          <KpiCard
-            label="Revenue (30d)"
-            value={`$${Number(summary.totalRevenue).toFixed(2)}`}
-          />
-          <KpiCard
-            label="Orders (30d)"
-            value={String(summary.totalOrders)}
-          />
+          <KpiCard label="Revenue (30d)" value={`$${Number(summary.totalRevenue).toFixed(2)}`} />
+          <KpiCard label="Orders (30d)" value={String(summary.totalOrders)} />
           <KpiCard
             label="Avg order value"
             value={`$${Number(summary.averageOrderValue).toFixed(2)}`}
@@ -58,20 +48,12 @@ export default function DashboardHome() {
           >
             <div className="space-y-2">
               {lowStock?.slice(0, 4).map((inv) => (
-                <div
-                  key={inv.id}
-                  className="alert-item"
-                >
+                <div key={inv.id} className="alert-item">
                   <span className="alert-item-name">{inv.productName}</span>
+                  <span className="alert-item-detail"> — {inv.branchName}: </span>
+                  <span className="alert-item-quantity">{inv.quantity}</span>
                   <span className="alert-item-detail">
-                    {" "}
-                    — {inv.branchName}:{" "}
-                  </span>
-                  <span className="alert-item-quantity">
-                    {inv.quantity}
-                  </span>
-                  <span className="alert-item-detail">
-                    {" "}
+                    {' '}
                     left (threshold: {inv.lowStockThreshold})
                   </span>
                 </div>
@@ -86,22 +68,11 @@ export default function DashboardHome() {
           >
             <div className="space-y-2">
               {expiring?.slice(0, 4).map((inv) => (
-                <div
-                  key={inv.id}
-                  className="alert-item"
-                >
+                <div key={inv.id} className="alert-item">
                   <span className="alert-item-name">{inv.productName}</span>
-                  <span className="alert-item-detail">
-                    {" "}
-                    — {inv.branchName}:{" "}
-                  </span>
-                  <span className="alert-item-warning">
-                    {inv.daysUntilExpiry}d left
-                  </span>
-                  <span className="alert-item-detail">
-                    {" "}
-                    ({inv.quantity} units)
-                  </span>
+                  <span className="alert-item-detail"> — {inv.branchName}: </span>
+                  <span className="alert-item-warning">{inv.daysUntilExpiry}d left</span>
+                  <span className="alert-item-detail"> ({inv.quantity} units)</span>
                 </div>
               ))}
             </div>
@@ -120,29 +91,25 @@ export default function DashboardHome() {
               </div>
             </div>
 
-            <button className="discount-view-all" onClick={() => window.location.href = '/dashboard/discounts'}>
+            <button
+              className="discount-view-all"
+              onClick={() => (window.location.href = '/dashboard/discounts')}
+            >
               View all ({discounts?.totalElements}) →
             </button>
           </div>
 
           <div className="discount-content">
             {discounts.content.map((d) => (
-              <div
-                key={d.id}
-                className="discount-item"
-              >
+              <div key={d.id} className="discount-item">
                 <span>
                   <span className="discount-item-name">{d.productName}</span>
                   <span className="discount-item-branch"> — {d.branchName}</span>
                 </span>
 
                 <span className="discount-pricing">
-                  <span className="discount-original">
-                    ${d.originalPrice.toFixed(2)}
-                  </span>
-                  <span className="discount-price">
-                    ${d.discountedPrice.toFixed(2)}
-                  </span>
+                  <span className="discount-original">${d.originalPrice.toFixed(2)}</span>
+                  <span className="discount-price">${d.discountedPrice.toFixed(2)}</span>
                   <span className="discount-badge">-{d.discountPct}%</span>
                 </span>
               </div>
@@ -164,7 +131,11 @@ export default function DashboardHome() {
               ]
             : []),
         ].map((link) => (
-          <button key={link.href} className="quick-link-button" onClick={() => window.location.href = link.href}>
+          <button
+            key={link.href}
+            className="quick-link-button"
+            onClick={() => (window.location.href = link.href)}
+          >
             {link.label}
           </button>
         ))}
@@ -201,14 +172,10 @@ function AlertCard({
       </div>
 
       <div className="alert-content">
-        {count === 0 ? (
-          <p className="alert-empty">No issues right now 🎉</p>
-        ) : (
-          children
-        )}
+        {count === 0 ? <p className="alert-empty">No issues right now 🎉</p> : children}
 
         {count > 4 && (
-          <button className="alert-view-all" onClick={() => window.location.href = href}>
+          <button className="alert-view-all" onClick={() => (window.location.href = href)}>
             View all {count} →
           </button>
         )}

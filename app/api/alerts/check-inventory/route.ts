@@ -3,14 +3,14 @@ import { checkInventoryAlerts, sendAlertNotification } from '@/app/actions/inven
 
 /**
  * GET /api/alerts/check-inventory
- * 
+ *
  * This endpoint should be called by an external cron job scheduler
  * Examples:
  * - GitHub Actions scheduled workflow
  * - AWS EventBridge/Cron
  * - Vercel Cron Jobs
  * - Custom cron: 0 7 * * * (daily at 7 AM)
- * 
+ *
  * In production, set up:
  * - Low stock check: Every 30 minutes
  * - Expiry check: Daily at 07:00
@@ -22,10 +22,7 @@ export async function GET(request: Request) {
     const cronSecret = process.env.CRON_SECRET_KEY;
 
     if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Run alert checks

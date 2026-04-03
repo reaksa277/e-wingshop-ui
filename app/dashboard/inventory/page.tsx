@@ -12,8 +12,8 @@ import {
   useUpsertInventory,
   useBranches,
   useProducts,
-} from "@/hooks";
-import type { InventoryRequest } from "@/types";
+} from '@/hooks';
+import type { InventoryRequest } from '@/types';
 
 // Shadcn UI Components
 import {
@@ -35,11 +35,11 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter
-} from "@/components/ui/dialog";
-import { Loader2, ArrowLeft, ArrowRight, Plus } from "lucide-react";
-import { DataTable } from "@/components/ui/data-table";
-import type { InventoryResponse } from "@/types";
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Loader2, ArrowLeft, ArrowRight, Plus } from 'lucide-react';
+import { DataTable } from '@/components/ui/data-table';
+import type { InventoryResponse } from '@/types';
 
 type Tab = 'all' | 'low' | 'expiring' | 'expired';
 
@@ -153,7 +153,13 @@ export default function InventoryPage() {
       quantity: Number(transferData.quantity),
     });
     setTransferDialogOpen(false);
-    setTransferData({ productId: 0, fromBranchId: 0, productName: "", toBranchId: "", quantity: "" });
+    setTransferData({
+      productId: 0,
+      fromBranchId: 0,
+      productName: '',
+      toBranchId: '',
+      quantity: '',
+    });
   };
 
   const handleAddInventory = async (e: React.FormEvent) => {
@@ -227,11 +233,18 @@ export default function InventoryPage() {
           <div className="flex flex-col">
             <span className="text-sm">{inv.expiryDate ?? '—'}</span>
             {inv.daysUntilExpiry !== undefined && (
-              <span className={`text-xs font-semibold ${
-                inv.daysUntilExpiry < 0 ? "text-destructive" :
-                inv.daysUntilExpiry <= 7 ? "text-accent" : "text-muted-foreground"
-              }`}>
-                {inv.daysUntilExpiry < 0 ? `${Math.abs(inv.daysUntilExpiry)}d ago` : `${inv.daysUntilExpiry}d left`}
+              <span
+                className={`text-xs font-semibold ${
+                  inv.daysUntilExpiry < 0
+                    ? 'text-destructive'
+                    : inv.daysUntilExpiry <= 7
+                      ? 'text-accent'
+                      : 'text-muted-foreground'
+                }`}
+              >
+                {inv.daysUntilExpiry < 0
+                  ? `${Math.abs(inv.daysUntilExpiry)}d ago`
+                  : `${inv.daysUntilExpiry}d left`}
               </span>
             )}
           </div>
@@ -244,10 +257,11 @@ export default function InventoryPage() {
       cell: ({ row }) => {
         const inv = row.original;
         return (
-          <Badge variant={inv.expired ? "destructive" : inv.lowStock ? "outline" : "secondary"} className={
-            !inv.expired && !inv.lowStock ? "" : ""
-          }>
-            {inv.expired ? "Expired" : inv.lowStock ? "Low" : "OK"}
+          <Badge
+            variant={inv.expired ? 'destructive' : inv.lowStock ? 'outline' : 'secondary'}
+            className={!inv.expired && !inv.lowStock ? '' : ''}
+          >
+            {inv.expired ? 'Expired' : inv.lowStock ? 'Low' : 'OK'}
           </Badge>
         );
       },
@@ -284,9 +298,9 @@ export default function InventoryPage() {
   ];
 
   const getRowClass = (row: InventoryResponse) => {
-    if (row.expired) return "bg-red-50/50 hover:bg-red-50";
-    if (row.lowStock) return "bg-amber-50/50 hover:bg-amber-50";
-    return "";
+    if (row.expired) return 'bg-red-50/50 hover:bg-red-50';
+    if (row.lowStock) return 'bg-amber-50/50 hover:bg-amber-50';
+    return '';
   };
 
   return (
@@ -300,7 +314,10 @@ export default function InventoryPage() {
           </Button>
           <Select
             value={branchId}
-            onValueChange={(val) => { setBranchId(val); setPage(0); }}
+            onValueChange={(val) => {
+              setBranchId(val);
+              setPage(0);
+            }}
           >
             <SelectTrigger className="w-50">
               <SelectValue placeholder="All Branches" />
@@ -308,7 +325,9 @@ export default function InventoryPage() {
             <SelectContent>
               <SelectItem value="all">All Branches</SelectItem>
               {branches?.map((b) => (
-                <SelectItem key={b.id} value={b.id.toString()}>{b.name}</SelectItem>
+                <SelectItem key={b.id} value={b.id.toString()}>
+                  {b.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -334,7 +353,11 @@ export default function InventoryPage() {
           </TabsTrigger>
           <TabsTrigger value="expiring" className="gap-2">
             Expiring
-            {expiringQuery.data?.length ? <Badge variant="outline" className="h-5 px-1.5">{expiringQuery.data.length}</Badge> : null}
+            {expiringQuery.data?.length ? (
+              <Badge variant="outline" className="h-5 px-1.5">
+                {expiringQuery.data.length}
+              </Badge>
+            ) : null}
           </TabsTrigger>
           <TabsTrigger value="expired">Expired</TabsTrigger>
         </TabsList>
@@ -346,12 +369,19 @@ export default function InventoryPage() {
           <CardContent className="p-6">
             <div className="mb-6">
               <h3 className="text-lg font-semibold">Add Stock Inventory</h3>
-              <p className="text-sm text-muted-foreground">Add new inventory for a product at a specific branch</p>
+              <p className="text-sm text-muted-foreground">
+                Add new inventory for a product at a specific branch
+              </p>
             </div>
-            <form onSubmit={handleAddInventory} className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <form
+              onSubmit={handleAddInventory}
+              className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+            >
               {/* Branch Selection */}
               <div className="space-y-2">
-                <Label htmlFor="branch-select">Branch <span className="text-destructive">*</span></Label>
+                <Label htmlFor="branch-select">
+                  Branch <span className="text-destructive">*</span>
+                </Label>
                 <Select
                   value={inventoryForm.branchId?.toString()}
                   onValueChange={(v) => {
@@ -361,7 +391,10 @@ export default function InventoryPage() {
                     }
                   }}
                 >
-                  <SelectTrigger id="branch-select" className={formErrors.branchId ? 'border-destructive' : ''}>
+                  <SelectTrigger
+                    id="branch-select"
+                    className={formErrors.branchId ? 'border-destructive' : ''}
+                  >
                     <SelectValue placeholder="Select Branch *" />
                   </SelectTrigger>
                   <SelectContent>
@@ -379,7 +412,9 @@ export default function InventoryPage() {
 
               {/* Product Selection */}
               <div className="space-y-2">
-                <Label htmlFor="product-select">Product <span className="text-destructive">*</span></Label>
+                <Label htmlFor="product-select">
+                  Product <span className="text-destructive">*</span>
+                </Label>
                 <Select
                   value={inventoryForm.productId?.toString()}
                   onValueChange={(v) => {
@@ -392,7 +427,10 @@ export default function InventoryPage() {
                     }
                   }}
                 >
-                  <SelectTrigger id="product-select" className={formErrors.productId ? 'border-destructive' : ''}>
+                  <SelectTrigger
+                    id="product-select"
+                    className={formErrors.productId ? 'border-destructive' : ''}
+                  >
                     <SelectValue placeholder="Select Product *" />
                   </SelectTrigger>
                   <SelectContent>
@@ -410,7 +448,9 @@ export default function InventoryPage() {
 
               {/* Quantity Input */}
               <div className="space-y-2">
-                <Label htmlFor="quantity-input">Quantity <span className="text-destructive">*</span></Label>
+                <Label htmlFor="quantity-input">
+                  Quantity <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="quantity-input"
                   required
@@ -438,7 +478,9 @@ export default function InventoryPage() {
                   type="number"
                   placeholder="Enter threshold (optional)"
                   value={inventoryForm.lowStockThreshold ?? ''}
-                  onChange={(e) => setInventoryForm((f) => ({ ...f, lowStockThreshold: Number(e.target.value) }))}
+                  onChange={(e) =>
+                    setInventoryForm((f) => ({ ...f, lowStockThreshold: Number(e.target.value) }))
+                  }
                 />
               </div>
 

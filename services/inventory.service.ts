@@ -39,7 +39,7 @@ export const inventoryService = {
     }),
 
   transfer: ({ fromBranchId, toBranchId, productId, quantity }: TransferStockParams) =>
-    api.post<void>("/inventory/transfer", {
+    api.post<void>('/inventory/transfer', {
       fromBranchId,
       toBranchId,
       productId,

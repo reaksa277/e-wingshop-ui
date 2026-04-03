@@ -315,7 +315,7 @@ export function DataTable<TData, TValue>({
         <div className="flex items-center justify-between gap-4">
           {enableRowSelection && (
             <div className="text-sm text-muted-foreground">
-              {table.getFilteredSelectedRowModel().rows.length} of{" "}
+              {table.getFilteredSelectedRowModel().rows.length} of{' '}
               {totalCount ?? table.getFilteredRowModel().rows.length} row(s) selected.
             </div>
           )}

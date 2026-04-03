@@ -13,14 +13,14 @@ import { getRoleName } from '@/lib/role-utils';
 import type { RoleName, UserResponse } from '@/types';
 
 interface AuthContextValue {
-  user:        UserResponse | undefined;
-  isLoading:   boolean;
-  isLoggedIn:  boolean;
-  role:        RoleName | undefined;
-  isOwner:     boolean;
-  isAdmin:     boolean;
-  isStaff:     boolean;
-  canManage:   boolean;   // OWNER or ADMIN
+  user: UserResponse | undefined;
+  isLoading: boolean;
+  isLoggedIn: boolean;
+  role: RoleName | undefined;
+  isOwner: boolean;
+  isAdmin: boolean;
+  isStaff: boolean;
+  canManage: boolean; // OWNER or ADMIN
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -36,17 +36,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading,
     isLoggedIn,
     role,
-<<<<<<< HEAD
-    isOwner:    role === "SUPERADMIN",
-    isAdmin:    role === "MANAGER",
-    isStaff:    role === "STAFF",
-    canManage:  role === "SUPERADMIN" || role === "MANAGER",
-=======
     isOwner: role === 'SUPERADMIN',
     isAdmin: role === 'MANAGER',
-    isCustomer: role === 'STAFF',
+    isStaff: role === 'STAFF',
     canManage: role === 'SUPERADMIN' || role === 'MANAGER',
->>>>>>> b750e70e4013afa744d4299da8c5baab8c10231f
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

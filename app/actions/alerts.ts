@@ -72,6 +72,6 @@ export async function getExpiryAlerts(
 export async function dismissExpiryAlert(alertId: string): Promise<{ success: boolean }> {
   // Mock implementation - replace with actual API call
   console.log(`Dismissing alert ${alertId}`);
-  
+
   return { success: true };
 }
